@@ -1,0 +1,193 @@
+import { fail, ok, type Result } from "../result.ts";
+import { parseAlignment, parsePrimitive } from "./primitives.ts";
+import type { Point, RgbColor, ScenePrimitive, TextAlignH, TextAlignV } from "./types.ts";
+import {
+  aggregateFromData,
+  colorFromAggregate,
+  componentObjects,
+  dataValue,
+  getData,
+  numberFromData,
+  pointFromAggregate,
+  refLocalName,
+  stringFromData,
+} from "./xml.ts";
+
+// -----------------------------------------------------------------------------
+// DISC profile (DiscProfile.xml, DEXPI 2.1 draft)
+//
+// A profile carries a Profile/Symbol catalogue. Each symbol has Variants,
+// optionally guarded by a Profile/PropertyValueCondition — e.g. a valve
+// symbol whose variant depends on the instance's ValvePosition attribute.
+// Symbols are referenced from drawings as "DiscProfile/<name>".
+// -----------------------------------------------------------------------------
+
+export type VariantCondition = Readonly<{
+  /** Bare attribute name, e.g. "ValvePosition". */
+  attributeName: string;
+  /** Bare enumeration literal, e.g. "NormallyClose". */
+  literalValue: string;
+}>;
+
+/**
+ * A Profile/LabelTemplate: placeholder text plus its full local-space text
+ * styling (coordinates in the symbol's own system, like its Primitives).
+ * Format reconstructed from the prior-art viewer — the DISC profile spec is
+ * not publicly available, so this is best-effort.
+ */
+export type ProfileLabelTemplate = Readonly<{
+  text: string;
+  position: Point;
+  rotation: number;
+  size: number;
+  font: string;
+  color: RgbColor;
+  hAlign: TextAlignH;
+  vAlign: TextAlignV;
+}>;
+
+export type ProfileSymbolVariant = Readonly<{
+  /** Registered ShapeDef id, e.g. "DiscProfile/ND0012#v1". */
+  shapeId: string;
+  condition: VariantCondition | null;
+  primitives: readonly ScenePrimitive[];
+  labelTemplates: readonly ProfileLabelTemplate[];
+}>;
+
+export type ProfileSymbol = Readonly<{
+  name: string;
+  variants: readonly ProfileSymbolVariant[];
+}>;
+
+export type DiscProfile = Readonly<{
+  /** Keyed by "DiscProfile/<name>" AND the bare symbol name. */
+  symbols: ReadonlyMap<string, ProfileSymbol>;
+}>;
+
+// -----------------------------------------------------------------------------
+// Parsing
+// -----------------------------------------------------------------------------
+
+function lastSegment(value: string): string {
+  return value.split(/[./]/).pop() ?? value;
+}
+
+function parseCondition(variant: Element): VariantCondition | null {
+  const conditionObj = componentObjects(variant, "Condition")[0];
+  if (!conditionObj) {
+    return null;
+  }
+
+  const propRaw = dataValue(getData(conditionObj, "Property"));
+  const valueRaw = dataValue(getData(conditionObj, "Value"));
+  const attributeName = typeof propRaw === "string" ? lastSegment(propRaw.trim()) : "";
+  const literalValue = typeof valueRaw === "string" ? lastSegment(valueRaw.trim()) : refLocalName(valueRaw);
+  if (!attributeName || !literalValue) {
+    return null;
+  }
+
+  return { attributeName, literalValue };
+}
+
+const DEFAULT_LABEL_SIZE_MM = 3.3;
+const BLACK: RgbColor = { r: 0, g: 0, b: 0 };
+
+function parseLabelTemplate(lt: Element): ProfileLabelTemplate {
+  const { h, v } = parseAlignment(lt);
+  return {
+    text: stringFromData(lt, "Text"),
+    position: pointFromAggregate(aggregateFromData(lt, "Position")) ?? { x: 0, y: 0 },
+    rotation: numberFromData(lt, "Rotation", 0),
+    size: numberFromData(lt, "Size", DEFAULT_LABEL_SIZE_MM),
+    font: stringFromData(lt, "Font") || "Arial",
+    color: colorFromAggregate(aggregateFromData(lt, "Color")) ?? BLACK,
+    hAlign: h,
+    vAlign: v,
+  };
+}
+
+/**
+ * Parses a DiscProfile.xml into a symbol catalogue. Expected failures come
+ * back as Result errors, never throws.
+ */
+export function parseDiscProfile(xmlText: string): Result<DiscProfile> {
+  const dom = new DOMParser().parseFromString(xmlText, "text/xml");
+  if (dom.querySelector("parsererror")) {
+    return fail("Not well-formed XML — the profile could not be parsed.");
+  }
+
+  const symbols = new Map<string, ProfileSymbol>();
+  for (const symbolEl of dom.querySelectorAll('Object[type="Profile/Symbol"]')) {
+    const name = symbolEl.getAttribute("name") ?? symbolEl.getAttribute("id") ?? "";
+    if (!name) {
+      continue;
+    }
+
+    const key = `DiscProfile/${name}`;
+    const variants = componentObjects(symbolEl, "Variants").map(
+      (variant, index): ProfileSymbolVariant => ({
+        shapeId: `${key}#v${index}`,
+        condition: parseCondition(variant),
+        primitives: componentObjects(variant, "Primitives")
+          .map((p) => parsePrimitive(p))
+          .filter((p): p is ScenePrimitive => p !== null),
+        labelTemplates: componentObjects(variant, "LabelTemplates").map(parseLabelTemplate),
+      }),
+    );
+    if (variants.length === 0) {
+      continue;
+    }
+
+    const symbol: ProfileSymbol = { name, variants };
+    symbols.set(key, symbol);
+    symbols.set(name, symbol);
+  }
+  if (symbols.size === 0) {
+    return fail("The file contains no Profile/Symbol catalogue — not a DISC profile.");
+  }
+
+  return ok({ symbols });
+}
+
+// -----------------------------------------------------------------------------
+// Variant selection
+// -----------------------------------------------------------------------------
+
+/**
+ * Resolves the instance attribute a condition tests, tolerating the bare,
+ * DiscProfile/-prefixed and fully-qualified spellings, and compares its bare
+ * literal value.
+ */
+function conditionMatches(condition: VariantCondition, instanceEl: Element | null): boolean {
+  if (!instanceEl) {
+    return false;
+  }
+
+  const raw =
+    dataValue(getData(instanceEl, condition.attributeName)) ??
+    dataValue(getData(instanceEl, `DiscProfile/${condition.attributeName}`)) ??
+    dataValue(getData(instanceEl, `Plant/Piping.${condition.attributeName}`)) ??
+    dataValue(getData(instanceEl, `Plant/Instrumentation.${condition.attributeName}`));
+  if (raw === null) {
+    return false;
+  }
+
+  const literal = typeof raw === "string" ? lastSegment(raw.trim()) : refLocalName(raw);
+  return literal === condition.literalValue;
+}
+
+/** The variant whose condition matches the instance, else the default, else the first. */
+export function pickVariant(symbol: ProfileSymbol, instanceEl: Element | null): ProfileSymbolVariant {
+  for (const variant of symbol.variants) {
+    if (variant.condition && conditionMatches(variant.condition, instanceEl)) {
+      return variant;
+    }
+  }
+
+  const variant = symbol.variants.find((v) => v.condition === null) ?? symbol.variants[0];
+  if (!variant) {
+    throw new Error("ProfileSymbol without variants");
+  }
+
+  return variant;
+}

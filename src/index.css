@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "@tredespace/ui/styles.css";
+@source "../node_modules/@tredespace/ui";
+
+/*
+ * Theming: author everything with dark-theme utilities. The @tredespace/ui
+ * stylesheet remaps the --color-* variables under html[data-theme="light"]
+ * (slate-900 becomes near-white, etc.), so the same classes render both themes.
+ */
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}

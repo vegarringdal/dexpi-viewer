@@ -1,0 +1,85 @@
+import {
+  IconAlertTriangle,
+  IconListDetails,
+  IconListTree,
+  IconMap,
+  IconPlugConnected,
+  IconRestore,
+  IconSettings,
+} from "@tabler/icons-react";
+import { useDockLayout, usePanelContext } from "@tredespace/ui/dockable";
+import { RibbonButton, RibbonSection } from "@tredespace/ui/widgets";
+import type { JSX } from "react";
+import { resetDockLayout } from "../../state/ui/ui.actions.ts";
+import { PANEL_IDS } from "../panelIds.ts";
+
+/** Per-panel visibility toggles (selected = open) + layout reset. */
+export function PanelsSection(): JSX.Element {
+  const { manager } = usePanelContext();
+  useDockLayout(manager);
+
+  const panelToggle = (panelId: string): (() => void) => {
+    return () => manager.togglePanel(panelId);
+  };
+
+  return (
+    <RibbonSection title="Panels">
+      <RibbonButton
+        icon={<IconListTree />}
+        label="Topology"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.topology)}
+        tooltip="Show/hide the topology tree"
+        onClick={panelToggle(PANEL_IDS.topology)}
+      />
+      <RibbonButton
+        icon={<IconListDetails />}
+        label="Properties"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.properties)}
+        tooltip="Show/hide the properties panel"
+        onClick={panelToggle(PANEL_IDS.properties)}
+      />
+      <RibbonButton
+        icon={<IconPlugConnected />}
+        label="Connections"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.connections)}
+        tooltip="Direct upstream/downstream neighbours of the selection"
+        onClick={panelToggle(PANEL_IDS.connections)}
+      />
+      <RibbonButton
+        icon={<IconSettings />}
+        label="Settings"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.settings)}
+        tooltip="Rendering options and shortcut bindings"
+        shortcut="app.settings"
+        onClick={panelToggle(PANEL_IDS.settings)}
+      />
+      <RibbonButton
+        icon={<IconMap />}
+        label="Minimap"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.minimap)}
+        tooltip="Show/hide the drawing overview"
+        onClick={panelToggle(PANEL_IDS.minimap)}
+      />
+      <RibbonButton
+        icon={<IconAlertTriangle />}
+        label="Validation"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.issues)}
+        tooltip="Show/hide the validation findings"
+        onClick={panelToggle(PANEL_IDS.issues)}
+      />
+      <RibbonButton
+        icon={<IconRestore />}
+        label="Reset"
+        size="big"
+        tooltip="Restore the default panel layout"
+        onClick={resetDockLayout}
+      />
+    </RibbonSection>
+  );
+}

@@ -1,0 +1,44 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+*.timestamp-*.mjs
+
+.vs/
+bin/
+obj/
+node_modules/
+
+DEXPI_Verificator_RFT.odt
+DEXPI Standard and Profile/
+ValidationErrTestFiles/
+DEXPI DISC Example Files/
+DEXPI Example Files/
+~$*
+
+NOTICE
+DEXPI Test/
+DISC Test/
+scd/
+DEXPI/
