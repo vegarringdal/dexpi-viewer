@@ -216,23 +216,44 @@ type TemplatedTextRef = Readonly<{
 }>;
 
 /**
- * Whether one label group's template assignments are ambiguous: several
- * sibling texts with DISTINCT non-empty literals (separate label parts —
- * prefix, type code, suffix…) all resolving to ONE identical non-empty
- * result. Replacing would erase the distinct parts with duplicates, so
- * every literal must stay.
+ * Node indices whose template assignment is ambiguous within one
+ * represented-object label context: two or more texts with DISTINCT
+ * non-empty literals (separate label parts — prefix, type code, marker,
+ * sequence/suffix…) resolving to the SAME non-empty result. Replacing that
+ * subset would erase the distinct parts with duplicates, so its literals
+ * stay. Detection is per identical-result subset, not whole-context: an
+ * independent sibling label (reference/status text with its own template
+ * and a different result) neither becomes part of the main tag nor stops
+ * the tag parts from being protected, and a text whose result is unique in
+ * the context still updates normally.
  */
-function isAmbiguousGroup(refs: readonly TemplatedTextRef[]): boolean {
-  const literals = new Set(refs.map((r) => r.literal.trim()).filter((v) => v.length > 0));
-  if (literals.size <= 1) {
-    return false;
+function collectAmbiguousIndices(refs: readonly TemplatedTextRef[]): Set<number> {
+  const byResult = new Map<string, TemplatedTextRef[]>();
+  for (const ref of refs) {
+    const result = ref.resolved?.trim() ?? "";
+    if (result.length === 0) {
+      continue;
+    }
+
+    const subset = byResult.get(result) ?? [];
+    subset.push(ref);
+    byResult.set(result, subset);
   }
 
-  const results = refs.flatMap((r) => {
-    const trimmed = r.resolved?.trim() ?? "";
-    return trimmed.length > 0 ? [trimmed] : [];
-  });
-  return results.length === refs.length && new Set(results).size === 1;
+  const ambiguous = new Set<number>();
+  for (const subset of byResult.values()) {
+    if (subset.length < 2) {
+      continue;
+    }
+
+    const literals = new Set(subset.map((r) => r.literal.trim()).filter((v) => v.length > 0));
+    if (literals.size > 1) {
+      for (const ref of subset) {
+        ambiguous.add(ref.index);
+      }
+    }
+  }
+  return ambiguous;
 }
 
 /**
@@ -244,10 +265,12 @@ function isAmbiguousGroup(refs: readonly TemplatedTextRef[]): boolean {
  * snapshot unchanged — never a partial concatenation of the fragments that
  * happened to resolve.
  *
- * Replacement is also gated per label group (director's rule): sibling texts
- * of one label that carry the same template but hold distinct literal parts
- * are an ambiguous assignment — resolving would repeat one value in every
- * position, so the whole group keeps its literals (see isAmbiguousGroup).
+ * Replacement is also gated per represented-object label context (director's
+ * rule): texts of one object's labels — inside one Label group OR spread
+ * over sibling one-text label groups — that hold distinct literal parts but
+ * resolve to one identical result are an ambiguous assignment; resolving
+ * would repeat one value in every position, so those literals stay (see
+ * collectAmbiguousIndices).
  *
  * Enum display policy (director's rule, e.g. slope labels): an enumeration
  * reference resolves through its published display mapping — the
@@ -342,15 +365,13 @@ export function resolveTemplateTexts(root: Element, nodes: readonly SceneNode[])
     groups.set(key, refs);
   });
 
-  // Pass 2: apply unambiguous results; ambiguous groups keep every literal.
+  // Pass 2: apply unambiguous results; ambiguous same-result subsets keep
+  // every literal.
   const accepted = new Map<number, string>();
   for (const refs of groups.values()) {
-    if (isAmbiguousGroup(refs)) {
-      continue;
-    }
-
+    const ambiguous = collectAmbiguousIndices(refs);
     for (const ref of refs) {
-      if (ref.resolved !== null && ref.resolved.trim().length > 0) {
+      if (!ambiguous.has(ref.index) && ref.resolved !== null && ref.resolved.trim().length > 0) {
         accepted.set(ref.index, ref.resolved);
       }
     }

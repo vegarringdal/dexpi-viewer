@@ -518,3 +518,82 @@ describe("property-break exporter placeholders", () => {
     expect(attrs.some((a) => a.value === "????????")).toBe(true);
   });
 });
+
+describe("mixed exporter placeholders in break values (director's fixture)", () => {
+  const DUMMY_PROFILE = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Profile">
+  <Object id="SymD" name="BreakSymbol" type="Profile/Symbol">
+    <Components property="Variants">
+      <Object type="Profile/SymbolVariant">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.Circle">
+            <Data property="Center">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>0</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+            <Data property="Radius"><Double>1.5</Double></Data>
+          </Object>
+        </Components>
+        <Components property="LabelTemplates">
+          <Object type="Profile/LabelTemplate">
+            <Data property="Text"><String>&lt;DemoValueA&gt;</String></Data>
+          </Object>
+          <Object type="Profile/LabelTemplate">
+            <Data property="Text"><String>&lt;DemoValueB&gt;</String></Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+
+  const DUMMY_MAIN = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="BREAK1" type="Plant/Piping.DemoPropertyBreak">
+    <Data property="DemoValueA"><String>??XX??</String></Data>
+    <Data property="DemoValueB"><String>??XX??</String></Data>
+  </Object>
+  <Object id="DIAGRAM1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#BREAK1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Profile/SymbolUsage">
+            <References objects="DemoProfile/BreakSymbol" property="Symbol"/>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+
+  it("renders no drawing text for the mixed ??XX?? placeholder", () => {
+    expect(overlayTexts(DUMMY_MAIN, DUMMY_PROFILE)).toHaveLength(0);
+  });
+
+  it("renders only the valid side when one value is real", () => {
+    const oneValid = DUMMY_MAIN.replace("??XX??</String></Data>", "LEFT-01</String></Data>");
+    expect(overlayTexts(oneValid, DUMMY_PROFILE).map((t) => t.value)).toEqual(["LEFT-01"]);
+  });
+
+  it("renders both label positions when both values are real", () => {
+    const twoValid = DUMMY_MAIN.replace("??XX??</String>", "LEFT-01</String>").replace(
+      "??XX??</String>",
+      "RIGHT-01</String>",
+    );
+    expect(overlayTexts(twoValid, DUMMY_PROFILE).map((t) => t.value)).toEqual(["LEFT-01", "RIGHT-01"]);
+  });
+
+  it("keeps the raw placeholder in the plant model for the Properties panel", () => {
+    const profile = parseDiscProfile(DUMMY_PROFILE).data ?? null;
+    const doc = parseDexpiDocument(DUMMY_MAIN, profile).data;
+    const attrs = doc?.plant.byId.get("BREAK1")?.attributes ?? [];
+    expect(attrs.filter((a) => a.value === "??XX??")).toHaveLength(2);
+  });
+});

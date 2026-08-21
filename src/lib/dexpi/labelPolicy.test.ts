@@ -32,6 +32,13 @@ describe("isRenderableLabelValue", () => {
     expect(isRenderableLabelValue("????\n????")).toBe(false);
   });
 
+  it("rejects mixed exporter placeholders of symbols and x/X", () => {
+    expect(isRenderableLabelValue("??XX??")).toBe(false);
+    expect(isRenderableLabelValue("x-x-x")).toBe(false);
+    expect(isRenderableLabelValue("?x?")).toBe(false);
+    expect(isRenderableLabelValue("X?X?")).toBe(false);
+  });
+
   it("keeps single symbols and values with real alphanumeric content", () => {
     // A lone "-" or "*" may be authored separator text; only runs are filler.
     expect(isRenderableLabelValue("-")).toBe(true);

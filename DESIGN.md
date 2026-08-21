@@ -353,9 +353,16 @@ that grow, and record scope changes here.
   (objectId, role); when a group has >1 distinct non-empty literals and
   every member resolves to the SAME non-empty result, the assignment is
   ambiguous and the whole group keeps its literals — positions, sizes and
-  alignment untouched, never merged into one string (isAmbiguousGroup).
+  alignment untouched, never merged into one string.
   Groups whose members resolve to different values, and lone texts,
-  update as before.
+  update as before. Refined same day (director's fixture): the ambiguity
+  scope is the complete represented-object label context — covering both
+  several texts inside one Label group AND several one-text label groups
+  as siblings of one representation — and detection is per
+  identical-result SUBSET (collectAmbiguousIndices), not whole-context
+  uniformity: an independent reference/status label with its own
+  template and a different result updates normally without disarming
+  the tag parts' protection.
 - **2026-08-21** Display-quality safeguard for drawing text
   (src/lib/dexpi/labelPolicy.ts, director's rule): the viewer never
   renders unresolved markers, placeholder tokens, or invalid sentinels as
@@ -364,11 +371,12 @@ that grow, and record scope changes here.
   TBD, null, #VALUE!, …), template-token shapes (`<Word>`/`{Word}`)
   that leaked into model data (e.g. a PropertyBreak's generic
   BreakValue1/2 fields), and the exporter's repeated placeholder
-  filler (isExporterPlaceholder, added same day after the first pass
-  missed it): length ≥ 2 with no letter or digit at all ("????",
-  "-----", "?!?!") or a pure x/X run ("xxxx") — shape-based, no
-  object/position/break-id special-casing; lone symbols stay
-  renderable. Applied in both drawing-text resolution paths:
+  filler (isMixedExporterPlaceholder, broadened twice same day as real
+  patterns surfaced): length ≥ 2 where EVERY character is filler — a
+  symbol/punctuation char or the unknown marker x/X — covering pure
+  runs ("????", "-----", "xxxx") and mixed patterns ("??XX??",
+  "x-x-x") alike; shape-based, no object/position/break-id
+  special-casing; lone symbols stay renderable. Applied in both drawing-text resolution paths:
   profile LabelTemplates render a non-renderable field blank, so only
   that label position is suppressed (the break symbol's two BreakValue
   positions stay independent); explicit-text templates treat it as a

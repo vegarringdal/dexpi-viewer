@@ -688,3 +688,87 @@ describe("enum display policy for drawing text (slope labels)", () => {
     expect(uses[0]?.transform.isMirrored).toBe(true);
   });
 });
+
+describe("ambiguity scope is the represented-object label context (director's fixture)", () => {
+  // Privacy-safe synthetic fixture: four distinct label parts in SEPARATE
+  // sibling one-text label groups, each carrying the same sequence+suffix
+  // template. Grouping by local label element only would miss this form.
+  function demoText(literal: string, extraFragments = ""): string {
+    return `<Object type="Core/Diagram.Label">
+        <Components property="Elements">
+          <Object type="Core/Diagram.Text">
+            <Data property="Text"><String>${literal}</String></Data>
+            <Components property="Template">
+              <Object type="Core/Diagram.TextTemplate">
+                <Components property="Fragments">
+                  ${
+                    extraFragments ||
+                    `<Object type="Core/Diagram.AttributeRepresentation">
+                       <Data property="AttributeName"><String>DemoSequence</String></Data>
+                     </Object>
+                     <Object type="Core/Diagram.AttributeRepresentation">
+                       <Data property="AttributeName"><String>DemoSuffix</String></Data>
+                     </Object>`
+                  }
+                </Components>
+              </Object>
+            </Components>
+          </Object>
+        </Components>
+      </Object>`;
+  }
+
+  function demoXml(labels: string): string {
+    return wrapModel(`
+      <Object id="OBJ1" type="Plant/Piping.DemoValve">
+        <Data property="DemoSequence"><String>0042</String></Data>
+        <Data property="DemoSuffix"><String>X</String></Data>
+        <Data property="DemoStatus"><String>NC</String></Data>
+      </Object>
+      <Object id="DIAG1" type="Core/Diagram.Diagram">
+        <Data property="MinX"><Double>0</Double></Data>
+        <Data property="MinY"><Double>0</Double></Data>
+        <Data property="MaxX"><Double>100</Double></Data>
+        <Data property="MaxY"><Double>50</Double></Data>
+        <Components property="Groups">
+          <Object type="Core/Diagram.RepresentationGroup">
+            <References objects="#OBJ1" property="Represents"/>
+            <Components property="Elements">${labels}</Components>
+          </Object>
+        </Components>
+      </Object>
+    `);
+  }
+
+  function renderedTextValues(xml: string): string[] {
+    return (parseDexpiDocument(xml).data?.scene.nodes ?? []).flatMap((n) =>
+      n.kind === "prim" && n.prim.kind === "text" ? [n.prim.value] : [],
+    );
+  }
+
+  it("keeps all four authored parts in sibling label groups, never four copies of the suffix", () => {
+    const xml = demoXml(demoText("AREA") + demoText("TYPE") + demoText("MARK") + demoText("0042X"));
+    expect(renderedTextValues(xml)).toEqual(["AREA", "TYPE", "MARK", "0042X"]);
+  });
+
+  it("still replaces one unambiguous text from its resolved template", () => {
+    const xml = demoXml(demoText("STALE"));
+    expect(renderedTextValues(xml)).toEqual(["0042X"]);
+  });
+
+  it("protects the tag parts even when an independent status label shares the context", () => {
+    // The status label has its own template and a different result: it
+    // updates normally and must not disarm the tag parts' protection.
+    const statusFragment = `<Object type="Core/Diagram.AttributeRepresentation">
+        <Data property="AttributeName"><String>DemoStatus</String></Data>
+      </Object>`;
+    const xml = demoXml(
+      demoText("AREA") +
+        demoText("TYPE") +
+        demoText("MARK") +
+        demoText("0042X") +
+        demoText("OLD-STATUS", statusFragment),
+    );
+    expect(renderedTextValues(xml)).toEqual(["AREA", "TYPE", "MARK", "0042X", "NC"]);
+  });
+});

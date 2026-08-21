@@ -32,25 +32,22 @@ const INVALID_SENTINELS: ReadonlySet<string> = new Set([
 const PLACEHOLDER_TOKEN = /<[A-Za-z][A-Za-z0-9_.]*>|\{[A-Za-z][A-Za-z0-9_.]*\}/;
 
 /**
- * The exporter's repeated unknown-value filler: a value of length ≥ 2 that
- * carries no letter or digit at all ("????", "-----", "?!?!", "····"), or
- * a pure run of the conventional unknown marker x/X ("xxxx"). Real
- * engineering values always contain at least one alphanumeric character
- * that is not such a filler run; single symbols stay renderable (lone "?"
- * is already in the sentinel list). Deliberately shape-based — no object,
- * position, or break identifier is consulted.
+ * The exporter's repeated/mixed unknown-value filler: a value of length ≥ 2
+ * in which EVERY character is filler — a symbol/punctuation character or
+ * the conventional unknown marker x/X. Covers pure runs ("????", "-----",
+ * "xxxx") and mixed patterns ("??XX??", "x-x-x", "?!?!"). Real engineering
+ * values always contain at least one letter (other than a bare x) or
+ * digit; single symbols stay renderable (lone "?" is already in the
+ * sentinel list). Deliberately shape-based — no object, position, or
+ * break identifier is consulted.
  */
-function isExporterPlaceholder(normalized: string): boolean {
+function isMixedExporterPlaceholder(normalized: string): boolean {
   const compact = normalized.replace(/\s+/g, "");
   if (compact.length < 2) {
     return false;
   }
 
-  if (!/[\p{L}\p{N}]/u.test(compact)) {
-    return true;
-  }
-
-  return /^[xX]+$/.test(compact);
+  return [...compact].every((c) => c === "x" || c === "X" || !/[\p{L}\p{N}]/u.test(c));
 }
 
 /**
@@ -70,5 +67,5 @@ export function isRenderableLabelValue(value: string): boolean {
     return false;
   }
 
-  return !PLACEHOLDER_TOKEN.test(normalized) && !isExporterPlaceholder(normalized);
+  return !PLACEHOLDER_TOKEN.test(normalized) && !isMixedExporterPlaceholder(normalized);
 }
