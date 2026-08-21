@@ -66,7 +66,22 @@ multiline blocks — per-line horizontal alignment, block-level vertical
 alignment, shared 1.4×size line spacing — identically on canvas and in
 the SVG/PDF exports.
 
-All milestones M0–M7 are complete; the open items are niche
+**M8 adds a Topology graph panel** (ribbon Panels → Topology): the
+engineering data as a semantic network — plant objects as nodes
+(connection hardware collapsed into its owner, category-colored
+borders) with **flow**, **containment**, and **reference** edges,
+laid out left→right along the flow direction. Nozzles, chambers,
+piping nodes and ports can optionally be shown as mini nodes on the
+flow path instead of being collapsed; a vertical-spacing stepper
+spreads dense layouts, and the selection's direct neighbours can be
+tinted by relation (amber upstream, green downstream, violet signal). Neighborhood mode graphs the
+current selection with an adjustable hop depth; Document mode graphs
+the whole file (soft-capped with a coverage note). Nodes sync with the
+global selection both ways, double-click zooms the drawing to the
+object, and the view pans/zooms like the drawing. The tree panel is
+now titled **Explorer**.
+
+All milestones M0–M8 are complete; the open items are niche
 (Proteus-era edge tolerances, profile LabelTemplate overlays, culling
 for truly huge files) and tracked in DESIGN.md.
 

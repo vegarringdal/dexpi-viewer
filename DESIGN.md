@@ -97,8 +97,10 @@ in `refrences/` when in doubt.
 ### UI shell (`src/components/`)
 
 - `DockView` root layout: ribbon in a locked top node; center drawing
-  panel; left topology (object tree) panel; right properties panel; bottom issues
-  panel (collapsed by default).
+  panel; left Explorer (object tree) panel; right properties panel; bottom issues
+  panel (collapsed by default). The Topology graph panel (semantic
+  network view, M8) is not in the default layout — it opens via its
+  ribbon toggle, tabbed with the drawing.
 - Ribbon sections: File (open, examples, export), View (fit, zoom,
   theme), Select/Trace (later milestones).
 - Theme: dark is library default; toggle sets `data-theme="light"` on
@@ -521,6 +523,94 @@ that grow, and record scope changes here.
       Measured ~56 fps sustained drag-pan under software-rendered
       swiftshader; real GPUs are faster. Culling deferred until a
       genuinely large fixture exists.
+
+### M8 — Topology graph ✅
+
+- [x] Semantic-network view of the engineering data as a dockable
+      "Topology graph" panel (id `topologyGraph`, ribbon Panels toggle,
+      hotkey ALT + 9002, `home: "center"` so it tabs with the drawing;
+      not in the default layout). The tree panel's TITLE renamed
+      Topology → **Explorer**; its panel id stays `topology` because
+      persisted dock layouts key on ids.
+- [x] Graph assembly (`src/lib/graph/semanticGraph.ts`, unit-tested on
+      both fixtures): nodes = plant objects with connection hardware
+      (ports/nodes/nozzles/chambers, transitively — Chamber→Nozzle)
+      collapsed into the nearest non-pass-through ancestor
+      (`resolveOwningNode`); edge kinds **flow** (connectivity edges
+      lifted to owning items), **containment** (hierarchy, skipping
+      pass-through intermediates), **reference** (References properties
+      minus the Source/Target family, which `isFlowReferenceProperty`
+      in connectivity.ts now exposes — otherwise every flow edge would
+      duplicate as a reference edge). Attributes are node detail
+      (tooltip), never edges. Ego extraction (`extractEgoGraph`, BFS
+      over enabled kinds) and a deterministic first-N `capGraph`.
+- [x] Hand-written deterministic layered layout, flow left→right
+      (`src/lib/graph/layeredLayout.ts`, no new dependencies): DFS
+      cycle-breaking (recirculation loops are real), longest-path
+      layering, containment/reference fixpoint for non-flow nodes
+      (with subtree-root seeding so pure hierarchies fan out),
+      isolated nodes in a spare column, 4 barycenter sweeps, cubic
+      bezier edges. Node widths from a char-count estimate — no canvas
+      measurement. Readability over graphviz parity: long edges get no
+      dummy nodes.
+- [x] Panel (`src/components/panels/topologyGraph/`): first inline-SVG
+      surface in the app (no second WebGL context — same reasoning as
+      the minimap). Theme via dark Tailwind fill-*/stroke-* classes
+      only — and ONLY the slate/blue scales, because the
+      @tredespace/ui light theme remaps just those token scales
+      (director caught emerald/violet-950 node fills going
+      dark-on-dark in light mode): node boxes fill slate-900, the
+      category reads from mid-scale border colors (emerald/violet/
+      cyan/slate 500–600) that are legible on both backgrounds.
+      Modes: **Neighborhood** (default; ego graph around the
+      selection, depth stepper 1–6) and **Document** (whole file,
+      soft cap 400 nodes with an amber "Showing N of M" note). Edge
+      kind toggles (FieldToggleRow, requireOne) plus a "Show:" row of
+      connection-hardware checkboxes (Nozzles / Chambers / Piping
+      nodes / Ports, director 2026-08-22, all off by default): checked
+      families stay as their own dashed mini pill nodes instead of
+      collapsing, and get stitched into the flow path towards their
+      owner in the direction the flow actually passes them (deepest
+      hardware first so Chamber→Nozzle nesting chains outward; a
+      spare nozzle with no flow gets containment only).
+      A "Gap n×" stepper (1–6, director 2026-08-22) multiplies the
+      vertical node gap for a more spread-out layout, and a "Linked"
+      toggle (default on, same day) tints the backgrounds of the
+      selection's direct flow neighbours — amber upstream / green
+      downstream (the app's trace colors) and violet for
+      signal/electrical links (either endpoint's typeName contains
+      "Signal") — as translucent mid-scale fills over the slate box so
+      both themes stay readable (computeLinkedTints in
+      src/lib/graph/linkedTints.ts, unit-tested).
+      mode/depth/kinds/hardware/gapScale/highlightLinked persist to
+      `localStorage["dexpi.topologyGraph"]`. A toolbar "?" button
+      (director 2026-08-22) toggles an in-panel legend overlay
+      (GraphLegend.tsx) that explains the encoding with live style
+      samples (SVG snippets using the same Tailwind classes as the
+      graph, so it can't drift): edge styles, category borders,
+      hardware pills incl. the spare-nozzle dashed-ownership rule,
+      selection tints, and the click/ctrl/double-click/pan gestures.
+      Ephemeral useState — deliberately not persisted. Pan, wheel
+      zoom-to-cursor (native non-passive listener), toolbar zoom
+      in/out buttons, Fit. Node/edge tooltips use the app's
+      `data-tooltip` bubble (works on SVG elements), not the
+      browser-native `<title>` (director). Selection syncs both
+      ways: click/ctrl-click selects (and reveals the object in the
+      Explorer tree, same as canvas clicks — verified headless),
+      hover highlights, double-click zooms the drawing. A plain click
+      on a graph node re-roots the neighborhood around it, same as an
+      external selection (director, 2026-08-22 — the first cut kept
+      the layout still on every graph click and read as broken);
+      only ctrl/cmd-toggles keep the layout stable so multi-select
+      doesn't jump mid-gesture (guard predicts the toggled primary id
+      so non-primary toggle-offs don't leave it armed). Re-roots
+      never zoom the view out (director, same day — usePinOnRecenter):
+      a graph click keeps the clicked node at its exact screen
+      position; an external selection (drawing/Explorer) preserves the
+      zoom and leaves a fully-visible root in place, centering it at
+      the same zoom only when it is off-screen or new to the graph.
+      Auto-fit remains for structural changes only (first layout,
+      mode switch, depth/edge/hardware toggles) and the Fit button.
 
 ## Decisions log
 

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node verify.mjs)",
+      "Bash(sed -i 's|page.getByRole\\(\"button\", { name: \"More hops\" }\\).click\\(\\).catch\\(\\(\\) => {}\\)|page.locator\\('\"'\"'button[data-tooltip=\"More hops\"]'\"'\"'\\).click\\(\\)|' verify.mjs)",
+      "Bash(sed -i 's|await page.evaluate\\(\\(\\) => document.documentElement.setAttribute\\(\"data-theme\", \"light\"\\)\\);|await page.evaluate\\(\\(\\) => document.documentElement.getAttribute\\(\"data-theme\"\\) ? document.documentElement.removeAttribute\\(\"data-theme\"\\) : document.documentElement.setAttribute\\(\"data-theme\", \"light\"\\)\\);|' verify.mjs)",
+      "Bash(node verify-reveal.mjs)",
+      "Bash(node verify-recenter.mjs)",
+      "Bash(node verify-pin.mjs)",
+      "Bash(node verify-hardware.mjs)",
+      "Bash(node verify-anchor.mjs)",
+      "Bash(node verify-gap-tints.mjs)",
+      "Bash(node verify-legend.mjs)"
+    ]
+  }
+}

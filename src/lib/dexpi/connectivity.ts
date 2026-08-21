@@ -24,6 +24,11 @@ const SOURCE_PROPS = new Set(["Source", "SourceItem", "SourceNode", "Inlet", "Up
 /** References that mean "flow goes TO the target" (owner → target). */
 const TARGET_PROPS = new Set(["Target", "TargetItem", "TargetNode", "Outlet", "DownstreamItem"]);
 
+/** True for References properties that this module already models as flow edges. */
+export function isFlowReferenceProperty(property: string): boolean {
+  return SOURCE_PROPS.has(property) || TARGET_PROPS.has(property);
+}
+
 /** Connection points that let flow pass through their owning item. */
 export function isPassThroughType(type: string): boolean {
   const local = type.split(".").pop() ?? type;

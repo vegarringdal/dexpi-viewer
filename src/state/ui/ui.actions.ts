@@ -22,6 +22,11 @@ export function openSettings(): void {
   dockManager?.openPanel("settings");
 }
 
+/** Opens (or focuses) the Topology graph panel in the dock. */
+export function openTopologyGraphPanel(): void {
+  dockManager?.openPanel("topologyGraph");
+}
+
 /**
  * Restores the persisted dock layout (if any) and starts saving every layout
  * change, debounced. Returns the disposer; call once per manager lifetime.

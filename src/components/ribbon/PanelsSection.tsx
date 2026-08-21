@@ -1,5 +1,6 @@
 import {
   IconAlertTriangle,
+  IconChartDots3,
   IconListDetails,
   IconListTree,
   IconMap,
@@ -26,11 +27,20 @@ export function PanelsSection(): JSX.Element {
     <RibbonSection title="Panels">
       <RibbonButton
         icon={<IconListTree />}
-        label="Topology"
+        label="Explorer"
         size="mini"
         selected={manager.isOpen(PANEL_IDS.topology)}
-        tooltip="Show/hide the topology tree"
+        tooltip="Show/hide the object explorer tree"
         onClick={panelToggle(PANEL_IDS.topology)}
+      />
+      <RibbonButton
+        icon={<IconChartDots3 />}
+        label="Topology"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.topologyGraph)}
+        tooltip="Semantic topology graph: flow, containment and references"
+        shortcut="app.topologyGraph"
+        onClick={panelToggle(PANEL_IDS.topologyGraph)}
       />
       <RibbonButton
         icon={<IconListDetails />}

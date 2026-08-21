@@ -2,6 +2,7 @@ export const PANEL_IDS = {
   ribbon: "ribbon",
   drawing: "drawing",
   topology: "topology",
+  topologyGraph: "topologyGraph",
   properties: "properties",
   issues: "issues",
   settings: "settings",
