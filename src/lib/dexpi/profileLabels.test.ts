@@ -148,6 +148,24 @@ describe("profile label overlays", () => {
     expect(texts.some((t) => t.value === "H=100")).toBe(false);
   });
 
+  it("prefers the <Attr>Representation twin over the base attribute", () => {
+    // Spec: "…Representation … should also be referenced in the graphics" —
+    // FailAction=FailRetainPosition pairs with FailActionRepresentation=FM,
+    // and the drawing shows the readable code.
+    const profileFailAction = PROFILE_XML.replace(
+      "&lt;TagName&gt;-&lt;NotModelled&gt;",
+      "&lt;FailAction&gt;",
+    );
+    const withRepresentation = MAIN_XML.replace(
+      '<Data property="TagName"><String>PT-100</String></Data>',
+      `<Data property="FailAction"><DataReference data="Plant/Enumerations.FailActionClassification.FailRetainPosition"/></Data>
+    <Data property="FailActionRepresentation"><String>FM</String></Data>`,
+    );
+    const texts = overlayTexts(withRepresentation, profileFailAction);
+    expect(texts.some((t) => t.value === "FM")).toBe(true);
+    expect(texts.some((t) => t.value === "FailRetainPosition")).toBe(false);
+  });
+
   it("splits a template with line breaks into one text per line", () => {
     // The line break in the template's own Text is a real formatting
     // instruction from the profile.

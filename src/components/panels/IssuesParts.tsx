@@ -13,21 +13,15 @@ const SEVERITY_STYLES: Readonly<Record<IssueSeverity, string>> = {
   info: "bg-sky-950 text-sky-300",
 };
 
-const SEVERITY_LABELS: Readonly<Record<IssueSeverity, string>> = {
-  error: "Errors",
-  warning: "Warnings",
-  info: "Info",
+const SEVERITY_DOT_STYLES: Readonly<Record<IssueSeverity, string>> = {
+  error: "bg-red-500",
+  warning: "bg-amber-500",
+  info: "bg-sky-500",
 };
 
-export function SeverityChip({
-  severity,
-  count,
-}: Readonly<{ severity: IssueSeverity; count: number }>): JSX.Element {
-  return (
-    <span className={`rounded px-1.5 py-0.5 font-semibold text-[10px] ${SEVERITY_STYLES[severity]}`}>
-      {count} {SEVERITY_LABELS[severity]}
-    </span>
-  );
+/** Small severity color swatch used inside the filter buttons. */
+export function SeverityDot({ severity }: Readonly<{ severity: IssueSeverity }>): JSX.Element {
+  return <span className={`inline-block h-2 w-2 shrink-0 rounded-full ${SEVERITY_DOT_STYLES[severity]}`} />;
 }
 
 // -----------------------------------------------------------------------------

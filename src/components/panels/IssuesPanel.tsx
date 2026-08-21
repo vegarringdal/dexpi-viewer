@@ -1,3 +1,4 @@
+import { IconChevronsDown, IconChevronsUp } from "@tabler/icons-react";
 import { PanelBody, usePanelTitle } from "@tredespace/ui/dockable";
 import { Button, Collapsible } from "@tredespace/ui/widgets";
 import { type JSX, useState } from "react";
@@ -5,13 +6,19 @@ import { type IssueSeverity, RULE_TITLES, type ValidationIssue } from "../../lib
 import { getLoadedDocument, setViewerError } from "../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../state/viewer/viewer.state.ts";
 import { exportIssuesCsv } from "../exportService.ts";
-import { IssueRow, SeverityChip } from "./IssuesParts.tsx";
+import { IssueRow, SeverityDot } from "./IssuesParts.tsx";
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
 type SeverityFilter = "all" | IssueSeverity;
+
+const SEVERITY_BUTTON_LABELS: Readonly<Record<IssueSeverity, string>> = {
+  error: "Errors",
+  warning: "Warnings",
+  info: "Info",
+};
 
 // -----------------------------------------------------------------------------
 // Component
@@ -21,6 +28,9 @@ export function IssuesPanel(): JSX.Element {
   const { file, docRevision } = viewerState.use();
   void docRevision;
   const [filter, setFilter] = useState<SeverityFilter>("all");
+  // Collapsible is uncontrolled; bumping `seq` remounts the groups with a
+  // fresh defaultOpen, which is how expand/collapse-all works.
+  const [groupsOpen, setGroupsOpen] = useState({ open: true, seq: 0 });
   const issues = getLoadedDocument()?.issues ?? [];
   usePanelTitle(file && issues.length > 0 ? `Validation (${issues.length})` : "Validation");
 
@@ -51,23 +61,36 @@ export function IssuesPanel(): JSX.Element {
     }
   };
 
-  const filterChip = (value: SeverityFilter, label: string): JSX.Element => (
+  const handleExpandAll = (): void => setGroupsOpen((p) => ({ open: true, seq: p.seq + 1 }));
+  const handleCollapseAll = (): void => setGroupsOpen((p) => ({ open: false, seq: p.seq + 1 }));
+
+  const filterButton = (value: SeverityFilter, count: number): JSX.Element => (
     <Button active={filter === value} onClick={() => setFilter(value)}>
-      {label}
+      {value !== "all" && <SeverityDot severity={value} />}
+      {value === "all" ? "All" : SEVERITY_BUTTON_LABELS[value]} ({count})
     </Button>
   );
 
   return (
     <PanelBody className="flex h-full flex-col gap-2 p-2">
       <div className="flex shrink-0 flex-wrap items-center gap-1">
-        <SeverityChip severity="error" count={errors} />
-        <SeverityChip severity="warning" count={warnings} />
-        <SeverityChip severity="info" count={infos} />
-        <span className="mx-1 text-slate-600">·</span>
-        {filterChip("all", `All (${issues.length})`)}
-        {filterChip("error", "Errors")}
-        {filterChip("warning", "Warnings")}
-        <div className="ml-auto">
+        {filterButton("all", issues.length)}
+        {filterButton("error", errors)}
+        {filterButton("warning", warnings)}
+        {filterButton("info", infos)}
+        <div className="ml-auto flex items-center gap-1">
+          <Button
+            iconOnly
+            icon={<IconChevronsDown />}
+            tooltip="Expand all groups"
+            onClick={handleExpandAll}
+          />
+          <Button
+            iconOnly
+            icon={<IconChevronsUp />}
+            tooltip="Collapse all groups"
+            onClick={handleCollapseAll}
+          />
           <Button onClick={handleExportCsv} tooltip="Save the findings as CSV">
             CSV
           </Button>
@@ -79,10 +102,10 @@ export function IssuesPanel(): JSX.Element {
         )}
         {[...groups.entries()].map(([ruleId, list]) => (
           <Collapsible
-            key={ruleId}
+            key={`${ruleId}-${groupsOpen.seq}`}
             title={`${ruleId} — ${RULE_TITLES[ruleId] ?? "Findings"}`}
             aside={String(list.length)}
-            defaultOpen
+            defaultOpen={groupsOpen.open}
           >
             {list.map((issue) => (
               <IssueRow key={`${issue.objectId ?? "doc"}-${issue.message}`} issue={issue} />

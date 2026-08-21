@@ -1,5 +1,10 @@
 import { type DiscProfile, type ProfileLabelTemplate, pickVariant } from "./discProfile.ts";
-import { buildHeatTraceOverlays, collectHeatTracedIds, resolveHeatTraceStyle } from "./heatTracing.ts";
+import {
+  buildHeatTraceOverlays,
+  buildHeatTraceSymbolOverlays,
+  collectHeatTracedIds,
+  resolveHeatTraceStyle,
+} from "./heatTracing.ts";
 import { parseConnectorPolyline, parsePrimitive } from "./primitives.ts";
 import { buildProfileLabelOverlays, type PendingProfileLabels } from "./profileLabels.ts";
 import { buildLookupIndex, resolveTemplateTexts } from "./resolveTemplates.ts";
@@ -391,13 +396,12 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
       ...buildProfileLabelOverlays(buildLookupIndex(root), ctx.profileLabels, explicitlyLabelled),
     ];
   }
+  const tracedIds = collectHeatTracedIds(root);
+  const traceStyle = resolveHeatTraceStyle(profile?.heatTraceStroke ?? null);
   nodes = [
     ...nodes,
-    ...buildHeatTraceOverlays(
-      nodes,
-      collectHeatTracedIds(root),
-      resolveHeatTraceStyle(profile?.heatTraceStroke ?? null),
-    ),
+    ...buildHeatTraceOverlays(nodes, tracedIds, traceStyle),
+    ...buildHeatTraceSymbolOverlays(nodes, tracedIds, traceStyle, (n) => computeSceneBounds([n], shapes)),
   ];
   return {
     nodes,

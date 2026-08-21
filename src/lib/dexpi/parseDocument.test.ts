@@ -228,6 +228,60 @@ describe("parseDexpiDocument (reference P&ID)", () => {
 });
 
 // -----------------------------------------------------------------------------
+// Deeply nested group structure (spec: Groups composes GraphicsGroup, so
+// RepresentationGroups nest arbitrarily and re-anchor Represents per level)
+// -----------------------------------------------------------------------------
+
+describe("nested representation groups", () => {
+  it("finds a Label under nested RepresentationGroups, anchored to the innermost Represents", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Outer1" type="Plant/ProcessEquipment.Tank"/>
+  <Object id="Inner1" type="Plant/ProcessEquipment.Nozzle"/>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Outer1" property="Represents"/>
+        <Components property="Groups">
+          <Object type="Core/Diagram.RepresentationGroup">
+            <References objects="#Inner1" property="Represents"/>
+            <Components property="Groups">
+              <Object type="Core/Diagram.Label">
+                <Components property="Elements">
+                  <Object type="Core/Diagram.Text">
+                    <Data property="Value"><String>DEEP LABEL</String></Data>
+                    <Data property="Position">
+                      <AggregatedDataValue type="Core/Diagram.Point">
+                        <Data property="X"><Double>5</Double></Data>
+                        <Data property="Y"><Double>5</Double></Data>
+                      </AggregatedDataValue>
+                    </Data>
+                  </Object>
+                </Components>
+              </Object>
+            </Components>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+    const doc = parseDexpiDocument(xml).data;
+    const label = (doc?.scene.nodes ?? []).find(
+      (n) => n.kind === "prim" && n.prim.kind === "text" && n.prim.value === "DEEP LABEL",
+    );
+    expect(label).toBeDefined();
+    expect(label?.role).toBe("label");
+    // The innermost RepresentationGroup's Represents wins, not the outer one.
+    expect(label?.objectId).toBe("Inner1");
+  });
+});
+
+// -----------------------------------------------------------------------------
 // PersistentIdentifiers
 // -----------------------------------------------------------------------------
 

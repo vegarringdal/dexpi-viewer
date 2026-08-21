@@ -261,6 +261,13 @@ that grow, and record scope changes here.
   by serving the build from a subpath. Live app:
   https://vegarringdal.github.io/dexpi-viewer/ — remember to commit
   `docs/` after building.
+- **2026-08-20** `<Attr>Representation` twins (23 in the 2.0 model, e.g.
+  FailAction→FailActionRepresentation="FM") hold the readable drawing
+  code; the spec says graphics should reference them. Drawing-text
+  resolution (TextTemplate fragments + profile label placeholders)
+  prefers the Representation twin when the base attribute is named
+  (`lookupDisplayAttribute` in resolveTemplates.ts); panels keep
+  showing the raw data unchanged.
 - **2026-08-20** Director's rendering rules (from real DEXPI+DiscProfile
   data): (1) never render tag text twice — explicit Core/Diagram.Label
   text is authoritative; property-/profile-derived tags are fallback
@@ -274,6 +281,17 @@ that grow, and record scope changes here.
   piping objects; classified runs get a dashed overlay beside the
   untouched base pipe (see the 2026-08-21 lateral-offset entry);
   HeatTracingBreak objects are logical property breaks, never drawn.
+  2026-08-20 addendum: heat-traced INLINE components (valves,
+  fittings — symbol placements) get a dashed side-line too, per the
+  prior-art convention: below the symbol's world bounds when placed
+  horizontally, to its right when rotated ~90°/270°
+  (buildHeatTraceSymbolOverlays). PIF outline-following overlays
+  (prior art's third category) remain open. Eligibility is
+  spec-bound: the 2.0 model defines HeatTracingType only on
+  PipingNetworkSystem/Segment, PipingComponent and
+  OfflineMeasuringElement — the attribute on a signal function
+  (logical, never physically traced) is ignored as a modelling
+  error (isHeatTraceEligible).
 - **2026-08-21** Heat-trace lateral offset (DISC Profile 0.5,
   `Profile/LineStroke.LateralOffset`): the dashed overlay is a parallel
   polyline offset perpendicular to the drawing direction — positive mm =

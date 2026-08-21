@@ -324,3 +324,142 @@ describe("profile heat-trace stroke", () => {
     });
   });
 });
+
+// -----------------------------------------------------------------------------
+// Inline-symbol overlays (valves, fittings)
+// -----------------------------------------------------------------------------
+
+const VALVE_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Seg1" type="Plant/Piping.PipingNetworkSegment">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+    <Components property="Items">
+      <Object id="Valve1" type="Plant/Piping.GlobeValve"/>
+      <Object id="Valve2" type="Plant/Piping.GlobeValve"/>
+    </Components>
+  </Object>
+  <Object id="Seg2" type="Plant/Piping.PipingNetworkSegment">
+    <Components property="Items">
+      <Object id="Valve3" type="Plant/Piping.GlobeValve"/>
+    </Components>
+  </Object>
+  <Object id="Cat1" type="Core/Diagram.ShapeCatalogue">
+    <Components property="Shapes">
+      <Object id="ValveShape" type="Core/Diagram.Shape">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.PolyLine">
+            <Data property="Points">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>-2</Double></Data>
+                <Data property="Y"><Double>-1</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>2</Double></Data>
+                <Data property="Y"><Double>1</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Valve1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#ValveShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>10</Double></Data>
+                <Data property="Y"><Double>10</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Valve2" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#ValveShape" property="Shape"/>
+            <Data property="Rotation"><Double>90</Double></Data>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>30</Double></Data>
+                <Data property="Y"><Double>10</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Valve3" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#ValveShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>40</Double></Data>
+                <Data property="Y"><Double>10</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+
+describe("inline symbol heat-trace overlays", () => {
+  const doc = parseDexpiDocument(VALVE_XML).data;
+  const symbolOverlays = (doc?.scene.nodes ?? []).flatMap((n) =>
+    n.kind === "prim" && n.role === "symbol" && n.prim.kind === "polyline" ? [n] : [],
+  );
+
+  it("draws a dashed side-line for traced valves only", () => {
+    expect(symbolOverlays.filter((n) => n.objectId === "Valve1")).toHaveLength(1);
+    expect(symbolOverlays.filter((n) => n.objectId === "Valve2")).toHaveLength(1);
+    expect(symbolOverlays.filter((n) => n.objectId === "Valve3")).toHaveLength(0);
+  });
+
+  it("places the line below a horizontal placement and beside a vertical one", () => {
+    const horizontal = symbolOverlays.find((n) => n.objectId === "Valve1");
+    const vertical = symbolOverlays.find((n) => n.objectId === "Valve2");
+    const [h1, h2] = horizontal?.prim.kind === "polyline" ? horizontal.prim.points : [];
+    const [v1, v2] = vertical?.prim.kind === "polyline" ? vertical.prim.points : [];
+    // Horizontal: constant y under the symbol (bounds maxY 11 + offset 1.5).
+    expect(h1?.y).toBeCloseTo(12.5);
+    expect(h2?.y).toBeCloseTo(12.5);
+    // Vertical: constant x to the right of the symbol.
+    expect(v1?.x).toBeDefined();
+    expect(v1?.x).toBeCloseTo(v2?.x ?? Number.NaN);
+    expect((v1?.x ?? 0) > 30).toBe(true);
+    const dashed = horizontal?.prim.kind === "polyline" ? horizontal.prim.stroke.dash : [];
+    expect(dashed.length).toBeGreaterThan(0);
+  });
+});
+
+describe("heat-trace eligibility", () => {
+  it("ignores HeatTracingType on a SignalConveyingFunction (signals are logical)", () => {
+    // The 2.0 model defines HeatTracingType only on piping classes and
+    // OfflineMeasuringElement — data on a signal function is a modelling
+    // error and must not dash the signal line.
+    const xml = MAIN_XML.replace(
+      '<Object id="Seg2" type="Plant/Piping.PipingNetworkSegment">',
+      `<Object id="SCF1" type="Plant/Instrumentation.SignalConveyingFunction">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+  </Object>
+  <Object id="Seg2" type="Plant/Piping.PipingNetworkSegment">`,
+    );
+    const doc = parseDexpiDocument(xml).data;
+    expect(doc).toBeDefined();
+    const overlays = (doc?.scene.nodes ?? []).filter((n) => n.kind === "prim" && n.objectId === "SCF1");
+    expect(overlays).toHaveLength(0);
+  });
+});

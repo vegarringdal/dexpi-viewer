@@ -127,6 +127,29 @@ function isElement(value: DataValue): value is Element {
 }
 
 /**
+ * Attribute lookup for DRAWING text: the spec pairs enumeration/quantity
+ * attributes with a `<Attr>Representation` twin holding the readable code
+ * ("FailAction: FailRetainPosition" ↔ "FailActionRepresentation: FM") and
+ * says graphics should reference the representation — so when a template
+ * names the base attribute, the representation wins if the object carries
+ * one. Panels keep showing the raw data; this is display-text only.
+ */
+export function lookupDisplayAttribute(
+  index: LookupIndex,
+  objectId: string,
+  attributeName: string,
+): DataValue | undefined {
+  if (!attributeName.endsWith("Representation")) {
+    const representation = lookupAttribute(index, objectId, `${attributeName}Representation`);
+    if (representation !== undefined) {
+      return representation;
+    }
+  }
+
+  return lookupAttribute(index, objectId, attributeName);
+}
+
+/**
  * Formats per the AttributeRepresentationType (Value | Units | ValueAndUnits).
  * Drawing labels always use conventional unit symbols — the "spec unit names"
  * setting only affects the Properties panel, never the rendered diagram.
@@ -176,7 +199,7 @@ export function resolveTemplateTexts(root: Element, nodes: readonly SceneNode[])
       return "";
     }
 
-    const value = lookupAttribute(index, objectId, fragment.attributeName);
+    const value = lookupDisplayAttribute(index, objectId, fragment.attributeName);
     return value === undefined ? "" : formatForRepresentation(value, fragment.repType);
   };
 

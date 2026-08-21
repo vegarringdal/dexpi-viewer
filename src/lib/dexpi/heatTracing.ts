@@ -1,5 +1,5 @@
 import type { ProfileLineStroke } from "./discProfile.ts";
-import type { Point, RgbColor, SceneNode, Stroke, StrokeRounding } from "./types.ts";
+import type { Bounds, Point, RgbColor, SceneNode, Stroke, StrokeRounding } from "./types.ts";
 import { componentObjects, dataValue, getData, refLocalName } from "./xml.ts";
 
 // -----------------------------------------------------------------------------
@@ -32,6 +32,9 @@ const HEAT_TRACE_COLOR: RgbColor = { r: 217, g: 108, b: 24 };
  * it. Deliberately documented and overridable rather than silently zero.
  */
 export const DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM = 1.5;
+
+/** Inline-symbol overlays have no pipe width to inherit; this is the default. */
+const DEFAULT_SYMBOL_TRACE_WIDTH_MM = 0.35;
 
 export type HeatTraceStyle = Readonly<{
   color: RgbColor;
@@ -79,10 +82,30 @@ export function resolveHeatTraceStyle(profileStroke: ProfileLineStroke | null): 
 // -----------------------------------------------------------------------------
 
 /**
+ * Whether the class can legitimately carry HeatTracingType. The 2.0 model
+ * defines it on PipingNetworkSystem/Segment, PipingComponent and
+ * OfflineMeasuringElement only — physical pipes and impulse lines. Signal
+ * functions are logical and never heat-traced, so data placed there is a
+ * modelling error and is ignored. Plant/Piping.* covers the piping
+ * subclasses; DiscProfile/* custom classes (profile-extended piping
+ * components, PIF extensions) are trusted, matching the prior-art viewer.
+ */
+function isHeatTraceEligible(type: string): boolean {
+  if (type.startsWith("Plant/Piping.") || type.startsWith("DiscProfile/")) {
+    return true;
+  }
+
+  const local = type.split(/[./]/).pop() ?? type;
+  return (
+    local === "OfflineMeasuringElement" || local === "ProcessInstrumentationFunction" || local === "Nozzle"
+  );
+}
+
+/**
  * Ids of every object classified as heat-traced (`HeatTracingType` present
- * and not a "none" literal — "None"/"NoHeatTracingSystem"), plus their
- * nested component objects — a classification on a segment covers the
- * pipes inside it.
+ * on an eligible class, and not a "none" literal — "None"/
+ * "NoHeatTracingSystem"), plus their nested component objects — a
+ * classification on a segment covers the pipes inside it.
  */
 export function collectHeatTracedIds(root: Element): Set<string> {
   const traced = new Set<string>();
@@ -97,6 +120,10 @@ export function collectHeatTracedIds(root: Element): Set<string> {
   };
 
   for (const el of root.querySelectorAll("Object[id]")) {
+    if (!isHeatTraceEligible(el.getAttribute("type") ?? "")) {
+      continue;
+    }
+
     const type = refLocalName(dataValue(getData(el, "HeatTracingType")));
     if (type && type !== "None" && type !== "NoHeatTracingSystem") {
       addWithDescendants(el);
@@ -254,6 +281,59 @@ export function buildHeatTraceOverlays(
       },
       objectId: node.objectId,
       role: "connector",
+    });
+  }
+  return overlays;
+}
+
+/** Vertical placements (rotation near 90°/270°) get the trace beside, not below. */
+function isVerticalRotation(rotationDeg: number): boolean {
+  const norm = ((rotationDeg % 360) + 360) % 360;
+  return (norm > 75 && norm < 105) || (norm > 255 && norm < 285);
+}
+
+/**
+ * Dashed side-lines for heat-traced INLINE components (valves, fittings,
+ * nozzles drawn as symbol placements): a horizontal placement gets the
+ * trace just below its world bounds, a vertical one just to the right —
+ * the prior-art convention. Label placements never get overlays.
+ */
+export function buildHeatTraceSymbolOverlays(
+  nodes: readonly SceneNode[],
+  tracedIds: ReadonlySet<string>,
+  style: HeatTraceStyle,
+  boundsOf: (node: SceneNode) => Bounds,
+): SceneNode[] {
+  if (tracedIds.size === 0) {
+    return [];
+  }
+
+  const offset = Math.abs(style.lateralOffsetMm) || DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM;
+  const overlays: SceneNode[] = [];
+  for (const node of nodes) {
+    if (node.kind !== "use" || node.role !== "symbol" || !node.objectId || !tracedIds.has(node.objectId)) {
+      continue;
+    }
+
+    const b = boundsOf(node);
+    if (b.maxX <= b.minX && b.maxY <= b.minY) {
+      continue;
+    }
+
+    const points: Point[] = isVerticalRotation(node.transform.rotation)
+      ? [
+          { x: b.maxX + offset, y: b.minY },
+          { x: b.maxX + offset, y: b.maxY },
+        ]
+      : [
+          { x: b.minX, y: b.maxY + offset },
+          { x: b.maxX, y: b.maxY + offset },
+        ];
+    overlays.push({
+      kind: "prim",
+      prim: { kind: "polyline", points, stroke: overlayStroke(style, DEFAULT_SYMBOL_TRACE_WIDTH_MM) },
+      objectId: node.objectId,
+      role: "symbol",
     });
   }
   return overlays;

@@ -1,6 +1,6 @@
 import type { ProfileLabelTemplate } from "./discProfile.ts";
 import { transformPrimitive } from "./flattenScene.ts";
-import { formatForRepresentation, type LookupIndex, lookupAttribute } from "./resolveTemplates.ts";
+import { formatForRepresentation, type LookupIndex, lookupDisplayAttribute } from "./resolveTemplates.ts";
 import { TEXT_LINE_SPACING } from "./textLayout.ts";
 import type { SceneNode, UseTransform } from "./types.ts";
 import { dataValue, getData, refLocalName } from "./xml.ts";
@@ -81,10 +81,23 @@ function pickRoleChild(
   return matches[idx] ?? matches[matches.length - 1] ?? null;
 }
 
-/** Direct-only Data lookup on one element, tolerating prefixed spellings. */
+/**
+ * Direct-only Data lookup on one element, tolerating prefixed spellings.
+ * Prefers the `<Attr>Representation` twin — the spec's readable drawing
+ * code — over the base attribute (see lookupDisplayAttribute).
+ */
 function ownValueText(el: Element, attributeName: string): string {
   const bare = attributeName.split("/").pop() ?? attributeName;
-  for (const name of [attributeName, bare, `DiscProfile/${bare}`]) {
+  const candidates = bare.endsWith("Representation")
+    ? [attributeName, bare, `DiscProfile/${bare}`]
+    : [
+        `${bare}Representation`,
+        `DiscProfile/${bare}Representation`,
+        attributeName,
+        bare,
+        `DiscProfile/${bare}`,
+      ];
+  for (const name of candidates) {
     const data = getData(el, name);
     if (data) {
       return formatForRepresentation(dataValue(data), "Value");
@@ -122,7 +135,7 @@ export function resolveProfileLabelText(
       return ownValueText(target, attrName);
     }
 
-    const value = lookupAttribute(index, objectId, attrName);
+    const value = lookupDisplayAttribute(index, objectId, attrName);
     return value === undefined ? "" : formatForRepresentation(value, "Value");
   });
   return unresolved ? null : resolved;
