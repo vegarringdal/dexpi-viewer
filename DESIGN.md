@@ -361,9 +361,14 @@ that grow, and record scope changes here.
   renders unresolved markers, placeholder tokens, or invalid sentinels as
   drawing text. `isRenderableLabelValue` is the single centralized
   policy — empty/whitespace, an explicit sentinel list (?, ???, N/A,
-  TBD, null, #VALUE!, …), and template-token shapes (`<Word>`/`{Word}`)
+  TBD, null, #VALUE!, …), template-token shapes (`<Word>`/`{Word}`)
   that leaked into model data (e.g. a PropertyBreak's generic
-  BreakValue1/2 fields). Applied in both drawing-text resolution paths:
+  BreakValue1/2 fields), and the exporter's repeated placeholder
+  filler (isExporterPlaceholder, added same day after the first pass
+  missed it): length ≥ 2 with no letter or digit at all ("????",
+  "-----", "?!?!") or a pure x/X run ("xxxx") — shape-based, no
+  object/position/break-id special-casing; lone symbols stay
+  renderable. Applied in both drawing-text resolution paths:
   profile LabelTemplates render a non-renderable field blank, so only
   that label position is suppressed (the break symbol's two BreakValue
   positions stay independent); explicit-text templates treat it as a
@@ -386,6 +391,20 @@ that grow, and record scope changes here.
   label. The viewer never converts a classification into a directional
   word — direction comes from the authored text or the slope symbol's
   own rotation/mirroring, which text resolution never touches.
+- **2026-08-21** Profile-label suppression is ownership-based
+  (collectExplicitlyLabelledIds in sceneGraph.ts, director's rule): the
+  explicitly-labelled set that blocks LabelTemplate overlays is computed
+  on the XML representation tree, NOT the emitted text nodes — the old
+  emitted-node scan lost the object association when the explicit label
+  group and the symbol group were siblings with Represents at a
+  different nesting level, so profile templates duplicated the tag. The
+  walk propagates Represents down as usual; an authored, non-empty label
+  text with no association on its own chain is attributed to the
+  nearest enclosing subtree that represents exactly ONE object
+  (ambiguous subtrees never guess). Ownership uses authored literals
+  only — template resolution can't move an object in or out of the set.
+  Suppression stays scoped per represented object (never by text value,
+  position, or symbol type), and explicit primitives are never merged.
 - **2026-08-19** License decided by the director: **AGPL-3.0-only**
       (LICENSE at repo root, package.json license field set, README
       section, About tab statement + viewer).

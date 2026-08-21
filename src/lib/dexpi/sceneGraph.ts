@@ -216,6 +216,104 @@ function walkGroup(
 }
 
 // -----------------------------------------------------------------------------
+// Explicit-label ownership
+// -----------------------------------------------------------------------------
+
+const TEXT_TYPES = new Set(["Core/Diagram.Text"]);
+
+function hasAuthoredText(el: Element): boolean {
+  return (stringFromData(el, "Value") || stringFromData(el, "Text")).trim().length > 0;
+}
+
+/**
+ * Ids of every object with explicit, non-empty AUTHORED diagram label text
+ * anywhere in its representation — the set that suppresses profile
+ * LabelTemplate overlays. Computed on the XML group tree, not the emitted
+ * scene nodes, so the association survives layouts where the label group
+ * and the symbol group are siblings and the Represents reference sits at a
+ * different nesting level: a label text with no Represents on its own
+ * chain is attributed to the nearest enclosing subtree that represents
+ * exactly ONE object. A subtree representing several objects never
+ * guesses, and ownership uses authored literals only — template
+ * resolution can never move an object in or out of this set.
+ */
+export function collectExplicitlyLabelledIds(root: Element): Set<string> {
+  const labelled = new Set<string>();
+  const visited = new Set<Element>();
+
+  type SubtreeInfo = Readonly<{
+    /** Distinct Represents targets in the subtree. */
+    repIds: ReadonlySet<string>;
+    /** Authored label texts still lacking an object association. */
+    unowned: number;
+  }>;
+
+  const walk = (node: Element, inheritedId: string | null, inheritedLabel: boolean): SubtreeInfo => {
+    if (visited.has(node)) {
+      return { repIds: new Set(), unowned: 0 };
+    }
+
+    visited.add(node);
+    const type = node.getAttribute("type") ?? "";
+    const isLabelContext = inheritedLabel || type === "Core/Diagram.Label" || type.endsWith("Label");
+    const ownRep = referenceTargets(node, "Represents")[0] ?? null;
+    const objectId = ownRep ?? inheritedId;
+
+    const repIds = new Set<string>(ownRep ? [ownRep] : []);
+    let unowned = 0;
+    const merge = (child: SubtreeInfo): void => {
+      for (const id of child.repIds) {
+        repIds.add(id);
+      }
+      unowned += child.unowned;
+    };
+
+    for (const el of componentObjects(node, "Elements")) {
+      const elType = el.getAttribute("type") ?? "";
+      if (TEXT_TYPES.has(elType)) {
+        if (isLabelContext && hasAuthoredText(el)) {
+          if (objectId) {
+            labelled.add(objectId);
+          } else {
+            unowned += 1;
+          }
+        }
+        continue;
+      }
+
+      if (USAGE_TYPES.has(elType) || elType === "Core/Diagram.ConnectorLine") {
+        continue;
+      }
+
+      merge(walk(el, objectId, isLabelContext));
+    }
+
+    for (const group of componentObjects(node, "Groups")) {
+      merge(walk(group, objectId, isLabelContext));
+    }
+
+    if (unowned > 0 && repIds.size === 1) {
+      for (const id of repIds) {
+        labelled.add(id);
+      }
+      unowned = 0;
+    }
+
+    return { repIds, unowned };
+  };
+
+  const diagrams = [...root.querySelectorAll('Object[type="Core/Diagram.Diagram"]')];
+  const roots =
+    diagrams.length > 0
+      ? diagrams
+      : [...root.querySelectorAll('Object[type="Core/Diagram.RepresentationGroup"]')];
+  for (const groupRoot of roots) {
+    walk(groupRoot, null, false);
+  }
+  return labelled;
+}
+
+// -----------------------------------------------------------------------------
 // Bounds
 // -----------------------------------------------------------------------------
 
@@ -379,21 +477,17 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
   let nodes = resolveTemplateTexts(root, ctx.nodes);
   if (ctx.profileLabels.length > 0) {
     // Explicit diagram labels are authoritative — objects that carry one
-    // never get profile LabelTemplate overlays on top.
-    const explicitlyLabelled = new Set<string>(
-      nodes.flatMap((n) =>
-        n.kind === "prim" &&
-        n.role === "label" &&
-        n.prim.kind === "text" &&
-        n.prim.value.trim().length > 0 &&
-        n.objectId
-          ? [n.objectId]
-          : [],
-      ),
-    );
+    // never get profile LabelTemplate overlays on top. Ownership comes
+    // from the XML representation tree (collectExplicitlyLabelledIds),
+    // not the emitted nodes, so sibling label groups whose Represents sits
+    // at a different level still suppress their object's templates.
     nodes = [
       ...nodes,
-      ...buildProfileLabelOverlays(buildLookupIndex(root), ctx.profileLabels, explicitlyLabelled),
+      ...buildProfileLabelOverlays(
+        buildLookupIndex(root),
+        ctx.profileLabels,
+        collectExplicitlyLabelledIds(root),
+      ),
     ];
   }
   const tracedIds = collectHeatTracedIds(root);

@@ -313,3 +313,208 @@ describe("property-break value labels", () => {
     expect(texts).toHaveLength(0);
   });
 });
+
+// -----------------------------------------------------------------------------
+// Label ownership across the representation tree — suppression must work
+// even when the explicit label group and the symbol group are siblings and
+// the Represents reference sits at a different nesting level.
+// -----------------------------------------------------------------------------
+
+describe("explicit-label ownership in sibling representation groups", () => {
+  // Parent group carries no Represents; the symbol sub-group represents
+  // PIF1 while the label sub-group has no association of its own.
+  const SIBLING_MAIN_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="PIF1" type="Plant/Instrumentation.ProcessInstrumentationFunction">
+    <Data property="TagName"><String>PT-100</String></Data>
+  </Object>
+  <Object id="PIF2" type="Plant/Instrumentation.ProcessInstrumentationFunction">
+    <Data property="TagName"><String>PT-200</String></Data>
+  </Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <Components property="Groups">
+          <Object type="Core/Diagram.RepresentationGroup">
+            <References objects="#PIF1" property="Represents"/>
+            <Components property="Elements">
+              <Object type="Profile/SymbolUsage">
+                <References objects="DiscProfile/Balloon" property="Symbol"/>
+                <Data property="Position">
+                  <AggregatedDataValue type="Core/Diagram.Point">
+                    <Data property="X"><Double>10</Double></Data>
+                    <Data property="Y"><Double>20</Double></Data>
+                  </AggregatedDataValue>
+                </Data>
+              </Object>
+            </Components>
+          </Object>
+          <Object type="Core/Diagram.Label">
+            <Components property="Elements">
+              <Object type="Core/Diagram.Text">
+                <Data property="Text"><String>PT-100</String></Data>
+                <Data property="Position">
+                  <AggregatedDataValue type="Core/Diagram.Point">
+                    <Data property="X"><Double>10</Double></Data>
+                    <Data property="Y"><Double>25</Double></Data>
+                  </AggregatedDataValue>
+                </Data>
+              </Object>
+              <Object type="Core/Diagram.Text">
+                <Data property="Text"><String>REF-7</String></Data>
+                <Data property="Position">
+                  <AggregatedDataValue type="Core/Diagram.Point">
+                    <Data property="X"><Double>10</Double></Data>
+                    <Data property="Y"><Double>28</Double></Data>
+                  </AggregatedDataValue>
+                </Data>
+              </Object>
+            </Components>
+          </Object>
+        </Components>
+      </Object>
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#PIF2" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Profile/SymbolUsage">
+            <References objects="DiscProfile/Balloon" property="Symbol"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>30</Double></Data>
+                <Data property="Y"><Double>20</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+
+  const texts = overlayTexts(SIBLING_MAIN_XML);
+
+  it("renders the multi-part explicit label once, unmerged and in place", () => {
+    const tag = texts.filter((t) => t.value === "PT-100");
+    const ref = texts.filter((t) => t.value === "REF-7");
+    expect(tag).toHaveLength(1);
+    expect(ref).toHaveLength(1);
+    expect(tag[0]?.position).toEqual({ x: 10, y: 25 });
+    expect(ref[0]?.position).toEqual({ x: 10, y: 28 });
+  });
+
+  it("suppresses every profile template for the explicitly labelled sibling object", () => {
+    expect(texts.some((t) => t.value === "PT-100-")).toBe(false);
+    expect(texts.some((t) => t.value === "H=100")).toBe(false);
+  });
+
+  it("still generates fallback labels for the object without an explicit label", () => {
+    expect(texts.some((t) => t.value === "PT-200-")).toBe(true);
+  });
+
+  it("scopes suppression per object, not by text value", () => {
+    // PIF2's fallback tag renders even though PIF1's explicit label exists
+    // elsewhere in the drawing — only PIF1's templates are suppressed.
+    const withIdenticalText = SIBLING_MAIN_XML.replace("<String>PT-200</String>", "<String>PT-100</String>");
+    const t2 = overlayTexts(withIdenticalText);
+    expect(t2.some((t) => t.value === "PT-100-")).toBe(true);
+  });
+});
+
+describe("property-break exporter placeholders", () => {
+  // Reuses the ND0007 break fixture from the describe above via module scope
+  // is not possible — rebuild the minimal pieces here.
+  const BREAK_PROFILE = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Profile">
+  <Object id="SymB" name="ND0007" type="Profile/Symbol">
+    <Components property="Variants">
+      <Object type="Profile/SymbolVariant">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.Circle">
+            <Data property="Center">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>0</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+            <Data property="Radius"><Double>1.5</Double></Data>
+          </Object>
+        </Components>
+        <Components property="LabelTemplates">
+          <Object type="Profile/LabelTemplate">
+            <Data property="Text"><String>&lt;BreakValue1&gt;</String></Data>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>4</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+          <Object type="Profile/LabelTemplate">
+            <Data property="Text"><String>&lt;BreakValue2&gt;</String></Data>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>-4</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+
+  function breakXml(v1: string, v2: string): string {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="PB1" type="Plant/Piping.PropertyBreak">
+    <Data property="DiscProfile/BreakValue1"><String>${v1}</String></Data>
+    <Data property="DiscProfile/BreakValue2"><String>${v2}</String></Data>
+  </Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#PB1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Profile/SymbolUsage">
+            <References objects="DiscProfile/ND0007" property="Symbol"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>20</Double></Data>
+                <Data property="Y"><Double>20</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+  }
+
+  it("renders zero break-label nodes for the repeated placeholder filler", () => {
+    expect(overlayTexts(breakXml("????????", "????????"), BREAK_PROFILE)).toHaveLength(0);
+    expect(overlayTexts(breakXml("xxxx", "-----"), BREAK_PROFILE)).toHaveLength(0);
+  });
+
+  it("renders exactly one label when only one side is real", () => {
+    const texts = overlayTexts(breakXml("AP110", "????????"), BREAK_PROFILE);
+    expect(texts.map((t) => t.value)).toEqual(["AP110"]);
+    expect(texts[0]?.position).toEqual({ x: 20, y: 24 });
+  });
+
+  it("keeps the raw placeholder available to the data/properties view", () => {
+    const profile = parseDiscProfile(BREAK_PROFILE).data ?? null;
+    const doc = parseDexpiDocument(breakXml("????????", "AP310"), profile).data;
+    const attrs = doc?.plant.byId.get("PB1")?.attributes ?? [];
+    expect(attrs.some((a) => a.value === "????????")).toBe(true);
+  });
+});
