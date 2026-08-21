@@ -332,6 +332,15 @@ that grow, and record scope changes here.
   corrected, and the heat-trace lateral-offset normal flipped to (−dy,dx)
   so positive LateralOffset is the *visual* right of the drawing
   direction as the DISC spec intends.
+- **2026-08-21** Director's label rule — TextTemplate resolution is
+  **all-or-nothing**: the label's XML `Data property="Text"` value is the
+  real display value; a template may replace it only when EVERY attribute
+  fragment resolves to a non-empty value. Any fragment that is missing
+  its target, resolves empty/whitespace, or has an unsupported fragment
+  kind (parseTemplateFragments drops the whole template, keeping the
+  snapshot authoritative) leaves the original Text untouched — never a
+  partial concatenation of the fragments that happened to resolve
+  (src/lib/dexpi/resolveTemplates.ts + primitives.ts).
 - **2026-08-19** License decided by the director: **AGPL-3.0-only**
       (LICENSE at repo root, package.json license field set, README
       section, About tab statement + viewer).

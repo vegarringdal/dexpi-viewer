@@ -48,7 +48,10 @@ copy options (label / type / label+type+id, one row per object).
 
 Two finishing pieces: **labels resolve their TextTemplates** — text
 comes from live attribute values (with proper unit symbols: barg, °C,
-m³/h), beating stale literal snapshots — and the scene body is cached
+m³/h), beating stale literal snapshots; resolution is all-or-nothing,
+so a template with any missing, unsupported or empty fragment keeps the
+label's original XML text instead of a partial value — and the scene
+body is cached
 as a **Skia picture**, so panning, hovering and selection replay a
 recording (~56 fps sustained pan even under software rendering).
 

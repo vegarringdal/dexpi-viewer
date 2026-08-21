@@ -176,8 +176,12 @@ export function formatForRepresentation(value: DataValue, repType: string): stri
 
 /**
  * Replaces every templated text primitive's value with its resolved template
- * text (fragment by fragment). Fragments that fail to resolve contribute
- * nothing; if the whole template resolves empty, the literal snapshot stays.
+ * text — but only all-or-nothing (director's rule): the label's XML `Text`
+ * value is the real display value, and the template may replace it only when
+ * EVERY attribute fragment resolves to a non-empty value. A fragment that is
+ * missing its target, unsupported, or resolves empty keeps the original
+ * snapshot unchanged — never a partial concatenation of the fragments that
+ * happened to resolve.
  */
 export function resolveTemplateTexts(root: Element, nodes: readonly SceneNode[]): SceneNode[] {
   const hasTemplates = nodes.some(
@@ -189,18 +193,39 @@ export function resolveTemplateTexts(root: Element, nodes: readonly SceneNode[])
 
   const index = buildLookupIndex(root);
 
-  const resolveFragment = (fragment: TemplateFragment, fallbackObjectId: string | null): string => {
+  /** null = the fragment failed to resolve (missing, unsupported, or empty). */
+  const resolveFragment = (fragment: TemplateFragment, fallbackObjectId: string | null): string | null => {
     if (fragment.kind === "literal") {
       return fragment.text;
     }
 
     const objectId = fragment.objectId ?? fallbackObjectId;
     if (!objectId || !fragment.attributeName) {
-      return "";
+      return null;
     }
 
     const value = lookupDisplayAttribute(index, objectId, fragment.attributeName);
-    return value === undefined ? "" : formatForRepresentation(value, fragment.repType);
+    if (value === undefined) {
+      return null;
+    }
+
+    const formatted = formatForRepresentation(value, fragment.repType);
+    return formatted.trim().length === 0 ? null : formatted;
+  };
+
+  const resolveTemplate = (
+    template: readonly TemplateFragment[],
+    fallbackObjectId: string | null,
+  ): string | null => {
+    const parts: string[] = [];
+    for (const fragment of template) {
+      const part = resolveFragment(fragment, fallbackObjectId);
+      if (part === null) {
+        return null;
+      }
+      parts.push(part);
+    }
+    return parts.join("");
   };
 
   return nodes.map((node) => {
@@ -208,8 +233,8 @@ export function resolveTemplateTexts(root: Element, nodes: readonly SceneNode[])
       return node;
     }
 
-    const resolved = node.prim.template.map((f) => resolveFragment(f, node.objectId)).join("");
-    if (resolved.trim().length === 0) {
+    const resolved = resolveTemplate(node.prim.template, node.objectId);
+    if (resolved === null || resolved.trim().length === 0) {
       return node;
     }
 

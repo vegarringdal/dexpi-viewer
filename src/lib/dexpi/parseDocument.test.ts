@@ -357,3 +357,74 @@ describe("template resolution (reference P&ID)", () => {
     expect(texts.some((t) => t.value === "STALE SNAPSHOT")).toBe(false);
   });
 });
+
+describe("template resolution is all-or-nothing (director's rule)", () => {
+  const SNAPSHOT = "P-100 / 5 barg";
+
+  function labelFixture(fragments: string): string {
+    return wrapModel(`
+      <Object id="EQ1" type="Plant/Equipment.Pump">
+        <Data property="TagName"><String>P-100</String></Data>
+        <Data property="BlankAttr"><String>   </String></Data>
+      </Object>
+      <Object id="D1" type="Core/Diagram.Diagram">
+        <Data property="MinX"><Double>0</Double></Data>
+        <Data property="MinY"><Double>0</Double></Data>
+        <Data property="MaxX"><Double>100</Double></Data>
+        <Data property="MaxY"><Double>50</Double></Data>
+        <Components property="Groups">
+          <Object type="Core/Diagram.RepresentationGroup">
+            <References objects="#EQ1" property="Represents"/>
+            <Components property="Elements">
+              <Object type="Core/Diagram.Label">
+                <Components property="Elements">
+                  <Object type="Core/Diagram.Text">
+                    <Data property="Text"><String>${SNAPSHOT}</String></Data>
+                    <Components property="Template">
+                      <Object type="Core/Diagram.TextTemplate">
+                        <Components property="Fragments">${fragments}</Components>
+                      </Object>
+                    </Components>
+                  </Object>
+                </Components>
+              </Object>
+            </Components>
+          </Object>
+        </Components>
+      </Object>
+    `);
+  }
+
+  const attrFragment = (name: string): string =>
+    `<Object type="Core/Diagram.AttributeRepresentation">
+       <Data property="AttributeName"><String>${name}</String></Data>
+       <Data property="Type"><DataReference data="Core/Diagram.AttributeRepresentationType.Value"/></Data>
+     </Object>`;
+  const literalFragment = (text: string): string =>
+    `<Object type="Core/Diagram.LiteralText"><Data property="Text"><String>${text}</String></Data></Object>`;
+
+  function renderedLabel(fragments: string): string | undefined {
+    const doc = parseDexpiDocument(labelFixture(fragments)).data;
+    return (doc?.scene.nodes ?? []).flatMap((n) =>
+      n.kind === "prim" && n.prim.kind === "text" ? [n.prim.value] : [],
+    )[0];
+  }
+
+  it("replaces the snapshot when every fragment resolves", () => {
+    expect(renderedLabel(literalFragment("TAG ") + attrFragment("TagName"))).toBe("TAG P-100");
+  });
+
+  it("keeps the snapshot when any fragment's attribute is missing", () => {
+    const fragments = attrFragment("TagName") + literalFragment(" / ") + attrFragment("DesignPressure");
+    expect(renderedLabel(fragments)).toBe(SNAPSHOT);
+  });
+
+  it("keeps the snapshot when a fragment resolves to an empty value", () => {
+    expect(renderedLabel(attrFragment("TagName") + attrFragment("BlankAttr"))).toBe(SNAPSHOT);
+  });
+
+  it("keeps the snapshot when the template contains an unsupported fragment kind", () => {
+    const fragments = `${attrFragment("TagName")}<Object type="Core/Diagram.FutureFragment"/>`;
+    expect(renderedLabel(fragments)).toBe(SNAPSHOT);
+  });
+});

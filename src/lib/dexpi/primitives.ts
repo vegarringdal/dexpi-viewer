@@ -137,6 +137,10 @@ function parseTemplateFragments(node: Element): TemplateFragment[] | null {
       });
     } else if (type === "Core/Diagram.LiteralText") {
       fragments.push({ kind: "literal", text: stringFromData(fragment, "Text") });
+    } else {
+      // Unsupported fragment kind: resolving the rest would produce a
+      // partial label, so the literal Text snapshot stays authoritative.
+      return null;
     }
   }
   return fragments.length > 0 ? fragments : null;
