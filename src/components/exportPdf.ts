@@ -3,6 +3,7 @@ import { degrees, LineCapStyle, PDFDocument, type PDFFont, type PDFPage, rgb } f
 import { type FaceKey, faceKeyFor, loadFontData } from "../lib/canvas/fonts.ts";
 import { flattenScene } from "../lib/dexpi/flattenScene.ts";
 import { primitiveToPathData } from "../lib/dexpi/pathData.ts";
+import { baselineOffsetMm, layoutTextLines } from "../lib/dexpi/textLayout.ts";
 import type { RgbColor, SceneGraph, ScenePrimitive, TextPrim } from "../lib/dexpi/types.ts";
 
 // -----------------------------------------------------------------------------
@@ -46,8 +47,9 @@ function drawGeometry(ctx: PdfContext, prim: Exclude<ScenePrimitive, TextPrim>):
     scale: MM_TO_PT,
     borderColor: toRgb(prim.stroke.color),
     borderWidth: Math.max(prim.stroke.width, 0.05),
-    borderLineCap: LineCapStyle.Round,
+    borderLineCap: prim.stroke.rounding === "Butt" ? LineCapStyle.Butt : LineCapStyle.Round,
     ...(prim.stroke.dash.length > 0 ? { borderDashArray: [...prim.stroke.dash] } : {}),
+    ...(prim.stroke.dashOffset ? { borderDashPhase: prim.stroke.dashOffset } : {}),
     ...("fill" in prim && fillStyle !== "Transparent"
       ? { color: toRgb(prim.fill.color), ...(fillStyle === "Hatch" ? { opacity: 0.25 } : {}) }
       : {}),
@@ -65,29 +67,36 @@ function drawPdfText(ctx: PdfContext, prim: TextPrim): void {
   }
 
   const sizePt = prim.size * MM_TO_PT;
-  const widthPt = font.widthOfTextAtSize(prim.value, sizePt);
-  const dx = prim.hAlign === "Center" ? -widthPt / 2 : prim.hAlign === "Right" ? -widthPt : 0;
-  const dyMm = prim.vAlign === "Center" ? 0.3 * prim.size : prim.vAlign === "Top" ? 0.8 * prim.size : 0;
-  const dy = dyMm * MM_TO_PT;
-
-  // Rotate the local (dx, dy) anchor offset into drawing space (y-down),
-  // then flip into PDF's y-up page space.
+  const baseDyMm = baselineOffsetMm(prim.size, prim.vAlign);
   const rad = (prim.rotation * Math.PI) / 180;
   const cos = Math.cos(rad);
   const sin = Math.sin(rad);
-  const offsetX = dx * cos - dy * sin;
-  const offsetY = dx * sin + dy * cos;
-  const xPt = (prim.position.x + ctx.ox) * MM_TO_PT + offsetX;
-  const yPt = ctx.pageHeightPt - ((prim.position.y + ctx.oy) * MM_TO_PT + offsetY);
+  for (const line of layoutTextLines(prim.value, prim.size, prim.vAlign)) {
+    if (line.value.length === 0) {
+      continue;
+    }
 
-  ctx.page.drawText(prim.value, {
-    x: xPt,
-    y: yPt,
-    size: sizePt,
-    font,
-    color: toRgb(prim.color),
-    rotate: degrees(-prim.rotation),
-  });
+    const widthPt = font.widthOfTextAtSize(line.value, sizePt);
+    const dx = prim.hAlign === "Center" ? -widthPt / 2 : prim.hAlign === "Right" ? -widthPt : 0;
+    const dy = (baseDyMm + line.offsetY) * MM_TO_PT;
+
+    // Rotate the local (dx, dy) anchor offset into drawing space (y-down),
+    // then flip into PDF's y-up page space. Rotating each line's offset
+    // around the shared anchor keeps the block turning as one unit.
+    const offsetX = dx * cos - dy * sin;
+    const offsetY = dx * sin + dy * cos;
+    const xPt = (prim.position.x + ctx.ox) * MM_TO_PT + offsetX;
+    const yPt = ctx.pageHeightPt - ((prim.position.y + ctx.oy) * MM_TO_PT + offsetY);
+
+    ctx.page.drawText(line.value, {
+      x: xPt,
+      y: yPt,
+      size: sizePt,
+      font,
+      color: toRgb(prim.color),
+      rotate: degrees(-prim.rotation),
+    });
+  }
 }
 
 /** Renders the scene graph into a single-page PDF; returns the file bytes. */

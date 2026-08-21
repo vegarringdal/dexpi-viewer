@@ -1,6 +1,6 @@
 import { fail, ok, type Result } from "../result.ts";
 import { parseAlignment, parsePrimitive } from "./primitives.ts";
-import type { Point, RgbColor, ScenePrimitive, TextAlignH, TextAlignV } from "./types.ts";
+import type { Point, RgbColor, ScenePrimitive, StrokeRounding, TextAlignH, TextAlignV } from "./types.ts";
 import {
   aggregateFromData,
   colorFromAggregate,
@@ -8,6 +8,7 @@ import {
   dataValue,
   getData,
   numberFromData,
+  numbersFromData,
   pointFromAggregate,
   refLocalName,
   stringFromData,
@@ -59,9 +60,28 @@ export type ProfileSymbol = Readonly<{
   variants: readonly ProfileSymbolVariant[];
 }>;
 
+/**
+ * A Profile/LineStroke definition (DISC Profile 0.5). All lengths in mm.
+ * `lateralOffsetMm` is perpendicular to the drawing direction: positive =
+ * right, negative = left. Fields the profile omits stay null (color, width,
+ * rounding) or empty/zero (dash array, offsets).
+ */
+export type ProfileLineStroke = Readonly<{
+  color: RgbColor | null;
+  /** SVG stroke-dasharray semantics; empty = solid. */
+  dashArray: readonly number[];
+  lateralOffsetMm: number;
+  rounding: StrokeRounding | null;
+  /** SVG stroke-dashoffset semantics. */
+  dashOffsetMm: number;
+  widthMm: number | null;
+}>;
+
 export type DiscProfile = Readonly<{
   /** Keyed by "DiscProfile/<name>" AND the bare symbol name. */
   symbols: ReadonlyMap<string, ProfileSymbol>;
+  /** The profile's heat-trace stroke (non-zero LateralOffset), if any. */
+  heatTraceStroke: ProfileLineStroke | null;
 }>;
 
 // -----------------------------------------------------------------------------
@@ -106,6 +126,37 @@ function parseLabelTemplate(lt: Element): ProfileLabelTemplate {
   };
 }
 
+function parseLineStroke(el: Element): ProfileLineStroke {
+  const roundingRaw = refLocalName(dataValue(getData(el, "LineRounding")));
+  const width = numberFromData(el, "Width", Number.NaN);
+  return {
+    color: colorFromAggregate(aggregateFromData(el, "Color")),
+    dashArray: numbersFromData(el, "DashArray"),
+    lateralOffsetMm: numberFromData(el, "LateralOffset", 0),
+    rounding: roundingRaw === "Butt" || roundingRaw === "Round" ? roundingRaw : null,
+    dashOffsetMm: numberFromData(el, "Offset", 0),
+    widthMm: Number.isFinite(width) ? width : null,
+  };
+}
+
+/**
+ * The spec models heat tracing as a Profile/AggregatedStroke whose first
+ * LineStroke (the pipe) has LateralOffset 0 and whose second (the dashed
+ * trace) a non-zero one. No published files carry stroke instances yet, so
+ * this scans every Profile/LineStroke regardless of nesting and picks the
+ * first with a non-zero LateralOffset — best-effort until real examples
+ * settle the container format.
+ */
+function findHeatTraceStroke(dom: Document): ProfileLineStroke | null {
+  for (const el of dom.querySelectorAll('Object[type="Profile/LineStroke"]')) {
+    const stroke = parseLineStroke(el);
+    if (stroke.lateralOffsetMm !== 0) {
+      return stroke;
+    }
+  }
+  return null;
+}
+
 /**
  * Parses a DiscProfile.xml into a symbol catalogue. Expected failures come
  * back as Result errors, never throws.
@@ -146,7 +197,7 @@ export function parseDiscProfile(xmlText: string): Result<DiscProfile> {
     return fail("The file contains no Profile/Symbol catalogue — not a DISC profile.");
   }
 
-  return ok({ symbols });
+  return ok({ symbols, heatTraceStroke: findHeatTraceStroke(dom) });
 }
 
 // -----------------------------------------------------------------------------

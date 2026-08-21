@@ -1,3 +1,4 @@
+import { baselineOffsetMm, layoutTextLines } from "./textLayout.ts";
 import type { RgbColor, SceneGraph, ScenePrimitive, Stroke, UseNode } from "./types.ts";
 
 // -----------------------------------------------------------------------------
@@ -30,7 +31,10 @@ function color(c: RgbColor): string {
 function strokeAttrs(stroke: Stroke, widthDivisor: number): string {
   const width = Math.max(stroke.width, 0.01) / widthDivisor;
   const dash = stroke.dash.length > 0 ? ` stroke-dasharray="${stroke.dash.map(num).join(" ")}"` : "";
-  return `stroke="${color(stroke.color)}" stroke-width="${num(width)}" stroke-linecap="round" stroke-linejoin="round"${dash}`;
+  const dashOffset = stroke.dashOffset ? ` stroke-dashoffset="${num(stroke.dashOffset)}"` : "";
+  const cap = stroke.rounding === "Butt" ? "butt" : "round";
+  const join = stroke.rounding === "Butt" ? "miter" : "round";
+  return `stroke="${color(stroke.color)}" stroke-width="${num(width)}" stroke-linecap="${cap}" stroke-linejoin="${join}"${dash}${dashOffset}`;
 }
 
 let hatchCounter = 0;
@@ -116,9 +120,21 @@ function emitPrimitive(prim: ScenePrimitive, widthDivisor: number): string {
       return `${defs}<rect transform="translate(${num(prim.center.x)},${num(prim.center.y)}) rotate(${num(prim.rotation)})" x="${num(-prim.width / 2)}" y="${num(-prim.height / 2)}" width="${num(prim.width)}" height="${num(prim.height)}" ${fill} ${strokeAttrs(prim.stroke, widthDivisor)}/>`;
     }
     case "text": {
-      const dy = prim.vAlign === "Center" ? 0.3 * prim.size : prim.vAlign === "Top" ? 0.8 * prim.size : 0;
+      const dy = baselineOffsetMm(prim.size, prim.vAlign);
       const rotate = prim.rotation !== 0 ? ` rotate(${num(prim.rotation)})` : "";
-      return `<text transform="translate(${num(prim.position.x)},${num(prim.position.y)})${rotate}" y="${num(dy)}" font-family="${esc(prim.font)}, Carlito, 'Liberation Sans', sans-serif" font-size="${num(prim.size)}" text-anchor="${textAnchor(prim.hAlign)}" fill="${color(prim.color)}">${esc(prim.value)}</text>`;
+      const attrs = `transform="translate(${num(prim.position.x)},${num(prim.position.y)})${rotate}" font-family="${esc(prim.font)}, Carlito, 'Liberation Sans', sans-serif" font-size="${num(prim.size)}" text-anchor="${textAnchor(prim.hAlign)}" fill="${color(prim.color)}"`;
+      const lines = layoutTextLines(prim.value, prim.size, prim.vAlign);
+      if (lines.length === 1) {
+        return `<text ${attrs} y="${num(dy)}">${esc(prim.value)}</text>`;
+      }
+
+      // Multiline: one tspan per line, all inside the rotated frame so the
+      // block rotates as a unit; x="0" re-anchors each line for text-anchor.
+      const spans = lines
+        .filter((line) => line.value.length > 0)
+        .map((line) => `<tspan x="0" y="${num(dy + line.offsetY)}">${esc(line.value)}</tspan>`)
+        .join("");
+      return `<text ${attrs}>${spans}</text>`;
     }
   }
 }

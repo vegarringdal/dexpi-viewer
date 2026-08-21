@@ -1,3 +1,4 @@
+import { layoutTextLines } from "./textLayout.ts";
 import type { Point, SceneGraph, SceneNode, ScenePrimitive, UseTransform } from "./types.ts";
 
 // -----------------------------------------------------------------------------
@@ -108,10 +109,21 @@ function hitsPrimitive(prim: ScenePrimitive, p: Point, tol: number): boolean {
       return nearEdge;
     }
     case "text": {
-      const w = Math.max(prim.value.length * prim.size * 0.6, prim.size);
+      const lines = layoutTextLines(prim.value, prim.size, prim.vAlign);
+      const maxChars = Math.max(...lines.map((l) => l.value.length));
+      const w = Math.max(maxChars * prim.size * 0.6, prim.size);
       const local = unrotate(p, prim.position, prim.rotation);
       const x0 = prim.hAlign === "Center" ? -w / 2 : prim.hAlign === "Right" ? -w : 0;
-      return local.x >= x0 - tol && local.x <= x0 + w + tol && local.y >= -prim.size && local.y <= prim.size;
+      // Line offsets are relative to the single-line baseline, so a
+      // single-line value keeps the exact previous hit band.
+      const firstOffset = lines[0]?.offsetY ?? 0;
+      const lastOffset = lines[lines.length - 1]?.offsetY ?? 0;
+      return (
+        local.x >= x0 - tol &&
+        local.x <= x0 + w + tol &&
+        local.y >= firstOffset - prim.size &&
+        local.y <= lastOffset + prim.size
+      );
     }
   }
 }

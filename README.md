@@ -1,7 +1,7 @@
 # DEXPI Viewer
 
 **Live app: <https://vegarringdal.github.io/dexpi-viewer/>**
-`
+
 A fast viewer for **DEXPI 2.0 XML** P&ID files: React 19 workbench UI
 (dockable panels + ribbon, light/dark theme) around a Skia
 **CanvasKit** drawing surface.
@@ -51,6 +51,16 @@ comes from live attribute values (with proper unit symbols: barg, °C,
 m³/h), beating stale literal snapshots — and the scene body is cached
 as a **Skia picture**, so panning, hovering and selection replay a
 recording (~56 fps sustained pan even under software rendering).
+
+Heat-traced piping (`HeatTracingType`) draws a dashed overlay laterally
+offset from the pipe centerline per DISC Profile
+`LineStroke.LateralOffset` semantics (positive = right of the drawing
+direction), with miter-joined bends; a loaded DiscProfile's heat-trace
+`LineStroke` (color, dash, width, rounding, dash offset) overrides the
+built-in defaults. Text values with line breaks render as proper
+multiline blocks — per-line horizontal alignment, block-level vertical
+alignment, shared 1.4×size line spacing — identically on canvas and in
+the SVG/PDF exports.
 
 All milestones M0–M7 are complete; the open items are niche
 (Proteus-era edge tolerances, profile LabelTemplate overlays, culling

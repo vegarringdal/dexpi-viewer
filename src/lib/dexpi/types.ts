@@ -2,7 +2,7 @@
 // Geometry & style
 // -----------------------------------------------------------------------------
 
-/** Drawing coordinates are mm, y-up (DEXPI convention). */
+/** Drawing coordinates are mm, y-down like SVG (DEXPI 2.0 convention). */
 export type Point = Readonly<{ x: number; y: number }>;
 
 export type Bounds = Readonly<{
@@ -15,12 +15,19 @@ export type Bounds = Readonly<{
 /** Channels 0–255. */
 export type RgbColor = Readonly<{ r: number; g: number; b: number }>;
 
+/** Profile/LineRounding: Butt = butt caps + miter joins, Round = round both. */
+export type StrokeRounding = "Butt" | "Round";
+
 export type Stroke = Readonly<{
   color: RgbColor;
   /** mm */
   width: number;
   /** Dash pattern in mm; empty = solid. */
   dash: readonly number[];
+  /** Dash phase in mm (SVG stroke-dashoffset); absent = 0. */
+  dashOffset?: number;
+  /** Cap/join style; absent = viewer default (round). */
+  rounding?: StrokeRounding;
 }>;
 
 export type Fill = Readonly<{

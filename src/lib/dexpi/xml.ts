@@ -133,6 +133,18 @@ export function colorFromAggregate(agg: Element | null): RgbColor | null {
   };
 }
 
+/** All finite numbers in a `<Data>` node holding a list of Double values. */
+export function numbersFromData(node: Element, property: string): number[] {
+  const data = getData(node, property);
+  if (!data) {
+    return [];
+  }
+
+  return directChildrenByTag(data, "Double")
+    .map((d) => Number.parseFloat(d.textContent ?? ""))
+    .filter((n) => Number.isFinite(n));
+}
+
 /** All points in a `<Data>` node holding a list of Point aggregates. */
 export function pointsFromData(node: Element, property: string): Point[] {
   const data = getData(node, property);

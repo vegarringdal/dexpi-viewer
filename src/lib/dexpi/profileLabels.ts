@@ -1,6 +1,7 @@
 import type { ProfileLabelTemplate } from "./discProfile.ts";
 import { transformPrimitive } from "./flattenScene.ts";
 import { formatForRepresentation, type LookupIndex, lookupAttribute } from "./resolveTemplates.ts";
+import { TEXT_LINE_SPACING } from "./textLayout.ts";
 import type { SceneNode, UseTransform } from "./types.ts";
 import { dataValue, getData, refLocalName } from "./xml.ts";
 
@@ -127,9 +128,6 @@ export function resolveProfileLabelText(
   return unresolved ? null : resolved;
 }
 
-/** Local-space line advance, as a multiple of the font size (y-down). */
-const LINE_SPACING = 1.4;
-
 /**
  * World-space text nodes for every pending placement's LabelTemplates —
  * resolved per instance, transformed by the instance's use-transform, and
@@ -168,7 +166,7 @@ export function buildProfileLabelOverlays(
           value: line,
           position: {
             x: template.position.x,
-            y: template.position.y + lineIndex * template.size * LINE_SPACING,
+            y: template.position.y + lineIndex * template.size * TEXT_LINE_SPACING,
           },
           rotation: template.rotation,
           size: template.size,

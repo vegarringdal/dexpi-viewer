@@ -1,8 +1,9 @@
 import { type DiscProfile, type ProfileLabelTemplate, pickVariant } from "./discProfile.ts";
-import { buildHeatTraceOverlays, collectHeatTracedIds } from "./heatTracing.ts";
+import { buildHeatTraceOverlays, collectHeatTracedIds, resolveHeatTraceStyle } from "./heatTracing.ts";
 import { parseConnectorPolyline, parsePrimitive } from "./primitives.ts";
 import { buildProfileLabelOverlays, type PendingProfileLabels } from "./profileLabels.ts";
 import { buildLookupIndex, resolveTemplateTexts } from "./resolveTemplates.ts";
+import { layoutTextLines } from "./textLayout.ts";
 import type {
   Bounds,
   ElementRole,
@@ -254,9 +255,13 @@ function extendByPrimitive(
       break;
     }
     case "text": {
-      const w = prim.value.length * prim.size * 0.6;
-      extend(b, dx + prim.position.x * scale - w, dy + prim.position.y * scale - prim.size);
-      extend(b, dx + prim.position.x * scale + w, dy + prim.position.y * scale + prim.size);
+      const lines = layoutTextLines(prim.value, prim.size, prim.vAlign);
+      const maxChars = Math.max(...lines.map((l) => l.value.length));
+      const w = maxChars * prim.size * 0.6;
+      const firstOffset = lines[0]?.offsetY ?? 0;
+      const lastOffset = lines[lines.length - 1]?.offsetY ?? 0;
+      extend(b, dx + prim.position.x * scale - w, dy + prim.position.y * scale + firstOffset - prim.size);
+      extend(b, dx + prim.position.x * scale + w, dy + prim.position.y * scale + lastOffset + prim.size);
       break;
     }
   }
@@ -386,7 +391,14 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
       ...buildProfileLabelOverlays(buildLookupIndex(root), ctx.profileLabels, explicitlyLabelled),
     ];
   }
-  nodes = [...nodes, ...buildHeatTraceOverlays(nodes, collectHeatTracedIds(root))];
+  nodes = [
+    ...nodes,
+    ...buildHeatTraceOverlays(
+      nodes,
+      collectHeatTracedIds(root),
+      resolveHeatTraceStyle(profile?.heatTraceStroke ?? null),
+    ),
+  ];
   return {
     nodes,
     shapes,

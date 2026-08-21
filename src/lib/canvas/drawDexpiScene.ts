@@ -1,5 +1,6 @@
 import type { Canvas, CanvasKit, Font, Paint, Path } from "canvaskit-wasm";
 import { renderingState } from "../../state/rendering/rendering.state.ts";
+import { baselineOffsetMm, layoutTextLines } from "../dexpi/textLayout.ts";
 import type {
   Fill,
   RgbColor,
@@ -79,11 +80,12 @@ function makeStrokePaint(ctx: DrawContext, stroke: Stroke): Paint {
   }
   paint.setStyle(ctx.ck.PaintStyle.Stroke);
   paint.setStrokeWidth(Math.max(stroke.width * ctx.widthScale, ctx.minWidthMm) / ctx.strokeDivisor);
-  paint.setStrokeCap(ctx.ck.StrokeCap.Round);
-  paint.setStrokeJoin(ctx.ck.StrokeJoin.Round);
+  const isButt = stroke.rounding === "Butt";
+  paint.setStrokeCap(isButt ? ctx.ck.StrokeCap.Butt : ctx.ck.StrokeCap.Round);
+  paint.setStrokeJoin(isButt ? ctx.ck.StrokeJoin.Miter : ctx.ck.StrokeJoin.Round);
   paint.setAntiAlias(true);
   if (stroke.dash.length > 0 && !ctx.overrideColor) {
-    const effect = ctx.ck.PathEffect.MakeDash([...stroke.dash], 0);
+    const effect = ctx.ck.PathEffect.MakeDash([...stroke.dash], stroke.dashOffset ?? 0);
     paint.setPathEffect(effect);
     effect.delete();
   }
@@ -104,7 +106,7 @@ function makeFillPaint(ctx: DrawContext, color: RgbColor): Paint {
 }
 
 // -----------------------------------------------------------------------------
-// Primitive drawing (canvas transform is already mm, y-up)
+// Primitive drawing (canvas transform is already mm, y-down)
 // -----------------------------------------------------------------------------
 
 function polyPath(ctx: DrawContext, points: readonly { x: number; y: number }[], close: boolean) {
@@ -136,15 +138,16 @@ function drawText(ctx: DrawContext, prim: TextPrim): void {
   font.setSubpixel(true);
   font.setLinearMetrics(true);
   font.setHinting(ctx.ck.FontHinting.None);
-  const ids = font.getGlyphIDs(prim.value);
-  const widths = font.getGlyphWidths(ids);
-  let textWidth = 0;
-  for (const w of widths) {
-    textWidth += w;
-  }
+  const measure = (text: string): number => {
+    const widths = font.getGlyphWidths(font.getGlyphIDs(text));
+    let total = 0;
+    for (const w of widths) {
+      total += w;
+    }
+    return total;
+  };
 
-  const dx = prim.hAlign === "Center" ? -textWidth / 2 : prim.hAlign === "Right" ? -textWidth : 0;
-  const dy = prim.vAlign === "Center" ? 0.3 * prim.size : prim.vAlign === "Top" ? 0.8 * prim.size : 0;
+  const dy = baselineOffsetMm(prim.size, prim.vAlign);
 
   const paint = new ctx.ck.Paint();
   paint.setColor(ctx.ck.Color4f(...(ctx.overrideColor ?? adaptColor(ctx, prim.color))));
@@ -155,7 +158,17 @@ function drawText(ctx: DrawContext, prim: TextPrim): void {
   if (prim.rotation !== 0) {
     ctx.canvas.rotate(prim.rotation, 0, 0);
   }
-  ctx.canvas.drawText(prim.value, dx, dy, paint, font);
+  // Each line measures and h-aligns on its own; the block rotates as one
+  // unit because all lines draw inside the rotated frame.
+  for (const line of layoutTextLines(prim.value, prim.size, prim.vAlign)) {
+    if (line.value.length === 0) {
+      continue;
+    }
+
+    const lineWidth = measure(line.value);
+    const dx = prim.hAlign === "Center" ? -lineWidth / 2 : prim.hAlign === "Right" ? -lineWidth : 0;
+    ctx.canvas.drawText(line.value, dx, dy + line.offsetY, paint, font);
+  }
   ctx.canvas.restore();
   paint.delete();
   font.delete();

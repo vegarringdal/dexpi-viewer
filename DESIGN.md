@@ -271,10 +271,49 @@ that grow, and record scope changes here.
   diagram label (enforced in buildSceneGraph); template line breaks are
   real formatting — one text per line (LINE_SPACING 1.4×size). (4)
   heat tracing is MAIN-file data: HeatTracingType(+Representation) on
-  piping objects; classified runs get a dashed overlay on top of the
-  untouched base pipe (viewer display rule: dash 2.4/1.6 mm, orange
-  217/108/24, pipe's width, no offset — src/lib/dexpi/heatTracing.ts);
+  piping objects; classified runs get a dashed overlay beside the
+  untouched base pipe (see the 2026-08-21 lateral-offset entry);
   HeatTracingBreak objects are logical property breaks, never drawn.
+- **2026-08-21** Heat-trace lateral offset (DISC Profile 0.5,
+  `Profile/LineStroke.LateralOffset`): the dashed overlay is a parallel
+  polyline offset perpendicular to the drawing direction — positive mm =
+  visual right of travel (normal (−dy,dx) in the y-down drawing space),
+  negative = left.
+  Whole segments are offset and joined with miter intersections at bends
+  (clamped to 4×|offset|; 180° turn-backs degrade to the plain vertex
+  offset), never per-vertex. Style source: a loaded DiscProfile's
+  `Profile/LineStroke` with non-zero LateralOffset wins (color, DashArray,
+  Width, LineRounding → stroke cap/join, Offset → dash phase); with no
+  profile stroke the documented viewer defaults apply — dash 2.4/1.6 mm,
+  orange 217/108/24, pipe's width, and
+  `DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM = 1.5` (deliberately non-zero and
+  awaiting director sign-off; src/lib/dexpi/heatTracing.ts). The spec's
+  container (`Profile/AggregatedStroke`) has no published instance
+  examples yet, so LineStrokes are found regardless of nesting. `Stroke`
+  gained optional `dashOffset`/`rounding`, honored by canvas, SVG and PDF
+  renderers. Spec source: DISCDEXPI repo (ToniaPedersen), DISC Profile
+  0.5 LineStroke page. Also: `NoHeatTracingSystem` (the literal real DISC
+  files use) now counts as untraced alongside `None`.
+- **2026-08-21** Multiline text: ordinary `Core/Diagram.Text` values with
+  line breaks were passed verbatim to single-line draw calls (missing-glyph
+  box, alignment measured over the break char). All three renderers now
+  share `src/lib/dexpi/textLayout.ts`: `layoutTextLines` splits on \r?\n
+  and returns per-line baseline offsets relative to the single-line
+  baseline (Top grows down from the anchor, Bottom keeps the last line and
+  grows up, Center spreads symmetrically; advance TEXT_LINE_SPACING =
+  1.4×size, same constant the profile LabelTemplate splitter uses);
+  `baselineOffsetMm` centralizes the 0.8/0.3/0 vertical factors. Each line
+  measures and h-aligns independently; the block rotates as one unit since
+  lines draw inside the rotated frame (canvas), inside one `<text>` as
+  `<tspan x="0">` per line (SVG; single-line output byte-identical to
+  before), or with per-line anchor offsets rotated around the shared
+  anchor (PDF). Hit-test/bounds heuristics use the longest line and block
+  extent; single-line values keep exactly their previous placement, hit
+  band and SVG markup. Fixed alongside: the drawing space is **y-down**
+  (verified in drawDexpiScene/exportSvg) — two stale "y-up" comments
+  corrected, and the heat-trace lateral-offset normal flipped to (−dy,dx)
+  so positive LateralOffset is the *visual* right of the drawing
+  direction as the DISC spec intends.
 - **2026-08-19** License decided by the director: **AGPL-3.0-only**
       (LICENSE at repo root, package.json license field set, README
       section, About tab statement + viewer).
