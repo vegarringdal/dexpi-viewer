@@ -1,5 +1,6 @@
 import type { ProfileLabelTemplate } from "./discProfile.ts";
 import { transformPrimitive } from "./flattenScene.ts";
+import { isRenderableLabelValue } from "./labelPolicy.ts";
 import { formatForRepresentation, type LookupIndex, lookupDisplayAttribute } from "./resolveTemplates.ts";
 import { TEXT_LINE_SPACING } from "./textLayout.ts";
 import type { SceneNode, UseTransform } from "./types.ts";
@@ -124,6 +125,11 @@ export function resolveProfileLabelText(
 
   const portStatusHint = extractPortStatusHint(text);
   let unresolved = false;
+  // Non-renderable values (sentinels, leaked placeholder tokens) render
+  // blank like an unmodelled field, so that label position is suppressed
+  // without hiding the template's other fields or sibling positions.
+  const renderableOrBlank = (formatted: string): string =>
+    isRenderableLabelValue(formatted) ? formatted : "";
   const resolved = text.replace(PLACEHOLDER, (_match, roleName: string | undefined, attrName: string) => {
     if (roleName) {
       const target = pickRoleChild(index, objectId, roleName, roleCounters, portStatusHint);
@@ -132,11 +138,11 @@ export function resolveProfileLabelText(
         return "";
       }
 
-      return ownValueText(target, attrName);
+      return renderableOrBlank(ownValueText(target, attrName));
     }
 
     const value = lookupDisplayAttribute(index, objectId, attrName);
-    return value === undefined ? "" : formatForRepresentation(value, "Value");
+    return value === undefined ? "" : renderableOrBlank(formatForRepresentation(value, "Value"));
   });
   return unresolved ? null : resolved;
 }

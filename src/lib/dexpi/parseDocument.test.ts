@@ -428,3 +428,263 @@ describe("template resolution is all-or-nothing (director's rule)", () => {
     expect(renderedLabel(fragments)).toBe(SNAPSHOT);
   });
 });
+
+describe("ambiguous sibling templates keep the label's distinct parts", () => {
+  // One explicit label group, three sibling texts (prefix / number / status
+  // marker) that all carry the SAME TagName template — the affected export
+  // pattern. Resolving each independently would repeat "P-100" three times.
+  const templateXml = `
+    <Components property="Template">
+      <Object type="Core/Diagram.TextTemplate">
+        <Components property="Fragments">
+          <Object type="Core/Diagram.AttributeRepresentation">
+            <Data property="AttributeName"><String>TagName</String></Data>
+            <Data property="Type"><DataReference data="Core/Diagram.AttributeRepresentationType.Value"/></Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>`;
+
+  function siblingText(literal: string, x: number, size: number): string {
+    return `<Object type="Core/Diagram.Text">
+        <Data property="Text"><String>${literal}</String></Data>
+        <Data property="Position">
+          <AggregatedDataValue type="Core/Diagram.Point">
+            <Data property="X"><Double>${x}</Double></Data>
+            <Data property="Y"><Double>10</Double></Data>
+          </AggregatedDataValue>
+        </Data>
+        <Data property="Size"><Double>${size}</Double></Data>
+        ${templateXml}
+      </Object>`;
+  }
+
+  const AMBIGUOUS_XML = wrapModel(`
+    <Object id="EQ1" type="Plant/Piping.BallValve">
+      <Data property="TagName"><String>P-100</String></Data>
+    </Object>
+    <Object id="D1" type="Core/Diagram.Diagram">
+      <Data property="MinX"><Double>0</Double></Data>
+      <Data property="MinY"><Double>0</Double></Data>
+      <Data property="MaxX"><Double>100</Double></Data>
+      <Data property="MaxY"><Double>50</Double></Data>
+      <Components property="Groups">
+        <Object type="Core/Diagram.RepresentationGroup">
+          <References objects="#EQ1" property="Represents"/>
+          <Components property="Elements">
+            <Object type="Core/Diagram.Label">
+              <Components property="Elements">
+                ${siblingText("PV", 10, 3.5)}
+                ${siblingText("4711", 16, 3.5)}
+                ${siblingText("NC", 24, 2)}
+              </Components>
+            </Object>
+          </Components>
+        </Object>
+      </Components>
+    </Object>
+  `);
+
+  const doc = parseDexpiDocument(AMBIGUOUS_XML).data;
+  const texts = (doc?.scene.nodes ?? []).flatMap((n) =>
+    n.kind === "prim" && n.prim.kind === "text" ? [n.prim] : [],
+  );
+
+  it("keeps every distinct literal instead of repeating one resolved value", () => {
+    expect(texts.map((t) => t.value)).toEqual(["PV", "4711", "NC"]);
+    expect(texts.some((t) => t.value === "P-100")).toBe(false);
+  });
+
+  it("preserves each primitive's own position and size", () => {
+    expect(texts.map((t) => t.position.x)).toEqual([10, 16, 24]);
+    expect(texts.map((t) => t.size)).toEqual([3.5, 3.5, 2]);
+  });
+
+  it("still resolves a lone text whose template is unambiguous", () => {
+    // Same shape but a single sibling: nothing to disambiguate — the
+    // template result replaces the (stale) literal as usual.
+    const single = wrapModel(`
+      <Object id="EQ1" type="Plant/Piping.BallValve">
+        <Data property="TagName"><String>P-100</String></Data>
+      </Object>
+      <Object id="D1" type="Core/Diagram.Diagram">
+        <Data property="MinX"><Double>0</Double></Data>
+        <Data property="MinY"><Double>0</Double></Data>
+        <Data property="MaxX"><Double>100</Double></Data>
+        <Data property="MaxY"><Double>50</Double></Data>
+        <Components property="Groups">
+          <Object type="Core/Diagram.RepresentationGroup">
+            <References objects="#EQ1" property="Represents"/>
+            <Components property="Elements">
+              <Object type="Core/Diagram.Label">
+                <Components property="Elements">${siblingText("STALE", 10, 3.5)}</Components>
+              </Object>
+            </Components>
+          </Object>
+        </Components>
+      </Object>
+    `);
+    const values = (parseDexpiDocument(single).data?.scene.nodes ?? []).flatMap((n) =>
+      n.kind === "prim" && n.prim.kind === "text" ? [n.prim.value] : [],
+    );
+    expect(values).toEqual(["P-100"]);
+  });
+
+  it("keeps distinct literals when siblings resolve to DIFFERENT values", () => {
+    // Not ambiguous: two siblings, two different attributes — both update.
+    const distinct = wrapModel(`
+      <Object id="EQ1" type="Plant/Piping.BallValve">
+        <Data property="TagName"><String>P-100</String></Data>
+        <Data property="SubTagName"><String>B</String></Data>
+      </Object>
+      <Object id="D1" type="Core/Diagram.Diagram">
+        <Data property="MinX"><Double>0</Double></Data>
+        <Data property="MinY"><Double>0</Double></Data>
+        <Data property="MaxX"><Double>100</Double></Data>
+        <Data property="MaxY"><Double>50</Double></Data>
+        <Components property="Groups">
+          <Object type="Core/Diagram.RepresentationGroup">
+            <References objects="#EQ1" property="Represents"/>
+            <Components property="Elements">
+              <Object type="Core/Diagram.Label">
+                <Components property="Elements">
+                  <Object type="Core/Diagram.Text">
+                    <Data property="Text"><String>OLD-TAG</String></Data>
+                    <Components property="Template">
+                      <Object type="Core/Diagram.TextTemplate">
+                        <Components property="Fragments">
+                          <Object type="Core/Diagram.AttributeRepresentation">
+                            <Data property="AttributeName"><String>TagName</String></Data>
+                          </Object>
+                        </Components>
+                      </Object>
+                    </Components>
+                  </Object>
+                  <Object type="Core/Diagram.Text">
+                    <Data property="Text"><String>OLD-SUB</String></Data>
+                    <Components property="Template">
+                      <Object type="Core/Diagram.TextTemplate">
+                        <Components property="Fragments">
+                          <Object type="Core/Diagram.AttributeRepresentation">
+                            <Data property="AttributeName"><String>SubTagName</String></Data>
+                          </Object>
+                        </Components>
+                      </Object>
+                    </Components>
+                  </Object>
+                </Components>
+              </Object>
+            </Components>
+          </Object>
+        </Components>
+      </Object>
+    `);
+    const values = (parseDexpiDocument(distinct).data?.scene.nodes ?? []).flatMap((n) =>
+      n.kind === "prim" && n.prim.kind === "text" ? [n.prim.value] : [],
+    );
+    expect(values).toEqual(["P-100", "B"]);
+  });
+});
+
+describe("enum display policy for drawing text (slope labels)", () => {
+  // The authored short direction label ("DN") sits next to a slope symbol
+  // whose mirroring carries the visual direction; the text's template
+  // references the Slope classification enum.
+  function slopeXml(segmentData: string, literal: string): string {
+    return wrapModel(`
+      <Object id="Seg1" type="Plant/Piping.PipingNetworkSegment">${segmentData}</Object>
+      <Object id="D1" type="Core/Diagram.Diagram">
+        <Data property="MinX"><Double>0</Double></Data>
+        <Data property="MinY"><Double>0</Double></Data>
+        <Data property="MaxX"><Double>100</Double></Data>
+        <Data property="MaxY"><Double>50</Double></Data>
+        <Components property="Groups">
+          <Object type="Core/Diagram.RepresentationGroup">
+            <References objects="#Seg1" property="Represents"/>
+            <Components property="Elements">
+              <Object type="Core/Diagram.ShapeUsage">
+                <References objects="SlopeSymbol" property="Shape"/>
+                <Data property="Rotation"><Double>30</Double></Data>
+                <Data property="IsMirrored"><Boolean>true</Boolean></Data>
+                <Data property="Position">
+                  <AggregatedDataValue type="Core/Diagram.Point">
+                    <Data property="X"><Double>40</Double></Data>
+                    <Data property="Y"><Double>20</Double></Data>
+                  </AggregatedDataValue>
+                </Data>
+              </Object>
+              <Object type="Core/Diagram.Label">
+                <Components property="Elements">
+                  <Object type="Core/Diagram.Text">
+                    <Data property="Text"><String>${literal}</String></Data>
+                    <Components property="Template">
+                      <Object type="Core/Diagram.TextTemplate">
+                        <Components property="Fragments">
+                          <Object type="Core/Diagram.AttributeRepresentation">
+                            <Data property="AttributeName"><String>Slope</String></Data>
+                          </Object>
+                        </Components>
+                      </Object>
+                    </Components>
+                  </Object>
+                </Components>
+              </Object>
+            </Components>
+          </Object>
+        </Components>
+      </Object>
+      <Object type="Core/Diagram.ShapeCatalogue">
+        <Components property="Shapes">
+          <Object id="SlopeSymbol" type="Core/Diagram.Shape">
+            <Components property="Elements">
+              <Object type="Core/Diagram.PolyLine">
+                <Data property="Points">
+                  <AggregatedDataValue type="Core/Diagram.Point">
+                    <Data property="X"><Double>0</Double></Data>
+                    <Data property="Y"><Double>0</Double></Data>
+                  </AggregatedDataValue>
+                  <AggregatedDataValue type="Core/Diagram.Point">
+                    <Data property="X"><Double>3</Double></Data>
+                    <Data property="Y"><Double>1</Double></Data>
+                  </AggregatedDataValue>
+                </Data>
+              </Object>
+            </Components>
+          </Object>
+        </Components>
+      </Object>
+    `);
+  }
+
+  const SLOPE_ENUM =
+    '<Data property="Slope"><DataReference data="Plant/Enumerations.SlopeClassification.Sloped"/></Data>';
+
+  function parsedTexts(xml: string): string[] {
+    return (parseDexpiDocument(xml).data?.scene.nodes ?? []).flatMap((n) =>
+      n.kind === "prim" && n.prim.kind === "text" ? [n.prim.value] : [],
+    );
+  }
+
+  it("keeps the authored short label when the enum has no display mapping", () => {
+    expect(parsedTexts(slopeXml(SLOPE_ENUM, "DN"))).toEqual(["DN"]);
+  });
+
+  it("replaces a stale literal through the enum's Representation display mapping", () => {
+    const withRepresentation = `${SLOPE_ENUM}
+      <Data property="SlopeRepresentation"><String>FALL</String></Data>`;
+    expect(parsedTexts(slopeXml(withRepresentation, "STALE"))).toEqual(["FALL"]);
+  });
+
+  it("still shows the raw enum name when there is no authored literal at all", () => {
+    expect(parsedTexts(slopeXml(SLOPE_ENUM, ""))).toEqual(["Sloped"]);
+  });
+
+  it("keeps the slope symbol's rotation and mirroring untouched by text resolution", () => {
+    const uses = (parseDexpiDocument(slopeXml(SLOPE_ENUM, "DN")).data?.scene.nodes ?? []).flatMap((n) =>
+      n.kind === "use" ? [n] : [],
+    );
+    expect(uses).toHaveLength(1);
+    expect(uses[0]?.transform.rotation).toBe(30);
+    expect(uses[0]?.transform.isMirrored).toBe(true);
+  });
+});

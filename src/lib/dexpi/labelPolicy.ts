@@ -1,0 +1,51 @@
+// -----------------------------------------------------------------------------
+// Drawing-text display policy (director's rule)
+//
+// The viewer must never render unresolved markers, placeholder tokens, or
+// clearly invalid sentinel values as normal drawing text. Some exporters
+// write such placeholders into the model (e.g. a PropertyBreak's generic
+// BreakValue fields) as though they were real engineering values; the
+// affected label position is suppressed instead of drawn. This is a
+// display-quality safeguard only — panels still show the raw stored data,
+// and the source model is never repaired.
+// -----------------------------------------------------------------------------
+
+/** Lowercased sentinels that mark a value as unset rather than real. */
+const INVALID_SENTINELS: ReadonlySet<string> = new Set([
+  "?",
+  "??",
+  "???",
+  "n/a",
+  "n.a.",
+  "tbd",
+  "xxx",
+  "null",
+  "undefined",
+  "unresolved",
+  "unknown",
+  "#n/a",
+  "#value!",
+  "#ref!",
+]);
+
+/** An unresolved template token that leaked into the data, e.g. "<BreakValue1>". */
+const PLACEHOLDER_TOKEN = /<[A-Za-z][A-Za-z0-9_.]*>|\{[A-Za-z][A-Za-z0-9_.]*\}/;
+
+/**
+ * Whether a resolved attribute value is real display information for the
+ * drawing. Empty/whitespace values, known invalid sentinels, and values
+ * still containing a template-token shape are not renderable — the label
+ * position they would fill is suppressed rather than drawn.
+ */
+export function isRenderableLabelValue(value: string): boolean {
+  const normalized = value.trim();
+  if (normalized.length === 0) {
+    return false;
+  }
+
+  if (INVALID_SENTINELS.has(normalized.toLowerCase())) {
+    return false;
+  }
+
+  return !PLACEHOLDER_TOKEN.test(normalized);
+}

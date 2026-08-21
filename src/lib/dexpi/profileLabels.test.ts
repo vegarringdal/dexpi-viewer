@@ -182,3 +182,134 @@ describe("profile label overlays", () => {
     expect((l2?.position.y ?? 0) - (l1?.position.y ?? 0)).toBeCloseTo(2.5 * 1.4);
   });
 });
+
+// -----------------------------------------------------------------------------
+// Property-break value labels — the DISC profile places two label positions
+// around the break symbol (<BreakValue1> below, <BreakValue2> above); each
+// renders only when its generic value is real, per labelPolicy.
+// -----------------------------------------------------------------------------
+
+describe("property-break value labels", () => {
+  const BREAK_PROFILE_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Profile">
+  <Object id="SymB" name="ND0007" type="Profile/Symbol">
+    <Components property="Variants">
+      <Object type="Profile/SymbolVariant">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.Circle">
+            <Data property="Center">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>0</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+            <Data property="Radius"><Double>1.5</Double></Data>
+          </Object>
+        </Components>
+        <Components property="LabelTemplates">
+          <Object type="Profile/LabelTemplate">
+            <Data property="Text"><String>&lt;BreakValue1&gt;</String></Data>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>4</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+          <Object type="Profile/LabelTemplate">
+            <Data property="Text"><String>&lt;BreakValue2&gt;</String></Data>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>-4</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+
+  function breakMainXml(breakBody: string): string {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="PB1" type="Plant/Piping.PropertyBreak">${breakBody}</Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#PB1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Profile/SymbolUsage">
+            <References objects="DiscProfile/ND0007" property="Symbol"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>20</Double></Data>
+                <Data property="Y"><Double>20</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+  }
+
+  function breakLabels(breakBody: string): TextPrim[] {
+    return overlayTexts(breakMainXml(breakBody), BREAK_PROFILE_XML);
+  }
+
+  it("renders both value labels at the profile-defined positions when both values are real", () => {
+    const texts = breakLabels(`
+      <Data property="DiscProfile/BreakValue1"><String>AP110</String></Data>
+      <Data property="DiscProfile/BreakValue2"><String>AP310</String></Data>`);
+    const v1 = texts.find((t) => t.value === "AP110");
+    const v2 = texts.find((t) => t.value === "AP310");
+    expect(v1?.position).toEqual({ x: 20, y: 24 });
+    expect(v2?.position).toEqual({ x: 20, y: 16 });
+  });
+
+  it("suppresses a leaked placeholder token instead of drawing it", () => {
+    const texts = breakLabels(`
+      <Data property="DiscProfile/BreakValue1"><String>&lt;BreakValue1&gt;</String></Data>
+      <Data property="DiscProfile/BreakValue2"><String>AP310</String></Data>`);
+    expect(texts.some((t) => t.value.includes("BreakValue"))).toBe(false);
+    expect(texts.some((t) => t.value === "AP310")).toBe(true);
+  });
+
+  it("suppresses an invalid sentinel instead of drawing it", () => {
+    const texts = breakLabels(`
+      <Data property="DiscProfile/BreakValue1"><String>???</String></Data>
+      <Data property="DiscProfile/BreakValue2"><String>N/A</String></Data>`);
+    expect(texts).toHaveLength(0);
+  });
+
+  it("renders only the label position whose value exists", () => {
+    const texts = breakLabels(`
+      <Data property="DiscProfile/BreakValue1"><String>AP110</String></Data>`);
+    expect(texts.map((t) => t.value)).toEqual(["AP110"]);
+    expect(texts[0]?.position).toEqual({ x: 20, y: 24 });
+  });
+
+  it("never fills the generic labels from conflicting nested logical-break values", () => {
+    // The parent has NO generic values; the nested records disagree, so
+    // ownership is ambiguous and both generic positions stay empty.
+    const texts = breakLabels(`
+      <Components property="DiscProfile/LogicalBreaks">
+        <Object id="AB1" type="DiscProfile/InformationModel.AreaBreak">
+          <Data property="BreakValue1"><String>AP110</String></Data>
+          <Data property="BreakValue2"><String>AP310</String></Data>
+        </Object>
+        <Object id="LB1" type="DiscProfile/InformationModel.LineIdBreak">
+          <Data property="BreakValue1"><String>D-20L00004A</String></Data>
+          <Data property="BreakValue2"><String>D-20L00004B</String></Data>
+        </Object>
+      </Components>`);
+    expect(texts).toHaveLength(0);
+  });
+});

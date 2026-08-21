@@ -291,7 +291,11 @@ that grow, and record scope changes here.
   PipingNetworkSystem/Segment, PipingComponent and
   OfflineMeasuringElement — the attribute on a signal function
   (logical, never physically traced) is ignored as a modelling
-  error (isHeatTraceEligible).
+  error (isHeatTraceEligible). The same predicate also filters
+  INHERITED descendants (2026-08-21 fix): a logical signal nested
+  below a heat-traced segment never joins the traced set, while
+  physical children (pipes in the segment) still inherit the
+  classification.
 - **2026-08-21** Heat-trace lateral offset (DISC Profile 0.5,
   `Profile/LineStroke.LateralOffset`): the dashed overlay is a parallel
   polyline offset perpendicular to the drawing direction — positive mm =
@@ -341,6 +345,47 @@ that grow, and record scope changes here.
   snapshot authoritative) leaves the original Text untouched — never a
   partial concatenation of the fragments that happened to resolve
   (src/lib/dexpi/resolveTemplates.ts + primitives.ts).
+  Addendum (same day): replacement is ALSO gated per label group. Some
+  exports stamp one identical attribute template onto several sibling
+  Text primitives that hold distinct literal parts (prefix / type code /
+  suffix / status marker); resolving each independently would repeat one
+  value in every position. Templated texts are grouped by
+  (objectId, role); when a group has >1 distinct non-empty literals and
+  every member resolves to the SAME non-empty result, the assignment is
+  ambiguous and the whole group keeps its literals — positions, sizes and
+  alignment untouched, never merged into one string (isAmbiguousGroup).
+  Groups whose members resolve to different values, and lone texts,
+  update as before.
+- **2026-08-21** Display-quality safeguard for drawing text
+  (src/lib/dexpi/labelPolicy.ts, director's rule): the viewer never
+  renders unresolved markers, placeholder tokens, or invalid sentinels as
+  drawing text. `isRenderableLabelValue` is the single centralized
+  policy — empty/whitespace, an explicit sentinel list (?, ???, N/A,
+  TBD, null, #VALUE!, …), and template-token shapes (`<Word>`/`{Word}`)
+  that leaked into model data (e.g. a PropertyBreak's generic
+  BreakValue1/2 fields). Applied in both drawing-text resolution paths:
+  profile LabelTemplates render a non-renderable field blank, so only
+  that label position is suppressed (the break symbol's two BreakValue
+  positions stay independent); explicit-text templates treat it as a
+  failed fragment, so the literal snapshot stays. Panels still show the
+  raw stored data — the source model is never repaired. Companion rule
+  in lookupAttribute: when several objects at the same BFS hop carry the
+  attribute with DIFFERING values (a PropertyBreak's nested
+  logical-break records), ownership is ambiguous and the lookup reports
+  unresolved instead of flattening an arbitrary nested value into the
+  generic parent label.
+- **2026-08-21** Enum display policy for drawing text (director's rule,
+  found via slope labels): an enumeration reference in an explicit
+  text's template resolves through its published display mapping — the
+  `<Attr>Representation` twin — when one exists. Without a mapping the
+  only text available is the raw technical local name ("Sloped"), which
+  never replaces a non-empty authored literal: the short human-readable
+  label in the XML wins (resolveTemplateTexts tracks per-fragment
+  whether the value was a bare DataReference). The raw name is still
+  shown when the literal is empty or a sentinel — better than a blank
+  label. The viewer never converts a classification into a directional
+  word — direction comes from the authored text or the slope symbol's
+  own rotation/mirroring, which text resolution never touches.
 - **2026-08-19** License decided by the director: **AGPL-3.0-only**
       (LICENSE at repo root, package.json license field set, README
       section, About tab statement + viewer).

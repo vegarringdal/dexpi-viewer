@@ -1,3 +1,4 @@
+import { isRenderableLabelValue } from "./labelPolicy.ts";
 import type { SceneNode, TemplateFragment } from "./types.ts";
 import { formatDataValue, unitSymbol } from "./values.ts";
 import {
@@ -77,11 +78,33 @@ function ownAttribute(el: Element, attributeName: string): DataValue | undefined
   return undefined;
 }
 
+/** Comparable identity of a DataValue, for same-depth ambiguity checks. */
+function valueKey(value: DataValue): string {
+  if (value === null) {
+    return "null";
+  }
+
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return `${typeof value}:${String(value)}`;
+  }
+
+  if (isDataReference(value)) {
+    return `ref:${value.target}`;
+  }
+
+  return `el:${value.outerHTML}`;
+}
+
 /**
  * The attribute's value on the object — or, when absent there, on the
  * nearest related object within two hops of Components children and
  * References targets (breadth-first; several standard label templates name
  * attributes that live on a referenced object, not the labelled one).
+ * When several objects at the SAME hop distance carry the attribute with
+ * differing values (e.g. a PropertyBreak's nested logical-break records),
+ * no single one owns it — picking any would be arbitrary, so the lookup
+ * reports the attribute as unresolved (director's rule: a value may only
+ * be used when its ownership is unambiguous).
  */
 export function lookupAttribute(
   index: LookupIndex,
@@ -100,6 +123,8 @@ export function lookupAttribute(
   let frontier: readonly string[] = [objectId];
   for (let depth = 0; depth < 2 && frontier.length > 0; depth++) {
     const next: string[] = [];
+    let found: { readonly value: DataValue } | null = null;
+    let isAmbiguous = false;
     for (const id of frontier) {
       for (const neighbor of [...(index.childrenOf.get(id) ?? []), ...(index.referencesOf.get(id) ?? [])]) {
         if (seen.has(neighbor)) {
@@ -111,11 +136,18 @@ export function lookupAttribute(
         if (el) {
           const value = ownAttribute(el, attributeName);
           if (value !== undefined) {
-            return value;
+            if (!found) {
+              found = { value };
+            } else if (valueKey(found.value) !== valueKey(value)) {
+              isAmbiguous = true;
+            }
           }
         }
         next.push(neighbor);
       }
+    }
+    if (found) {
+      return isAmbiguous ? undefined : found.value;
     }
     frontier = next;
   }
@@ -174,6 +206,35 @@ export function formatForRepresentation(value: DataValue, repType: string): stri
 // Entry point
 // -----------------------------------------------------------------------------
 
+type TemplatedTextRef = Readonly<{
+  /** Position in the input node list. */
+  index: number;
+  /** The current literal snapshot value. */
+  literal: string;
+  /** The full-template result, or null when any fragment failed. */
+  resolved: string | null;
+}>;
+
+/**
+ * Whether one label group's template assignments are ambiguous: several
+ * sibling texts with DISTINCT non-empty literals (separate label parts —
+ * prefix, type code, suffix…) all resolving to ONE identical non-empty
+ * result. Replacing would erase the distinct parts with duplicates, so
+ * every literal must stay.
+ */
+function isAmbiguousGroup(refs: readonly TemplatedTextRef[]): boolean {
+  const literals = new Set(refs.map((r) => r.literal.trim()).filter((v) => v.length > 0));
+  if (literals.size <= 1) {
+    return false;
+  }
+
+  const results = refs.flatMap((r) => {
+    const trimmed = r.resolved?.trim() ?? "";
+    return trimmed.length > 0 ? [trimmed] : [];
+  });
+  return results.length === refs.length && new Set(results).size === 1;
+}
+
 /**
  * Replaces every templated text primitive's value with its resolved template
  * text — but only all-or-nothing (director's rule): the label's XML `Text`
@@ -182,6 +243,20 @@ export function formatForRepresentation(value: DataValue, repType: string): stri
  * missing its target, unsupported, or resolves empty keeps the original
  * snapshot unchanged — never a partial concatenation of the fragments that
  * happened to resolve.
+ *
+ * Replacement is also gated per label group (director's rule): sibling texts
+ * of one label that carry the same template but hold distinct literal parts
+ * are an ambiguous assignment — resolving would repeat one value in every
+ * position, so the whole group keeps its literals (see isAmbiguousGroup).
+ *
+ * Enum display policy (director's rule, e.g. slope labels): an enumeration
+ * reference resolves through its published display mapping — the
+ * `<Attr>Representation` twin — when one exists. Without a mapping the only
+ * available text is the raw technical local name ("Sloped"), which must not
+ * overwrite a non-empty authored literal; the short human-readable label in
+ * the XML wins. The raw name is still used when the literal is empty or a
+ * sentinel — better than a blank label. The viewer never converts a
+ * classification into a directional word.
  */
 export function resolveTemplateTexts(root: Element, nodes: readonly SceneNode[]): SceneNode[] {
   const hasTemplates = nodes.some(
@@ -193,10 +268,19 @@ export function resolveTemplateTexts(root: Element, nodes: readonly SceneNode[])
 
   const index = buildLookupIndex(root);
 
+  type ResolvedFragment = Readonly<{
+    text: string;
+    /** The value is a bare enum reference shown by its technical local name. */
+    isRawEnumName: boolean;
+  }>;
+
   /** null = the fragment failed to resolve (missing, unsupported, or empty). */
-  const resolveFragment = (fragment: TemplateFragment, fallbackObjectId: string | null): string | null => {
+  const resolveFragment = (
+    fragment: TemplateFragment,
+    fallbackObjectId: string | null,
+  ): ResolvedFragment | null => {
     if (fragment.kind === "literal") {
-      return fragment.text;
+      return { text: fragment.text, isRawEnumName: false };
     }
 
     const objectId = fragment.objectId ?? fallbackObjectId;
@@ -210,31 +294,71 @@ export function resolveTemplateTexts(root: Element, nodes: readonly SceneNode[])
     }
 
     const formatted = formatForRepresentation(value, fragment.repType);
-    return formatted.trim().length === 0 ? null : formatted;
+    if (!isRenderableLabelValue(formatted)) {
+      return null;
+    }
+
+    return { text: formatted, isRawEnumName: isDataReference(value) };
   };
 
   const resolveTemplate = (
     template: readonly TemplateFragment[],
     fallbackObjectId: string | null,
-  ): string | null => {
+  ): ResolvedFragment | null => {
     const parts: string[] = [];
+    let usedRawEnumName = false;
     for (const fragment of template) {
       const part = resolveFragment(fragment, fallbackObjectId);
       if (part === null) {
         return null;
       }
-      parts.push(part);
+
+      parts.push(part.text);
+      usedRawEnumName = usedRawEnumName || part.isRawEnumName;
     }
-    return parts.join("");
+    return { text: parts.join(""), isRawEnumName: usedRawEnumName };
   };
 
-  return nodes.map((node) => {
+  // Pass 1: resolve every templated text and group the refs by the label
+  // they belong to — sibling texts of one label share the represented
+  // object id and role; texts without an object id stand alone.
+  const groups = new Map<string, TemplatedTextRef[]>();
+  nodes.forEach((node, nodeIndex) => {
     if (node.kind !== "prim" || node.prim.kind !== "text" || !node.prim.template) {
-      return node;
+      return;
     }
 
-    const resolved = resolveTemplate(node.prim.template, node.objectId);
-    if (resolved === null || resolved.trim().length === 0) {
+    const literal = node.prim.value;
+    const result = resolveTemplate(node.prim.template, node.objectId);
+    // Enum display policy: a technical-only result (raw enum local name,
+    // no Representation mapping) never replaces an authored, renderable
+    // label — the short human-readable literal wins.
+    const resolved =
+      result === null || (result.isRawEnumName && isRenderableLabelValue(literal)) ? null : result.text;
+
+    const key = node.objectId ? `${node.objectId} ${node.role}` : `#${nodeIndex}`;
+    const refs = groups.get(key) ?? [];
+    refs.push({ index: nodeIndex, literal, resolved });
+    groups.set(key, refs);
+  });
+
+  // Pass 2: apply unambiguous results; ambiguous groups keep every literal.
+  const accepted = new Map<number, string>();
+  for (const refs of groups.values()) {
+    if (isAmbiguousGroup(refs)) {
+      continue;
+    }
+
+    for (const ref of refs) {
+      if (ref.resolved !== null && ref.resolved.trim().length > 0) {
+        accepted.set(ref.index, ref.resolved);
+      }
+    }
+  }
+
+  return nodes.map((node, nodeIndex) => {
+    const resolved = accepted.get(nodeIndex);
+    if (resolved === undefined || node.kind !== "prim" || node.prim.kind !== "text") {
       return node;
     }
 

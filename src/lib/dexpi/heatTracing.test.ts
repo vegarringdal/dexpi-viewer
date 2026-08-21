@@ -9,6 +9,10 @@ import type { PolyLinePrim, PrimNode } from "./types.ts";
 // segment; the pipe inside inherits the classification. The HeatTracingBreak
 // is a logical property break, never drawn. Pipe1 runs left→right at y=10,
 // Pipe2 (untraced) at y=20, Pipe3 (traced) runs bottom→top at x=45.
+// Sig1 (logical signal nested in the traced Seg1) and Sig2 (a signal
+// carrying HeatTracingType directly — a modelling error) draw connectors at
+// y=30/y=35 and must never get an overlay: eligibility filters both direct
+// classifications and inherited descendants.
 // -----------------------------------------------------------------------------
 
 const MAIN_XML = `<?xml version="1.0" encoding="UTF-8"?>
@@ -19,7 +23,11 @@ const MAIN_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <Components property="Items">
       <Object id="Pipe1" type="Plant/Piping.Pipe"/>
       <Object id="Break1" type="DiscProfile/InformationModel.HeatTracingBreak"/>
+      <Object id="Sig1" type="Plant/Instrumentation.MeasuringLineFunction"/>
     </Components>
+  </Object>
+  <Object id="Sig2" type="Plant/Instrumentation.SignalConveyingFunction">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
   </Object>
   <Object id="Seg2" type="Plant/Piping.PipingNetworkSegment">
     <Components property="Items">
@@ -84,6 +92,40 @@ const MAIN_XML = `<?xml version="1.0" encoding="UTF-8"?>
               <AggregatedDataValue type="Core/Diagram.Point">
                 <Data property="X"><Double>45</Double></Data>
                 <Data property="Y"><Double>40</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Sig1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ConnectorLine">
+            <Data property="InnerPoints">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>30</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>40</Double></Data>
+                <Data property="Y"><Double>30</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Sig2" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ConnectorLine">
+            <Data property="InnerPoints">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>35</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>40</Double></Data>
+                <Data property="Y"><Double>35</Double></Data>
               </AggregatedDataValue>
             </Data>
           </Object>
@@ -288,6 +330,20 @@ describe("heat tracing overlays", () => {
   it("never draws HeatTracingBreak objects", () => {
     const doc = parseDexpiDocument(MAIN_XML).data;
     expect((doc?.scene.nodes ?? []).some((n) => n.objectId === "Break1")).toBe(false);
+  });
+
+  it("gives no overlay to a logical signal nested below the heat-traced segment", () => {
+    // Sig1 sits inside Seg1's Items, but eligibility filters inherited
+    // descendants too — only its single base connector renders.
+    const sig1 = connectors.filter((n) => n.objectId === "Sig1");
+    expect(sig1).toHaveLength(1);
+    expect(sig1[0]?.prim.stroke.dash).toHaveLength(0);
+  });
+
+  it("ignores HeatTracingType data placed directly on a logical signal", () => {
+    const sig2 = connectors.filter((n) => n.objectId === "Sig2");
+    expect(sig2).toHaveLength(1);
+    expect(sig2[0]?.prim.stroke.dash).toHaveLength(0);
   });
 });
 

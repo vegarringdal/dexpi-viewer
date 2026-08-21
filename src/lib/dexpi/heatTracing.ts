@@ -105,15 +105,20 @@ function isHeatTraceEligible(type: string): boolean {
  * Ids of every object classified as heat-traced (`HeatTracingType` present
  * on an eligible class, and not a "none" literal — "None"/
  * "NoHeatTracingSystem"), plus their nested component objects — a
- * classification on a segment covers the pipes inside it.
+ * classification on a segment covers the pipes inside it. Inherited
+ * descendants pass the same eligibility rule as direct classifications:
+ * a logical signal nested below a traced segment stays untraced.
  */
 export function collectHeatTracedIds(root: Element): Set<string> {
   const traced = new Set<string>();
   const addWithDescendants = (el: Element): void => {
-    const id = el.getAttribute("id");
-    if (id) {
-      traced.add(id);
+    if (isHeatTraceEligible(el.getAttribute("type") ?? "")) {
+      const id = el.getAttribute("id");
+      if (id) {
+        traced.add(id);
+      }
     }
+
     for (const child of componentObjects(el)) {
       addWithDescendants(child);
     }
