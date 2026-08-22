@@ -19,6 +19,10 @@ export type PlantNode = Readonly<{
   /** Core/PersistentIdentifier entries (name = Context, value = Value). */
   persistentIds: readonly PlantAttribute[];
   attributes: readonly PlantAttribute[];
+  /** Data properties present in the XML but carrying <Undefined/> / empty
+   *  values — shown (never hidden), but kept out of `attributes` so value
+   *  consumers (classification, labels) cannot pick up placeholders. */
+  undefinedAttributes: readonly string[];
   /** Outgoing References (property → target ids). */
   references: readonly PlantReference[];
   /** Positional XPath of the object's element in the source XML. */
@@ -112,13 +116,16 @@ function resolveLabel(attributes: readonly PlantAttribute[], id: string): string
 // Walk
 // -----------------------------------------------------------------------------
 
-function collectAttributes(node: Element): PlantAttribute[] {
+function collectAttributes(node: Element): { attributes: PlantAttribute[]; undefined: string[] } {
   const attributes: PlantAttribute[] = [];
+  const undefinedNames: string[] = [];
   for (const data of directChildrenByTag(node, "Data")) {
     const name = data.getAttribute("property") ?? "";
     const value = formatDataValue(dataValue(data));
     if (name && value) {
       attributes.push({ name, value });
+    } else if (name) {
+      undefinedNames.push(name);
     }
   }
 
@@ -140,7 +147,7 @@ function collectAttributes(node: Element): PlantAttribute[] {
     }
   }
 
-  return attributes;
+  return { attributes, undefined: undefinedNames };
 }
 
 function collectPersistentIds(node: Element): PlantAttribute[] {
@@ -187,7 +194,8 @@ function walkPlant(
   }
 
   const typeName = type.split("/").pop() ?? type;
-  const attributes = collectAttributes(node);
+  const collected = collectAttributes(node);
+  const attributes = collected.attributes;
   const references = collectReferences(node);
   for (const reference of references) {
     for (const target of reference.targets) {
@@ -208,6 +216,7 @@ function walkPlant(
     parentId,
     persistentIds: collectPersistentIds(node),
     attributes,
+    undefinedAttributes: collected.undefined,
     references,
     xpath: elementXPath(node),
     children,

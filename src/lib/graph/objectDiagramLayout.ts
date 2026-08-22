@@ -22,6 +22,8 @@ export type DiagramEdge = Readonly<{
   y2: number;
   label: string;
   relation: DiagramRelation;
+  /** The edge leads to an unresolvable reference target — drawn red. */
+  broken: boolean;
 }>;
 
 export type InspectLayout = Readonly<{
@@ -41,7 +43,7 @@ const COLUMN_GAP = 110;
 const MARGIN = 12;
 
 function cardHeight(card: DiagramCard): number {
-  return HEADER_HEIGHT + card.rows.length * ROW_HEIGHT + CARD_PAD_BOTTOM;
+  return HEADER_HEIGHT + (card.rows.length + card.issueRows.length) * ROW_HEIGHT + CARD_PAD_BOTTOM;
 }
 
 function columnHeight(heights: readonly number[]): number {
@@ -130,6 +132,7 @@ export function layoutObjectDiagram(diagram: ObjectDiagram): InspectLayout {
       y2: anchorY(right),
       label: neighbor.property,
       relation: neighbor.relation,
+      broken: neighbor.card.broken,
     });
   }
 

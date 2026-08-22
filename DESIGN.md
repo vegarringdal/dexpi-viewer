@@ -442,6 +442,26 @@ that grow, and record scope changes here.
   stale "Tennessee Eastman" hotkey description was fixed. Verified
   against the sheet's official SVG rendering — layout matches; the
   missing sheet border is the "/Border" well-known shape (below).
+- **2026-08-22** Undefined-valued Data properties are shown, not hidden
+  (follow-up to the same director principle): collectAttributes used to
+  drop any property whose value formats empty — a PIF carrying five
+  `<Undefined/>` properties read as "No attributes". PlantNode gained
+  `undefinedAttributes` (names only, kept OUT of `attributes` so
+  classification/labels can't consume placeholders); the Properties Data
+  section and the Inspect cards render them as dimmed/italic
+  "(undefined)" rows. Unknown/custom property NAMES were never filtered
+  anywhere — they always showed with values; flagging them as illegal is
+  M10's job.
+- **2026-08-22** Inspect panel marks problems in red (director: "instead
+  of hiding, show them, but red as issues"): every card carries its
+  object's effective validation findings — severity-colored border
+  (red/amber/sky) plus severity-colored "⚠ ruleId: message" rows inside
+  the card (capped at 3 + "+n more", tooltip holds the full text) — and
+  an unresolvable reference target renders as a fully RED broken card
+  ("Reference target resolves to nothing…") with a red edge, never
+  silently as a normal-looking stub. buildObjectDiagram takes an
+  issuesById map (panel builds it from getEffectiveIssues, so severity
+  overrides apply); DiagramCard gained severity/issueRows/broken.
 - **2026-08-22** Properties panel gained an "Issues (n)" section below
   Sub-components (director: an element's findings should be obvious when
   you click it): the selected object's validation findings with severity
@@ -908,6 +928,36 @@ that grow, and record scope changes here.
   (hover/multi-select churn in the same store must not retrace);
   toggle-again-to-clear semantics unchanged since originId now always
   tracks the selection.
+
+### M10 — Model-driven validation (planned)
+
+Validate every object against the DEXPI class model itself instead of
+hand-written per-fact rules. The class tables exist machine-readable in
+the repo three times over: the EA/XMI information model in
+`refrences/dexpi-2.0-supporting-materials.zip` (authoritative — a
+one-off generator turns it into `src/lib/generated/metaModel.ts`), the
+prior-art viewer's `metaModel.js` cardinality tables (proven shapes),
+and DiscProfile.xml's own ClassExtension/DataProperty declarations +
+allowed-property whitelist (so profile-added attributes validate with
+the same walker, closing the long-open profile-validation item).
+
+- [ ] XMI → TS metamodel generator (classes, supertypes, attributes
+      with type/enum/lower/upper, reference properties with target
+      class + cardinality); regenerating covers new spec versions
+- [ ] Generic walker rule family (MDL-*): unknown attribute (typo
+      detection), missing required attribute (generalizes META-001),
+      cardinality violations, illegal enum literal / wrong value type,
+      reference-to-wrong-class
+- [ ] Tuning pass against reference_pid + the 15 official DISC sheets
+      (DiscProfile/-prefixed spellings and `<Undefined/>` idioms WILL
+      trip naive checks — same empirical loop as every rule so far);
+      findings feed the existing severity-override config, Properties
+      Issues section, Inspect cards and CSV
+- [ ] Later by-product: attribute fill-rate/completeness dashboard
+
+Scope note: covers per-object SHAPE only — cross-object semantics
+(CON-*) stay hand-written.
+
 
 ## Decisions log
 

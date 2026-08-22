@@ -22,6 +22,19 @@ type InspectCardViewProps = Readonly<{
 
 const NAME_COLUMN_CHARS = 24;
 const VALUE_COLUMN_CHARS = 22;
+const ISSUE_ROW_CHARS = 48;
+
+const SEVERITY_STROKE: Readonly<Record<string, string>> = {
+  error: "stroke-red-500",
+  warning: "stroke-amber-500",
+  info: "stroke-sky-500",
+};
+
+const SEVERITY_TEXT: Readonly<Record<string, string>> = {
+  error: "fill-red-400",
+  warning: "fill-amber-400",
+  info: "fill-sky-400",
+};
 
 // -----------------------------------------------------------------------------
 // Helper functions
@@ -67,15 +80,23 @@ export function InspectCardView({ placed, isCenter, onNavigate }: InspectCardVie
         width={placed.width}
         height={placed.height}
         rx={6}
-        strokeWidth={isCenter ? 1.5 : 1}
-        className={
-          isCenter ? "fill-blue-950 stroke-blue-400" : "fill-slate-900 stroke-slate-600 hover:stroke-blue-500"
-        }
+        strokeWidth={card.severity ? 1.5 : isCenter ? 1.5 : 1}
+        className={`${isCenter ? "fill-blue-950" : "fill-slate-900"} ${
+          card.severity
+            ? SEVERITY_STROKE[card.severity]
+            : isCenter
+              ? "stroke-blue-400"
+              : "stroke-slate-600 hover:stroke-blue-500"
+        }`}
       />
-      <text x={8} y={13} className="fill-slate-100 font-semibold text-[10px]">
+      <text
+        x={8}
+        y={13}
+        className={`${card.broken ? "fill-red-400" : "fill-slate-100"} font-semibold text-[10px]`}
+      >
         {truncate(card.title, 30)}
       </text>
-      <text x={8} y={24} className="fill-slate-400 text-[8px]">
+      <text x={8} y={24} className={`${card.broken ? "fill-red-400" : "fill-slate-400"} text-[8px]`}>
         {truncate(card.subtitle, 40)}
       </text>
       {rows.length > 0 && (
@@ -91,6 +112,17 @@ export function InspectCardView({ placed, isCenter, onNavigate }: InspectCardVie
         <text key={row.name + String(i)} x={8} y={HEADER_HEIGHT + 8 + i * ROW_HEIGHT} className="text-[8px]">
           <tspan className="fill-slate-400">{truncate(row.name, NAME_COLUMN_CHARS)} </tspan>
           <tspan className="fill-slate-200">{truncate(row.value, VALUE_COLUMN_CHARS)}</tspan>
+        </text>
+      ))}
+      {card.issueRows.map((line, i) => (
+        <text
+          key={line + String(i)}
+          x={8}
+          y={HEADER_HEIGHT + 8 + (rows.length + i) * ROW_HEIGHT}
+          className={`text-[8px] ${SEVERITY_TEXT[card.severity ?? "error"]}`}
+          data-tooltip={line}
+        >
+          ⚠ {truncate(line, ISSUE_ROW_CHARS)}
         </text>
       ))}
     </g>

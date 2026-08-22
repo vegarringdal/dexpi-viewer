@@ -1,6 +1,7 @@
 import { PanelBody } from "@tredespace/ui/dockable";
 import { Button, Select, type SelectOption } from "@tredespace/ui/widgets";
 import { type JSX, useEffect, useMemo, useRef, useState } from "react";
+import type { ValidationIssue } from "../../../lib/dexpi/validation.ts";
 import {
   buildObjectDiagram,
   MAX_DIAGRAM_DEPTH,
@@ -9,6 +10,8 @@ import {
 import { layoutObjectDiagram, type PlacedCard } from "../../../lib/graph/objectDiagramLayout.ts";
 import { setSelectedObject } from "../../../state/selection/selection.actions.ts";
 import { selectionState } from "../../../state/selection/selection.state.ts";
+import { getEffectiveIssues } from "../../../state/validation/validation.actions.ts";
+import { validationConfigState } from "../../../state/validation/validation.state.ts";
 import { getLoadedDocument, getLoadedProfile } from "../../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../../state/viewer/viewer.state.ts";
 import { useSvgPanZoom } from "../../hooks/useSvgPanZoom.ts";
@@ -47,6 +50,7 @@ const DEPTH_OPTIONS: readonly SelectOption[] = Array.from(
 export function InspectPanel(): JSX.Element {
   const { file, docRevision } = viewerState.use();
   const { selectedId } = selectionState.use();
+  const { overrides } = validationConfigState.use();
   const [depth, setDepth] = useState(MIN_DIAGRAM_DEPTH);
 
   const layout = useMemo(() => {
@@ -56,9 +60,22 @@ export function InspectPanel(): JSX.Element {
       return null;
     }
 
-    const diagram = buildObjectDiagram(doc.plant, selectedId, getLoadedProfile()?.instances, depth);
+    const issuesById = new Map<string, ValidationIssue[]>();
+    void overrides;
+    for (const issue of getEffectiveIssues()) {
+      if (issue.objectId) {
+        issuesById.set(issue.objectId, [...(issuesById.get(issue.objectId) ?? []), issue]);
+      }
+    }
+    const diagram = buildObjectDiagram(
+      doc.plant,
+      selectedId,
+      getLoadedProfile()?.instances,
+      depth,
+      issuesById,
+    );
     return diagram ? layoutObjectDiagram(diagram) : null;
-  }, [docRevision, selectedId, depth]);
+  }, [docRevision, selectedId, depth, overrides]);
 
   const panZoom = useSvgPanZoom(layout?.width ?? 0, layout?.height ?? 0);
   const { fitToContent, setViewTransform, transform } = panZoom;

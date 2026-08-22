@@ -90,7 +90,9 @@ export function PropertiesPanel(): JSX.Element {
       </Section>
 
       <Section title="Data">
-        {node.attributes.length === 0 && <EmptyNote text="No attributes." />}
+        {node.attributes.length === 0 && node.undefinedAttributes.length === 0 && (
+          <EmptyNote text="No attributes." />
+        )}
         <dl className="grid grid-cols-[minmax(90px,45%)_1fr] gap-x-3 gap-y-1 text-xs">
           {node.attributes.map((attr) => (
             <div key={attr.name} className="contents">
@@ -98,6 +100,14 @@ export function PropertiesPanel(): JSX.Element {
                 {attr.name}
               </dt>
               <dd className="break-words font-mono text-slate-200">{attr.value}</dd>
+            </div>
+          ))}
+          {node.undefinedAttributes.map((name) => (
+            <div key={name} className="contents">
+              <dt className="truncate text-slate-500" title={name}>
+                {name}
+              </dt>
+              <dd className="font-mono text-slate-500 italic">(undefined)</dd>
             </div>
           ))}
         </dl>

@@ -1,5 +1,6 @@
 import type { ProfileInstanceData } from "../dexpi/discProfile.ts";
 import type { PlantModel, PlantNode } from "../dexpi/plantModel.ts";
+import type { IssueSeverity, ValidationIssue } from "../dexpi/validation.ts";
 
 // -----------------------------------------------------------------------------
 // Object diagram (Inspect panel)
@@ -20,6 +21,12 @@ export type DiagramCard = Readonly<{
   title: string;
   subtitle: string;
   rows: readonly DiagramRow[];
+  /** Worst validation severity attached to this object, if any. */
+  severity: IssueSeverity | null;
+  /** Findings shown in the card (severity-colored), "ruleId: message". */
+  issueRows: readonly string[];
+  /** True for a reference target that resolves to nothing — shown, in red. */
+  broken: boolean;
   /** False for profile-instance stubs and unresolved targets. */
   navigable: boolean;
 }>;
@@ -53,15 +60,45 @@ export const MAX_DIAGRAM_DEPTH = 3;
 /** Neighbors per side and level before collapsing into a "+n more" stub. */
 const MAX_NEIGHBORS_PER_LEVEL = 20;
 
-function cardFor(node: PlantNode, navigable: boolean): DiagramCard {
+/** Findings listed inside a card before collapsing into "+n more". */
+const MAX_ISSUE_ROWS = 3;
+
+export type IssuesById = ReadonlyMap<string, readonly ValidationIssue[]>;
+
+const SEVERITY_RANK: Readonly<Record<IssueSeverity, number>> = { error: 0, warning: 1, info: 2 };
+
+function worstSeverity(issues: readonly ValidationIssue[]): IssueSeverity | null {
+  let worst: IssueSeverity | null = null;
+  for (const issue of issues) {
+    if (worst === null || SEVERITY_RANK[issue.severity] < SEVERITY_RANK[worst]) {
+      worst = issue.severity;
+    }
+  }
+  return worst;
+}
+
+function issueRowsFor(issues: readonly ValidationIssue[]): string[] {
+  const rows = issues.slice(0, MAX_ISSUE_ROWS).map((i) => `${i.ruleId}: ${i.message}`);
+  if (issues.length > MAX_ISSUE_ROWS) {
+    rows.push(`+ ${issues.length - MAX_ISSUE_ROWS} more findings…`);
+  }
+  return rows;
+}
+
+function cardFor(node: PlantNode, navigable: boolean, issuesById: IssuesById): DiagramCard {
+  const issues = issuesById.get(node.id) ?? [];
   return {
     id: node.id,
     title: node.label || node.id,
     subtitle: node.type,
     rows: [
       ...node.attributes,
+      ...node.undefinedAttributes.map((name) => ({ name, value: "(undefined)" })),
       ...node.persistentIds.map((p) => ({ name: `PersistentId (${p.name})`, value: p.value })),
     ],
+    severity: worstSeverity(issues),
+    issueRows: issueRowsFor(issues),
+    broken: false,
     navigable,
   };
 }
@@ -73,6 +110,9 @@ function stubCard(target: string, instances: ReadonlyMap<string, ProfileInstance
     title: target.split(".").pop() ?? target,
     subtitle: data ? "profile instance" : "unresolved target",
     rows: data ? [...data.entries()].map(([name, value]) => ({ name, value })) : [],
+    severity: data ? null : "error",
+    issueRows: data ? [] : ["Reference target resolves to nothing in this document or the profile"],
+    broken: !data,
     navigable: false,
   };
 }
@@ -88,11 +128,14 @@ const NO_INSTANCES: ReadonlyMap<string, ProfileInstanceData> = new Map();
  * or null when the id is unknown. Every object places at most once (first
  * side/level to reach it wins), which also breaks reference cycles.
  */
+const NO_ISSUES: IssuesById = new Map();
+
 export function buildObjectDiagram(
   plant: PlantModel,
   objectId: string,
   instances: ReadonlyMap<string, ProfileInstanceData> = NO_INSTANCES,
   depth: number = MIN_DIAGRAM_DEPTH,
+  issuesById: IssuesById = NO_ISSUES,
 ): ObjectDiagram | null {
   const node = plant.byId.get(objectId);
   if (!node) {
@@ -106,12 +149,22 @@ export function buildObjectDiagram(
     const out: Pending[] = [];
     const parent = source.parentId ? plant.byId.get(source.parentId) : undefined;
     if (parent) {
-      out.push({ card: cardFor(parent, true), property: "Components", relation: "parent", fromKey });
+      out.push({
+        card: cardFor(parent, true, issuesById),
+        property: "Components",
+        relation: "parent",
+        fromKey,
+      });
     }
     for (const ref of plant.referencedBy.get(source.id) ?? []) {
       const from = plant.byId.get(ref.fromId);
       if (from) {
-        out.push({ card: cardFor(from, true), property: ref.property, relation: "referencedBy", fromKey });
+        out.push({
+          card: cardFor(from, true, issuesById),
+          property: ref.property,
+          relation: "referencedBy",
+          fromKey,
+        });
       }
     }
     return out;
@@ -124,7 +177,7 @@ export function buildObjectDiagram(
         const targetNode = plant.byId.get(target);
         if (targetNode) {
           out.push({
-            card: cardFor(targetNode, true),
+            card: cardFor(targetNode, true, issuesById),
             property: ref.property,
             relation: "reference",
             fromKey,
@@ -140,7 +193,12 @@ export function buildObjectDiagram(
       }
     }
     for (const child of source.children) {
-      out.push({ card: cardFor(child, true), property: "Components", relation: "child", fromKey });
+      out.push({
+        card: cardFor(child, true, issuesById),
+        property: "Components",
+        relation: "child",
+        fromKey,
+      });
     }
     return out;
   };
@@ -181,7 +239,16 @@ export function buildObjectDiagram(
         fromKey: shown[shown.length - 1]?.fromKey ?? "center",
         side,
         level,
-        card: { id: "", title: `+ ${hidden} more…`, subtitle: "", rows: [], navigable: false },
+        card: {
+          id: "",
+          title: `+ ${hidden} more…`,
+          subtitle: "",
+          rows: [],
+          severity: null,
+          issueRows: [],
+          broken: false,
+          navigable: false,
+        },
         property: "",
         relation: "reference",
       });
@@ -197,5 +264,5 @@ export function buildObjectDiagram(
     outFrontier = expand("out", outFrontier, level, outgoingOf);
   }
 
-  return { center: cardFor(node, false), neighbors };
+  return { center: cardFor(node, false, issuesById), neighbors };
 }

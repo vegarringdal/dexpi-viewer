@@ -68,7 +68,31 @@ describe("buildObjectDiagram", () => {
     expect(outgoing.some((n) => n.relation === "child" && n.card.id === "SCF1")).toBe(true);
     const stub = outgoing.find((n) => n.relation === "profile");
     expect(stub?.card.navigable).toBe(false);
+    expect(stub?.card.broken).toBe(false);
     expect(stub?.card.rows).toEqual([{ name: "Abbreviation", value: "MCC" }]);
+  });
+
+  it("shows unresolvable reference targets as broken error cards instead of hiding them", () => {
+    const noInstances = buildObjectDiagram(plant, "PIF1");
+    const stub = (noInstances?.neighbors ?? []).find((n) => n.relation === "profile");
+    expect(stub?.card.broken).toBe(true);
+    expect(stub?.card.severity).toBe("error");
+    expect(stub?.card.issueRows.length).toBe(1);
+  });
+
+  it("carries validation findings onto cards as severity + issue rows", () => {
+    const issuesById = new Map([
+      [
+        "PIF1",
+        [
+          { ruleId: "CON-001", severity: "warning" as const, message: "missing target", objectId: "PIF1" },
+          { ruleId: "SCH-001", severity: "error" as const, message: "duplicate id", objectId: "PIF1" },
+        ],
+      ],
+    ]);
+    const diagram = buildObjectDiagram(plant, "PIF1", instances, 1, issuesById);
+    expect(diagram?.center.severity).toBe("error");
+    expect(diagram?.center.issueRows).toEqual(["CON-001: missing target", "SCH-001: duplicate id"]);
   });
 
   it("expands level 2 outward, chaining edges to the level-1 card", () => {
@@ -124,5 +148,22 @@ describe("layoutObjectDiagram", () => {
     expect(layout.edges.some((e) => e.label === "ParentStructure")).toBe(true);
     // Cards show ALL rows: height grows with the full row count.
     expect(layout.center.height).toBeGreaterThan(30 + layout.center.card.rows.length * 12);
+  });
+});
+
+describe("undefined-valued data properties", () => {
+  it("shows properties the file carries with <Undefined/> values instead of hiding them", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="PIF9" type="Plant/Instrumentation.ProcessInstrumentationFunction">
+    <Data property="DiscProfile/ItemTag"><Undefined/></Data>
+    <Data property="Vendor/CustomThing"><String>hello</String></Data>
+  </Object>
+</Model>`;
+    const plant = buildPlantModel(rootOf(xml));
+    const diagram = buildObjectDiagram(plant, "PIF9");
+    const rows = diagram?.center.rows ?? [];
+    expect(rows).toContainEqual({ name: "Vendor/CustomThing", value: "hello" });
+    expect(rows).toContainEqual({ name: "DiscProfile/ItemTag", value: "(undefined)" });
   });
 });

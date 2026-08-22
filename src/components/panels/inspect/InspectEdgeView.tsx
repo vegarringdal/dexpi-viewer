@@ -42,10 +42,15 @@ export function InspectEdgeView({ edge }: InspectEdgeViewProps): JSX.Element {
         y2={edge.y2}
         strokeDasharray={isContainment ? CONTAINMENT_DASH : undefined}
         markerEnd="url(#inspect-arrow)"
-        className={RELATION_CLASS[edge.relation]}
+        className={edge.broken ? "stroke-red-500" : RELATION_CLASS[edge.relation]}
       />
       {edge.label.length > 0 && (
-        <text x={midX} y={midY - 4} textAnchor="middle" className="fill-slate-400 text-[8px]">
+        <text
+          x={midX}
+          y={midY - 4}
+          textAnchor="middle"
+          className={`${edge.broken ? "fill-red-400" : "fill-slate-400"} text-[8px]`}
+        >
           {edge.label}
         </text>
       )}
