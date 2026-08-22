@@ -28,10 +28,21 @@ export function SeverityDot({ severity }: Readonly<{ severity: IssueSeverity }>)
 // Finding row
 // -----------------------------------------------------------------------------
 
-export function IssueRow({ issue }: Readonly<{ issue: ValidationIssue }>): JSX.Element {
-  const objectLabel = issue.objectId
-    ? (getLoadedDocument()?.plant.byId.get(issue.objectId)?.label ?? issue.objectId)
-    : null;
+export function IssueRow({
+  issue,
+  showRuleId = false,
+  hideObjectLink = false,
+}: Readonly<{
+  issue: ValidationIssue;
+  /** Prefix the rule id — for contexts without the per-rule group header. */
+  showRuleId?: boolean;
+  /** Skip the jump link — for contexts already scoped to the object. */
+  hideObjectLink?: boolean;
+}>): JSX.Element {
+  const objectLabel =
+    issue.objectId && !hideObjectLink
+      ? (getLoadedDocument()?.plant.byId.get(issue.objectId)?.label ?? issue.objectId)
+      : null;
 
   const handleJump = (): void => {
     if (issue.objectId) {
@@ -46,6 +57,7 @@ export function IssueRow({ issue }: Readonly<{ issue: ValidationIssue }>): JSX.E
         <span className={`shrink-0 rounded px-1 font-mono text-[10px] ${SEVERITY_STYLES[issue.severity]}`}>
           {issue.severity}
         </span>
+        {showRuleId && <span className="shrink-0 font-mono text-[10px] text-slate-500">{issue.ruleId}</span>}
         <span className="min-w-0 flex-1 text-slate-300 text-xs">{issue.message}</span>
       </div>
       {issue.suggestion && (

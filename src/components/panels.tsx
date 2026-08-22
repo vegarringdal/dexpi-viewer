@@ -1,7 +1,6 @@
 import { definePanel } from "@tredespace/ui/dockable";
-import type { JSX } from "react";
-import { CanvasStage } from "../lib/canvas/CanvasStage.tsx";
 import { ConnectionsPanel } from "./panels/ConnectionsPanel.tsx";
+import { DrawingPanel } from "./panels/drawing/DrawingPanel.tsx";
 import { HighlightPanel } from "./panels/HighlightPanel.tsx";
 import { IssuesPanel } from "./panels/IssuesPanel.tsx";
 import { InspectPanel } from "./panels/inspect/InspectPanel.tsx";
@@ -11,14 +10,6 @@ import { TopologyPanel } from "./panels/TopologyPanel.tsx";
 import { TopologyGraphPanel } from "./panels/topologyGraph/TopologyGraphPanel.tsx";
 import { RibbonBar } from "./RibbonBar.tsx";
 import { SettingsPanel } from "./settings/SettingsPanel.tsx";
-
-// -----------------------------------------------------------------------------
-// Panel bodies
-// -----------------------------------------------------------------------------
-
-function DrawingPanel(): JSX.Element {
-  return <CanvasStage />;
-}
 
 // -----------------------------------------------------------------------------
 // Panel definitions

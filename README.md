@@ -55,6 +55,14 @@ selected objects highlight in the drawing, hovering any object row in
 a panel highlights it on the canvas, and right-clicking tree rows opens
 copy options (label / type / label+type+id, one row per object).
 
+A **verification underlay** (Drawing-panel toolbar) loads a reference
+image, SVG, or PDF stretched onto the diagram extent — the official
+DISC renderings align exactly — with opacity, under/over placement and
+mm nudges (0.1mm steps), a "hide white" blend that drops the
+reference's paper background, and an ink tint (color picker — e.g.
+red reference under black drawing) for spotting rendering differences
+in place.
+
 An **Inspect** panel (ribbon toggle) draws a UML-style instance diagram
 of the selected object for debugging: its full raw data in a center
 card, and every one-hop relation — references, referenced-by,

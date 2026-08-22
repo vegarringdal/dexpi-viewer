@@ -1,10 +1,12 @@
-import type { CanvasKit, SkPicture, Surface } from "canvaskit-wasm";
+import type { CanvasKit, Canvas as CkCanvas, Image as CkImage, SkPicture, Surface } from "canvaskit-wasm";
 import { type RefObject, useEffect, useRef } from "react";
 import { highlightState } from "../../state/highlight/highlight.state.ts";
 import { renderingState } from "../../state/rendering/rendering.state.ts";
 import { selectionState } from "../../state/selection/selection.state.ts";
 import { themeState } from "../../state/theme/theme.state.ts";
 import { traceState } from "../../state/trace/trace.state.ts";
+import { getUnderlayBitmap } from "../../state/underlay/underlay.actions.ts";
+import { underlayState } from "../../state/underlay/underlay.state.ts";
 import {
   getLoadedDocument,
   setViewerError,
@@ -24,6 +26,7 @@ import { createSceneFonts, loadFontData, type SceneFonts } from "./fonts.ts";
 import { loadCanvasKit } from "./loadCanvasKit.ts";
 import { classifyColor, getScenePalette, type PaletteColor } from "./scenePalette.ts";
 import { attachStageInput } from "./stageInput.ts";
+import { hexToColor4f, underlayDestRect } from "./underlaySource.ts";
 import { Viewport } from "./viewport.ts";
 
 // -----------------------------------------------------------------------------
@@ -50,6 +53,9 @@ export type StageRuntime = {
   /** Recorded scene body; replayed while panning/hovering (see scenePicture). */
   picture: SkPicture | null;
   pictureKey: string;
+  /** GPU copy of the underlay bitmap, re-uploaded per bitmapRevision. */
+  underlayImage: CkImage | null;
+  underlayRevision: number;
   /** True while a coalesced draw callback is queued (see redraw). */
   drawPending: boolean;
 };
@@ -130,14 +136,26 @@ export function useCanvasStage(): CanvasStageHandles {
         }
       });
       const rendering = renderingState.get();
+      const underlay = underlayState.get();
+      // An underlay behind the drawing needs the opaque paper rect gone,
+      // or it would be completely hidden (director's catch).
+      const hidePaper =
+        underlay.name !== null &&
+        underlay.visible &&
+        underlay.placement === "under" &&
+        underlay.opacityPercent > 0;
       const options: SceneDrawOptions = {
         minWidthMm: rendering.minStrokePx / Math.max(viewport.scale, 1e-9),
         widthScale: rendering.strokeWidthScale,
+        hidePaper,
       };
       const picture = scenePicture(rt, doc.scene, palette, options);
       canvas.clear(ck.Color4f(...palette.background));
       canvas.save();
       canvas.concat(viewportMatrix(viewport, dpr));
+      if (underlay.placement === "under") {
+        drawUnderlay(rt, canvas, doc.scene.bounds);
+      }
       if (picture) {
         canvas.drawPicture(picture);
       } else {
@@ -150,8 +168,64 @@ export function useCanvasStage(): CanvasStageHandles {
         downstreamIds: new Set(trace.downstreamIds),
         classification,
       });
+      if (underlay.placement === "over") {
+        drawUnderlay(rt, canvas, doc.scene.bounds);
+      }
       canvas.restore();
     });
+  }
+
+  /**
+   * Draws the verification underlay stretched onto the diagram extent
+   * (plus the user's offset/scale nudges) at the configured opacity. The
+   * GPU image is re-uploaded only when the decoded bitmap changes.
+   */
+  function drawUnderlay(
+    rt: StageRuntime,
+    canvas: CkCanvas,
+    bounds: Parameters<typeof underlayDestRect>[0],
+  ): void {
+    const state = underlayState.get();
+    const bitmap = getUnderlayBitmap();
+    if (!state.name || !state.visible || state.opacityPercent <= 0 || !bitmap) {
+      return;
+    }
+
+    if (rt.underlayRevision !== state.bitmapRevision) {
+      rt.underlayImage?.delete();
+      rt.underlayImage = rt.ck.MakeImageFromCanvasImageSource(bitmap);
+      rt.underlayRevision = state.bitmapRevision;
+    }
+    const image = rt.underlayImage;
+    if (!image) {
+      return;
+    }
+
+    const dst = underlayDestRect(bounds, state);
+    const paint = new rt.ck.Paint();
+    paint.setAlphaf(state.opacityPercent / 100);
+    if (state.tintHex) {
+      // SrcIn keeps each pixel's alpha and replaces its color — line art
+      // (the official SVGs rasterize with a TRANSPARENT background) turns
+      // uniformly into the tint color without filling the background.
+      paint.setColorFilter(
+        rt.ck.ColorFilter.MakeBlend(rt.ck.Color4f(...hexToColor4f(state.tintHex)), rt.ck.BlendMode.SrcIn),
+      );
+    }
+    if (state.hideWhite) {
+      // Multiply makes white transparent-equivalent: only the ink darkens
+      // what is underneath ("dim background" diff overlay).
+      paint.setBlendMode(rt.ck.BlendMode.Multiply);
+    }
+    canvas.drawImageRectOptions(
+      image,
+      rt.ck.LTRBRect(0, 0, image.width(), image.height()),
+      rt.ck.LTRBRect(dst.left, dst.top, dst.right, dst.bottom),
+      rt.ck.FilterMode.Linear,
+      rt.ck.MipmapMode.Linear,
+      paint,
+    );
+    paint.delete();
   }
 
   function zoomToObject(objectId: string | null): void {
@@ -185,7 +259,7 @@ export function useCanvasStage(): CanvasStageHandles {
     palette: ReturnType<typeof getScenePalette>,
     options: SceneDrawOptions,
   ): SkPicture | null {
-    const key = `${viewerState.get().docRevision}:${themeState.get().theme}:${options.minWidthMm.toFixed(5)}:${options.widthScale}`;
+    const key = `${viewerState.get().docRevision}:${themeState.get().theme}:${options.minWidthMm.toFixed(5)}:${options.widthScale}:${options.hidePaper === true}`;
     if (runtime.picture && runtime.pictureKey === key) {
       return runtime.picture;
     }
@@ -281,6 +355,7 @@ export function useCanvasStage(): CanvasStageHandles {
     const unsubRendering = renderingState.subscribe(() => redraw());
     const unsubTrace = traceState.subscribe(() => redraw());
     const unsubHighlight = highlightState.subscribe(() => redraw());
+    const unsubUnderlay = underlayState.subscribe(() => redraw());
     const unsubViewer = viewerState.subscribe(() => {
       const { docRevision, viewCmdSeq, viewCmd } = viewerState.get();
       if (docRevision !== seenRevision) {
@@ -323,6 +398,8 @@ export function useCanvasStage(): CanvasStageHandles {
           fittedRevision: 0,
           picture: null,
           pictureKey: "",
+          underlayImage: null,
+          underlayRevision: 0,
           drawPending: false,
         };
         observer = new ResizeObserver(() => rebuildSurface());
@@ -343,10 +420,12 @@ export function useCanvasStage(): CanvasStageHandles {
       unsubRendering();
       unsubTrace();
       unsubHighlight();
+      unsubUnderlay();
       unsubViewer();
       unsubSelection();
       observer?.disconnect();
       detachInput?.();
+      runtimeRef.current?.underlayImage?.delete();
       runtimeRef.current?.picture?.delete();
       runtimeRef.current?.fonts?.dispose();
       runtimeRef.current?.surface?.delete();

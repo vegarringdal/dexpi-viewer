@@ -1,8 +1,11 @@
 import { PanelBody } from "@tredespace/ui/dockable";
 import type { JSX } from "react";
 import { selectionState } from "../../state/selection/selection.state.ts";
+import { getEffectiveIssues } from "../../state/validation/validation.actions.ts";
+import { validationConfigState } from "../../state/validation/validation.state.ts";
 import { getLoadedDocument } from "../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../state/viewer/viewer.state.ts";
+import { IssueRow } from "./IssuesParts.tsx";
 import { ChipList, EmptyNote, ObjectChip, Section } from "./PropertiesSections.tsx";
 
 // -----------------------------------------------------------------------------
@@ -41,6 +44,7 @@ function persistentIdRows(
 export function PropertiesPanel(): JSX.Element {
   const { file, docRevision } = viewerState.use();
   const { selectedId } = selectionState.use();
+  validationConfigState.use();
   void docRevision;
 
   if (!file) {
@@ -59,6 +63,7 @@ export function PropertiesPanel(): JSX.Element {
   }
 
   const incoming = doc.plant.referencedBy.get(selectedId) ?? [];
+  const issues = getEffectiveIssues().filter((issue) => issue.objectId === selectedId);
 
   const identityRows: readonly { name: string; value: string }[] = [
     { name: "ID", value: node.id },
@@ -133,6 +138,14 @@ export function PropertiesPanel(): JSX.Element {
             <ObjectChip key={child.id} objectId={child.id} />
           ))}
         </ChipList>
+      </Section>
+
+      <Section title={`Issues (${issues.length})`}>
+        {issues.length === 0 && <EmptyNote text="No validation findings for this object." />}
+        {issues.map((issue, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: same rule can hit one object more than once; the index disambiguates.
+          <IssueRow key={`${issue.ruleId}-${index}`} issue={issue} showRuleId hideObjectLink />
+        ))}
       </Section>
     </PanelBody>
   );

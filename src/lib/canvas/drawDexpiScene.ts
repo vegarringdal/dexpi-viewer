@@ -375,6 +375,8 @@ export type SceneDrawOptions = Readonly<{
   /** Below this width (mm) strokes clamp up (= minStrokePx / viewport.scale). */
   minWidthMm: number;
   widthScale: number;
+  /** Skip the opaque paper rect — an underlay behind the drawing must show through. */
+  hidePaper?: boolean;
 }>;
 
 function makeContext(
@@ -412,19 +414,21 @@ export function drawSceneContent(
 ): void {
   const ctx = makeContext(ck, canvas, palette, fonts, options);
   const b = scene.bounds;
-  const paper = new ck.Paint();
-  paper.setColor(ck.Color4f(...palette.paper));
-  paper.setAntiAlias(true);
-  canvas.drawRect(
-    ck.LTRBRect(
-      b.minX - PAPER_MARGIN_MM,
-      b.minY - PAPER_MARGIN_MM,
-      b.maxX + PAPER_MARGIN_MM,
-      b.maxY + PAPER_MARGIN_MM,
-    ),
-    paper,
-  );
-  paper.delete();
+  if (!options.hidePaper) {
+    const paper = new ck.Paint();
+    paper.setColor(ck.Color4f(...palette.paper));
+    paper.setAntiAlias(true);
+    canvas.drawRect(
+      ck.LTRBRect(
+        b.minX - PAPER_MARGIN_MM,
+        b.minY - PAPER_MARGIN_MM,
+        b.maxX + PAPER_MARGIN_MM,
+        b.maxY + PAPER_MARGIN_MM,
+      ),
+      paper,
+    );
+    paper.delete();
+  }
 
   for (const node of scene.nodes) {
     drawNode(ctx, scene, node);

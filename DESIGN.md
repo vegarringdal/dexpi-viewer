@@ -442,6 +442,37 @@ that grow, and record scope changes here.
   stale "Tennessee Eastman" hotkey description was fixed. Verified
   against the sheet's official SVG rendering — layout matches; the
   missing sheet border is the "/Border" well-known shape (below).
+- **2026-08-22** Properties panel gained an "Issues (n)" section below
+  Sub-components (director: an element's findings should be obvious when
+  you click it): the selected object's validation findings with severity
+  chip, rule id, message and suggestion — severity overrides applied
+  (getEffectiveIssues; the panel subscribes to validationConfigState),
+  rendered by the shared IssueRow, which gained showRuleId/hideObjectLink
+  props (the jump link is pointless when already scoped to the object).
+- **2026-08-22** Verification underlay (director's idea — "align a
+  background image/svg/pdf with our generated drawing to verify
+  issues"): the Drawing panel gained a top toolbar that loads a
+  reference file as an alignment underlay. Raster images decode
+  natively, SVG rasterizes via the browser at 4096px long edge, PDF
+  (page 1) via pdfjs-dist (new dependency, notices regenerated). The
+  bitmap is uploaded to a CanvasKit image once per load and drawn
+  inside the same mm transform as the scene — stretched to the diagram
+  extent by default, which aligns the official DISC SVGs exactly —
+  with opacity, under/over placement, and mm-offset/scale nudges
+  (NumberInput steppers). State pair in src/state/underlay/ (bitmap
+  handle in actions); decode + pure placement math in
+  src/lib/canvas/underlaySource.ts (rect math unit-tested). When the
+  underlay sits UNDER the drawing, the opaque paper rect is skipped
+  (SceneDrawOptions.hidePaper, part of the picture cache key) — the
+  director caught that the white sheet would otherwise hide it.
+  Same-day additions (director): offset steps refined to 0.1mm; a
+  "Hide white" toggle multiply-blends the underlay so a white/paper
+  background disappears and only its ink shows; a "Tint" toggle +
+  ColorSelect recolors the underlay's ink (SrcIn color filter — keeps
+  per-pixel alpha; the official SVGs rasterize with a TRANSPARENT
+  background, which is why a Screen-blend tint turned the whole extent
+  solid red on the first attempt) — red-reference-vs-black-drawing is
+  the intended diff workflow.
 - **2026-08-22** Inspect panel (director's idea: "reading XML and how it's
   connected can be hard" — a debug panel): a UML-style instance diagram of
   the selected object. Center card shows the object's FULL raw Data plus
