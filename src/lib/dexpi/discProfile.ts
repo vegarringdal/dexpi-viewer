@@ -6,7 +6,9 @@ import {
   colorFromAggregate,
   componentObjects,
   dataValue,
+  directChildrenByTag,
   getData,
+  isDataReference,
   numberFromData,
   numbersFromData,
   pointFromAggregate,
@@ -79,11 +81,21 @@ export type ProfileLineStroke = Readonly<{
   widthMm: number | null;
 }>;
 
+/** Data properties of one published InformationModel instance, as strings. */
+export type ProfileInstanceData = ReadonlyMap<string, string>;
+
 export type DiscProfile = Readonly<{
   /** Keyed by "DiscProfile/<name>" AND the bare symbol name. */
   symbols: ReadonlyMap<string, ProfileSymbol>;
   /** The profile's heat-trace stroke (non-zero LateralOffset), if any. */
   heatTraceStroke: ProfileLineStroke | null;
+  /**
+   * Published instances from the profile's packages (e.g. the TypeCode
+   * catalogues: ProcessInstrumentationFunctionTypeCodes.MotorControlCenter
+   * carries Abbreviation "MCC"). Keyed by the qualified name drawings
+   * reference ("<Model>/<Pkg>.<Pkg>.<Name>") AND its model-less suffix.
+   */
+  instances: ReadonlyMap<string, ProfileInstanceData>;
 }>;
 
 // -----------------------------------------------------------------------------
@@ -160,6 +172,45 @@ function findHeatTraceStroke(dom: Document): ProfileLineStroke | null {
 }
 
 /**
+ * Collects the named instance Objects nested in the profile's Packages
+ * (TypeCode catalogues and the like) so drawing References into the
+ * published model ("DiscProfile/InformationModel.….MotorControlCenter")
+ * can resolve to their Data (e.g. Abbreviation).
+ */
+function collectInstances(dom: Document): Map<string, ProfileInstanceData> {
+  const instances = new Map<string, ProfileInstanceData>();
+  const walk = (container: Element, path: string): void => {
+    for (const pkg of directChildrenByTag(container, "Package")) {
+      const pkgName = pkg.getAttribute("name");
+      walk(pkg, pkgName ? (path ? `${path}.${pkgName}` : pkgName) : path);
+    }
+    for (const obj of directChildrenByTag(container, "Object")) {
+      const name = obj.getAttribute("name");
+      if (!name || !path) {
+        continue;
+      }
+
+      const attrs = new Map<string, string>();
+      for (const data of directChildrenByTag(obj, "Data")) {
+        const property = data.getAttribute("property");
+        const value = dataValue(data);
+        const text = typeof value === "string" ? value : isDataReference(value) ? refLocalName(value) : "";
+        if (property && text) {
+          attrs.set(property, text);
+        }
+      }
+      if (attrs.size > 0) {
+        const modelName = dom.documentElement.getAttribute("name") ?? "DiscProfile";
+        instances.set(`${modelName}/${path}.${name}`, attrs);
+        instances.set(`${path}.${name}`, attrs);
+      }
+    }
+  };
+  walk(dom.documentElement, "");
+  return instances;
+}
+
+/**
  * Parses a DiscProfile.xml into a symbol catalogue. Expected failures come
  * back as Result errors, never throws.
  */
@@ -199,7 +250,7 @@ export function parseDiscProfile(xmlText: string): Result<DiscProfile> {
     return fail("The file contains no Profile/Symbol catalogue — not a DISC profile.");
   }
 
-  return ok({ symbols, heatTraceStroke: findHeatTraceStroke(dom) });
+  return ok({ symbols, heatTraceStroke: findHeatTraceStroke(dom), instances: collectInstances(dom) });
 }
 
 // -----------------------------------------------------------------------------

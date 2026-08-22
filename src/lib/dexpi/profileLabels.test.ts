@@ -166,20 +166,18 @@ describe("profile label overlays", () => {
     expect(texts.some((t) => t.value === "FailRetainPosition")).toBe(false);
   });
 
-  it("splits a template with line breaks into one text per line", () => {
-    // The line break in the template's own Text is a real formatting
-    // instruction from the profile.
+  it("keeps a template with line breaks as ONE multi-line text primitive", () => {
+    // The line break is real formatting from the profile, but the lines must
+    // stay one primitive so layoutTextLines block-aligns them per vAlign —
+    // bottom-anchored labels grow upward, matching the official renderings.
     const profileMultiline = PROFILE_XML.replace(
       "&lt;TagName&gt;-&lt;NotModelled&gt;",
       "L1\n&lt;TagName&gt;",
     );
     const texts = overlayTexts(MAIN_XML, profileMultiline);
-    const l1 = texts.find((t) => t.value === "L1");
-    const l2 = texts.find((t) => t.value === "PT-100");
-    expect(l1).toBeDefined();
-    expect(l2).toBeDefined();
-    // The second line advances by size × spacing in local (here world) y-down.
-    expect((l2?.position.y ?? 0) - (l1?.position.y ?? 0)).toBeCloseTo(2.5 * 1.4);
+    const block = texts.find((t) => t.value === "L1\nPT-100");
+    expect(block).toBeDefined();
+    expect(texts.some((t) => t.value === "L1")).toBe(false);
   });
 });
 
@@ -294,6 +292,21 @@ describe("property-break value labels", () => {
       <Data property="DiscProfile/BreakValue1"><String>AP110</String></Data>`);
     expect(texts.map((t) => t.value)).toEqual(["AP110"]);
     expect(texts[0]?.position).toEqual({ x: 20, y: 24 });
+  });
+
+  it("keeps break labels in sheet space even on a rotated placement", () => {
+    // Official: the 270°-rotated property breaks show their values
+    // horizontal at UNROTATED offsets — unlike every other symbol family.
+    const xml = breakMainXml(`
+      <Data property="DiscProfile/BreakValue1"><String>AP110</String></Data>`).replace(
+      '<References objects="DiscProfile/ND0007" property="Symbol"/>',
+      `<Data property="Rotation"><Double>270</Double></Data>
+            <References objects="DiscProfile/ND0007" property="Symbol"/>`,
+    );
+    const texts = overlayTexts(xml, BREAK_PROFILE_XML);
+    expect(texts[0]?.rotation).toBe(0);
+    expect(texts[0]?.position.x ?? 0).toBeCloseTo(20);
+    expect(texts[0]?.position.y ?? 0).toBeCloseTo(24);
   });
 
   it("never fills the generic labels from conflicting nested logical-break values", () => {
@@ -595,5 +608,158 @@ describe("mixed exporter placeholders in break values (director's fixture)", () 
     const doc = parseDexpiDocument(DUMMY_MAIN, profile).data;
     const attrs = doc?.plant.byId.get("BREAK1")?.attributes ?? [];
     expect(attrs.filter((a) => a.value === "??XX??")).toHaveLength(2);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Plant-context fallback — an inline flow element (e.g. a Coriolis meter
+// behind an FE balloon) carries no ParentStructure/PlantSystem references,
+// yet the balloon template shows the plant codes. The document's unique
+// PlantStructureItem carriers stand in; differing carriers stay unresolved.
+// -----------------------------------------------------------------------------
+
+describe("plant-context attribute fallback", () => {
+  const PLANT_PROFILE = PROFILE_XML.replace(
+    "&lt;TagName&gt;-&lt;NotModelled&gt;",
+    "&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;",
+  );
+
+  const withStructure = (plants: string): string =>
+    MAIN_XML.replace(
+      '<Object id="D1"',
+      `${plants}
+  <Object id="PS1" type="Plant/PlantStructure.PlantSystem">
+    <Data property="PlantSystemIdentificationCode"><String>20</String></Data>
+  </Object>
+  <Object id="D1"`,
+    );
+
+  const ONE_PLANT = `<Object id="PP1" type="Plant/PlantStructure.ProcessPlant">
+    <Data property="ProcessPlantIdentificationCode"><String>D</String></Data>
+  </Object>`;
+
+  it("resolves the codes from the document's unique carriers when unreachable by reference", () => {
+    const texts = overlayTexts(withStructure(ONE_PLANT), PLANT_PROFILE);
+    expect(texts.some((t) => t.value === "D-20")).toBe(true);
+  });
+
+  it("stays unresolved when two carriers disagree (multi-plant document)", () => {
+    const twoPlants = `${ONE_PLANT}
+  <Object id="PP2" type="Plant/PlantStructure.ProcessPlant">
+    <Data property="ProcessPlantIdentificationCode"><String>E</String></Data>
+  </Object>`;
+    const texts = overlayTexts(withStructure(twoPlants), PLANT_PROFILE);
+    expect(texts.some((t) => t.value === "-20")).toBe(true);
+    expect(texts.some((t) => t.value.startsWith("D-"))).toBe(false);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// ReferenceProperty placeholders — <TypeCode> resolves through the object's
+// References into the profile's published TypeCode catalogue instances.
+// -----------------------------------------------------------------------------
+
+describe("TypeCode placeholder via published profile instances", () => {
+  const TYPECODE_PROFILE = `${PROFILE_XML.replace(
+    "&lt;TagName&gt;-&lt;NotModelled&gt;",
+    "&lt;TypeCode&gt;",
+  ).replace(
+    "</Model>",
+    `  <Package name="InformationModel">
+    <Package name="ProcessInstrumentationFunctionTypeCodes">
+      <Object name="MotorControlCenter" type="/InformationModel.ProcessInstrumentationFunctionTypeCode">
+        <Data property="Abbreviation"><String>MCC</String></Data>
+      </Object>
+    </Package>
+  </Package>
+</Model>`,
+  )}`;
+
+  it("renders the referenced instance's Abbreviation", () => {
+    const withTypeCode = MAIN_XML.replace(
+      '<Data property="TagName"><String>PT-100</String></Data>',
+      '<References objects="DiscProfile/InformationModel.ProcessInstrumentationFunctionTypeCodes.MotorControlCenter" property="DiscProfile/TypeCode"/>',
+    );
+    const texts = overlayTexts(withTypeCode, TYPECODE_PROFILE);
+    expect(texts.some((t) => t.value === "MCC")).toBe(true);
+  });
+
+  it("renders blank when the object carries no TypeCode reference", () => {
+    const texts = overlayTexts(MAIN_XML, TYPECODE_PROFILE);
+    expect(texts.some((t) => t.value.includes("TypeCode"))).toBe(false);
+    expect(texts.some((t) => t.value === "MCC")).toBe(false);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Sheet-space labels — a symbol usage's rotation/mirroring applies to its
+// geometry only; the official renderings keep label text upright at the
+// unrotated template offset (DISC_EXAMPLE-14-12's 180°-rotated off-page
+// connector, the 270°-rotated property breaks).
+// -----------------------------------------------------------------------------
+
+describe("labels on rotated symbol usages", () => {
+  // Official convention: labels follow the placement rotation normalized to
+  // the readable half-plane (90→270, 180→0, offsets rotate with the flipped
+  // angle) — except PropertyBreak placements, whose labels stay sheet-space.
+  it("flips a 180° placement upright at the unrotated template offset", () => {
+    const rotated = MAIN_XML.replace(
+      '<References objects="DiscProfile/Balloon" property="Symbol"/>',
+      `<Data property="Rotation"><Double>180</Double></Data>
+            <References objects="DiscProfile/Balloon" property="Symbol"/>`,
+    );
+    const label = overlayTexts(rotated).find((t) => t.value.startsWith("PT-100"));
+    expect(label?.position).toEqual({ x: 10, y: 21 });
+    expect(label?.rotation).toBe(0);
+  });
+
+  it("flips a 90° placement to 270 and rotates the offset with it", () => {
+    const rotated = MAIN_XML.replace(
+      '<References objects="DiscProfile/Balloon" property="Symbol"/>',
+      `<Data property="Rotation"><Double>90</Double></Data>
+            <References objects="DiscProfile/Balloon" property="Symbol"/>`,
+    );
+    const label = overlayTexts(rotated).find((t) => t.value.startsWith("PT-100"));
+    expect(label?.rotation).toBe(270);
+    expect(label?.position.x ?? 0).toBeCloseTo(11);
+    expect(label?.position.y ?? 0).toBeCloseTo(20);
+  });
+});
+
+describe("labels on rotated LABEL-ONLY symbols", () => {
+  // The line-number label symbols (ND0000/ND0040/ND0041) carry no geometry;
+  // the official SVG rotates their text WITH the placement (a vertical
+  // pipe's line label renders rotate(270)).
+  const LABEL_ONLY_PROFILE = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Profile">
+  <Object id="SymL" name="LineTag" type="Profile/Symbol">
+    <Components property="Variants">
+      <Object type="Profile/SymbolVariant">
+        <Components property="LabelTemplates">
+          <Object type="Profile/LabelTemplate">
+            <Data property="Text"><String>&lt;TagName&gt;</String></Data>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>2</Double></Data>
+                <Data property="Y"><Double>0</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+
+  it("rotates the label with the placement", () => {
+    const rotated = MAIN_XML.replace(
+      '<References objects="DiscProfile/Balloon" property="Symbol"/>',
+      `<Data property="Rotation"><Double>270</Double></Data>
+            <References objects="DiscProfile/LineTag" property="Symbol"/>`,
+    );
+    const label = overlayTexts(rotated, LABEL_ONLY_PROFILE).find((t) => t.value === "PT-100");
+    expect(label?.rotation).toBe(270);
+    expect(label?.position.x ?? 0).toBeCloseTo(10);
+    expect(label?.position.y ?? 0).toBeCloseTo(18);
   });
 });

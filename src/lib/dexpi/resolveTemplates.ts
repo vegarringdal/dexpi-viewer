@@ -149,6 +149,62 @@ function valueKey(value: DataValue): string {
 }
 
 /**
+ * Plant-structure context identifiers (DEXPI PlantStructureItem / PlantMetaData
+ * attribute family). These are document-level context, not per-item data: a
+ * sheet's instruments all belong to the same ProcessPlant/PlantSystem unless
+ * the file models several — so when the related-object search fails (e.g. an
+ * inline flow element carries no ParentStructure reference at all, though the
+ * balloon template still shows "<ProcessPlantIdentificationCode>-…"), the
+ * document's unique carrier of the attribute may stand in.
+ */
+const PLANT_CONTEXT_ATTRIBUTE =
+  /^(Enterprise|IndustrialComplex|PlantArea|PlantSection|PlantSystem|PlantTrain|ProcessPlant|Site)(IdentificationCode|Name)$/;
+
+const plantContextCache = new WeakMap<LookupIndex, Map<string, DataValue | undefined>>();
+
+/**
+ * Document-level fallback for plant-context attributes: resolves ONLY when
+ * every id-bearing carrier in the document agrees on one value (the usual
+ * single-ProcessPlant/-PlantSystem sheet). Differing carriers — a genuine
+ * multi-system document — stay unresolved, per the unambiguous-ownership
+ * rule: never guess which system an item belongs to.
+ */
+function lookupPlantContextAttribute(index: LookupIndex, attributeName: string): DataValue | undefined {
+  const bare = attributeName.split("/").pop() ?? attributeName;
+  if (!PLANT_CONTEXT_ATTRIBUTE.test(bare)) {
+    return undefined;
+  }
+
+  let cache = plantContextCache.get(index);
+  if (!cache) {
+    cache = new Map();
+    plantContextCache.set(index, cache);
+  }
+  const cached = cache.get(bare);
+  if (cached !== undefined || cache.has(bare)) {
+    return cached;
+  }
+
+  let found: { readonly value: DataValue } | null = null;
+  for (const el of index.byId.values()) {
+    const value = directData(el, bare);
+    if (value === undefined) {
+      continue;
+    }
+
+    if (!found) {
+      found = { value };
+    } else if (valueKey(found.value) !== valueKey(value)) {
+      found = null;
+      break;
+    }
+  }
+  const resolved = found?.value;
+  cache.set(bare, resolved);
+  return resolved;
+}
+
+/**
  * The attribute's value on the object — or, when absent there, on the
  * nearest related object within two hops of Components children and
  * References targets (breadth-first; several standard label templates name
@@ -158,6 +214,8 @@ function valueKey(value: DataValue): string {
  * no single one owns it — picking any would be arbitrary, so the lookup
  * reports the attribute as unresolved (director's rule: a value may only
  * be used when its ownership is unambiguous).
+ * Plant-context identifiers get one extra chance: the document-level
+ * fallback above (unique carrier anywhere in the file).
  */
 export function lookupAttribute(
   index: LookupIndex,
@@ -204,7 +262,7 @@ export function lookupAttribute(
     }
     frontier = next;
   }
-  return undefined;
+  return lookupPlantContextAttribute(index, attributeName);
 }
 
 function isElement(value: DataValue): value is Element {

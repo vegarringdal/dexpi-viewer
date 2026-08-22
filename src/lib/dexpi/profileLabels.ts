@@ -1,10 +1,9 @@
-import type { ProfileLabelTemplate } from "./discProfile.ts";
+import type { ProfileInstanceData, ProfileLabelTemplate } from "./discProfile.ts";
 import { transformPrimitive } from "./flattenScene.ts";
 import { isRenderableLabelValue } from "./labelPolicy.ts";
 import { formatForRepresentation, type LookupIndex, lookupDisplayAttribute } from "./resolveTemplates.ts";
-import { TEXT_LINE_SPACING } from "./textLayout.ts";
 import type { SceneNode, UseTransform } from "./types.ts";
-import { dataValue, getData, refLocalName } from "./xml.ts";
+import { dataValue, directChildrenByTag, getData, refLocalName } from "./xml.ts";
 
 // -----------------------------------------------------------------------------
 // DiscProfile label overlays
@@ -109,6 +108,52 @@ function ownValueText(el: Element, attributeName: string): string {
   return "";
 }
 
+const NO_INSTANCES: ReadonlyMap<string, ProfileInstanceData> = new Map();
+
+/**
+ * Flips a placement rotation into the readable half-plane for label text:
+ * 90 and 180 flip by 180° (top-to-bottom / upside-down text never appears
+ * in the official renderings), 0 and 270 stay.
+ */
+function normalizeLabelRotation(rotation: number): number {
+  const r = ((rotation % 360) + 360) % 360;
+  return r > 45 && r <= 225 ? (r + 180) % 360 : r;
+}
+
+/**
+ * A placeholder can name a ReferenceProperty instead of a Data property —
+ * e.g. <TypeCode> on the MCC/SIS function boxes and actuator circles: the
+ * object carries `References property="DiscProfile/TypeCode"` to a
+ * published profile instance (…TypeCodes.MotorControlCenter), whose
+ * Abbreviation is the drawing code ("MCC", "M", …).
+ */
+function instanceValueFromReferences(
+  el: Element,
+  attributeName: string,
+  instances: ReadonlyMap<string, ProfileInstanceData>,
+): string | undefined {
+  if (instances.size === 0) {
+    return undefined;
+  }
+
+  const bare = attributeName.split("/").pop() ?? attributeName;
+  for (const refs of directChildrenByTag(el, "References")) {
+    const property = refs.getAttribute("property") ?? "";
+    if (property !== attributeName && property !== bare && property !== `DiscProfile/${bare}`) {
+      continue;
+    }
+
+    for (const raw of (refs.getAttribute("objects") ?? "").split(/\s+/)) {
+      const attrs = instances.get(raw) ?? instances.get(raw.split("/").pop() ?? raw);
+      const abbreviation = attrs?.get("Abbreviation");
+      if (abbreviation) {
+        return abbreviation;
+      }
+    }
+  }
+  return undefined;
+}
+
 /**
  * Resolves one LabelTemplate text for an instance; null suppresses the
  * template (an alarm role-path with no matching child). The "' & " VB-style
@@ -119,6 +164,7 @@ export function resolveProfileLabelText(
   objectId: string,
   index: LookupIndex,
   roleCounters: Map<string, number>,
+  instances: ReadonlyMap<string, ProfileInstanceData> = NO_INSTANCES,
 ): string | null {
   const text = rawText.replace(/'\s*&\s*/g, "");
   if (!/[<>]/.test(text)) {
@@ -140,11 +186,17 @@ export function resolveProfileLabelText(
         return "";
       }
 
-      return renderableOrBlank(ownValueText(target, attrName));
+      const own = ownValueText(target, attrName);
+      return renderableOrBlank(own || (instanceValueFromReferences(target, attrName, instances) ?? ""));
     }
 
     const value = lookupDisplayAttribute(index, objectId, attrName);
-    return value === undefined ? "" : renderableOrBlank(formatForRepresentation(value, "Value"));
+    if (value !== undefined) {
+      return renderableOrBlank(formatForRepresentation(value, "Value"));
+    }
+
+    const el = index.byId.get(objectId);
+    return el ? renderableOrBlank(instanceValueFromReferences(el, attrName, instances) ?? "") : "";
   });
   return unresolved ? null : resolved;
 }
@@ -156,13 +208,17 @@ export function resolveProfileLabelText(
  *
  * Director's rendering rules: the enhanced file's explicit diagram labels
  * are authoritative — a placement whose represented object already has
- * explicit label text renders NO template overlays (never both). Template
- * line breaks are real formatting: each line becomes its own text primitive.
+ * explicit label text renders NO template overlays (never both). A
+ * multi-line value stays ONE text primitive so layoutTextLines block-aligns
+ * it per the template's vAlign — bottom-anchored labels (the break values)
+ * grow UPWARD from the anchor like the official renderings, never down into
+ * the symbol.
  */
 export function buildProfileLabelOverlays(
   index: LookupIndex,
   pending: readonly PendingProfileLabels[],
   objectIdsWithExplicitLabels: ReadonlySet<string>,
+  instances: ReadonlyMap<string, ProfileInstanceData> = NO_INSTANCES,
 ): SceneNode[] {
   const nodes: SceneNode[] = [];
   for (const entry of pending) {
@@ -170,34 +226,44 @@ export function buildProfileLabelOverlays(
       continue;
     }
 
+    // Labels follow the placement's rotation NORMALIZED to stay readable
+    // (90→270, 180→0; offsets rotate with the flipped angle too) — the
+    // official renderings draw a vertical valve's tag and a vertical
+    // pipe's line label rotate(270) whether the usage says 90 or 270, and
+    // a 180°-rotated off-page connector's text upright at the unrotated
+    // offsets. Sole exception: PropertyBreak placements keep their value
+    // labels in sheet space entirely (the 270°-rotated breaks show them
+    // horizontal at unrotated offsets). Verified against
+    // DISC_EXAMPLE-14-12's full rotated-usage inventory.
+    const representedType = index.byId.get(entry.objectId)?.getAttribute("type") ?? "";
+    const labelRotation = representedType.endsWith("PropertyBreak")
+      ? 0
+      : normalizeLabelRotation(entry.transform.rotation);
+    const labelTransform: UseTransform = {
+      ...entry.transform,
+      rotation: labelRotation,
+      isMirrored: false,
+    };
     const roleCounters = new Map<string, number>();
     for (const template of entry.templates) {
-      const value = resolveProfileLabelText(template.text, entry.objectId, index, roleCounters);
+      const value = resolveProfileLabelText(template.text, entry.objectId, index, roleCounters, instances);
       if (!value || value.trim().length === 0) {
         continue;
       }
 
-      for (const [lineIndex, line] of value.split(/\r?\n/).entries()) {
-        if (line.trim().length === 0) {
-          continue;
-        }
-
-        const prim = transformPrimitive(entry.transform, {
-          kind: "text",
-          value: line,
-          position: {
-            x: template.position.x,
-            y: template.position.y + lineIndex * template.size * TEXT_LINE_SPACING,
-          },
-          rotation: template.rotation,
-          size: template.size,
-          color: template.color,
-          font: template.font,
-          hAlign: template.hAlign,
-          vAlign: template.vAlign,
-        });
-        nodes.push({ kind: "prim", prim, objectId: entry.objectId, role: "label" });
-      }
+      const lines = value.split(/\r?\n/).filter((line) => line.trim().length > 0);
+      const prim = transformPrimitive(labelTransform, {
+        kind: "text",
+        value: lines.join("\n"),
+        position: { x: template.position.x, y: template.position.y },
+        rotation: template.rotation,
+        size: template.size,
+        color: template.color,
+        font: template.font,
+        hAlign: template.hAlign,
+        vAlign: template.vAlign,
+      });
+      nodes.push({ kind: "prim", prim, objectId: entry.objectId, role: "label" });
     }
   }
   return nodes;

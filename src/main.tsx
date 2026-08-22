@@ -5,10 +5,12 @@ import { App } from "./App.tsx";
 import { registerAppHotkeys } from "./components/hotkeys.ts";
 import { applyStoredRenderingSettings } from "./state/rendering/rendering.actions.ts";
 import { applyStoredTheme } from "./state/theme/theme.actions.ts";
+import { applyStoredValidationOverrides } from "./state/validation/validation.actions.ts";
 import "./index.css";
 
 applyStoredTheme();
 applyStoredRenderingSettings();
+applyStoredValidationOverrides();
 initTooltips();
 registerAppHotkeys();
 

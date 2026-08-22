@@ -125,7 +125,7 @@ function emitPrimitive(prim: ScenePrimitive, widthDivisor: number): string {
       const attrs = `transform="translate(${num(prim.position.x)},${num(prim.position.y)})${rotate}" font-family="${esc(prim.font)}, Carlito, 'Liberation Sans', sans-serif" font-size="${num(prim.size)}" text-anchor="${textAnchor(prim.hAlign)}" fill="${color(prim.color)}"`;
       const lines = layoutTextLines(prim.value, prim.size, prim.vAlign);
       if (lines.length === 1) {
-        return `<text ${attrs} y="${num(dy)}">${esc(prim.value)}</text>`;
+        return `<text ${attrs} y="${num(dy)}">${esc(lines[0]?.value ?? "")}</text>`;
       }
 
       // Multiline: one tspan per line, all inside the rotated frame so the

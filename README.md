@@ -33,12 +33,16 @@ arcs), node-position-stitched connector lines, and the title block.
 **M5 (connectivity) and M6 (export, validation, DISC profiles) are done
 too**: trace upstream (amber) / downstream (green) from any selection;
 export the drawing as spec-mapped **SVG** or vector **PDF** (embedded
-metric-compatible fonts) and the validation findings as **CSV**; six
-validation rules feed the Issues panel (count in the tab, click to jump
-to the object); and a **DISC profile** (DiscProfile.xml, DEXPI 2.1) can
-be loaded to resolve Profile/SymbolUsage references with per-instance
-variant conditions. Clicking the drawing reveals the object in the
-searchable tree (expand/collapse-all included).
+metric-compatible fonts) and the validation findings as **CSV**;
+fourteen validation rules in four categories — Schema (SCH), Graphics
+(GFX), Connectivity (CON, incl. unconnected nozzles and nominal-diameter
+mismatches at connection points), Meta data (META) — feed the Validation
+panel (count in the tab, severity + category filters, click to jump to
+the object, per-rule severity overrides incl. Ignore, persisted); and a
+**DISC profile** (DiscProfile.xml, DEXPI 2.1) can be loaded to resolve
+Profile/SymbolUsage references with per-instance variant conditions.
+Clicking the drawing reveals the object in the searchable tree
+(expand/collapse-all included).
 
 **M7 polish is in**: the panel layout persists across sessions (ribbon
 Reset restores the default), a **minimap** (bottom-left, toggleable)

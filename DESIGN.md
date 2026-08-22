@@ -442,6 +442,122 @@ that grow, and record scope changes here.
   stale "Tennessee Eastman" hotkey description was fixed. Verified
   against the sheet's official SVG rendering — layout matches; the
   missing sheet border is the "/Border" well-known shape (below).
+- **2026-08-22** Semantic signal-line styling (src/lib/dexpi/signalLines.ts,
+  applied at scene build): the official renderings override a signal-family
+  ConnectorLine's authored stroke (uniformly LongDash in the XML) by the
+  represented object's semantics, and synthesize mark glyphs that exist in
+  no XML — recovered empirically from all 15 official sheets (248 lines,
+  no exceptions): MeasuringLineFunction → solid; SignalConveying → dash
+  3/3; ElectricalSignalConveying → solid + square-bracket glyphs every
+  6.5mm from 2.5mm after the drawn start, rotated to the local segment
+  direction; BusSignalConveying → dash 2.75/4.75 + circle marks (r 1.25;
+  the single observed 9mm line carries one 5mm in — modeled as a 10mm
+  cadence from 5mm until longer real examples exist). Additionally
+  HydraulicSignalConveying → solid (no official sample; director's call:
+  hydraulic is a fluid-filled line like a measuring line). All other
+  unknown subtype values keep the authored stroke. The DiscProfile defines only the
+  attribute (no LineStroke graphics), and the prior-art viewer's "E"/"O"
+  glyph decorations are its own invention — the official vocabulary is the
+  one above. objectsById in the scene builder is now always populated
+  (was profile-only). Glyph geometry parity is regression-tested against
+  sheet 08's official SVG.
+- **2026-08-22** Profile-label rotation, final rule (converged over three
+  iterations, each corrected by real data the director flagged): labels
+  follow the placement's rotation **normalized to the readable
+  half-plane** — 90→270 and 180→0 flip by 180°, 0 and 270 stay, and the
+  template OFFSETS rotate with the flipped angle too. Verified against
+  DISC_EXAMPLE-14-12's full rotated-usage inventory: a vertical valve's
+  tag renders rotate(270) whether the usage says 90 or 270 (ND0182A/B,
+  ND0193A, ND0192A, ND0054, ND0056), the vertical line labels (ND0040)
+  render rotate(270), and the 180°-rotated off-page connector's texts
+  come out upright at unrotated offsets — which the normalization
+  produces naturally (180→0), no special case. **Sole exception:
+  PropertyBreak placements keep their value labels fully in sheet space**
+  (the 270°-rotated breaks show them horizontal at unrotated offsets) —
+  keyed off the represented object's type. isMirrored never applies to
+  labels. Wrong intermediate models, for the record: (1) full transform —
+  drew 180° connector labels upside down; (2) sheet-space for
+  geometry-carrying symbols / full for label-only — killed the valve-tag
+  and line-label rotation. NOTE: nozzle N01/N02 texts and similar are
+  EXPLICIT diagram texts in the XML, not overlays — they were red
+  herrings when reading the official SVG evidence.
+- **2026-08-22** `<TypeCode>` placeholders resolve via References into
+  the profile's published instances: the MCC/SIS function boxes and
+  actuator circles carry `References property="DiscProfile/TypeCode"`
+  to instances like
+  `DiscProfile/InformationModel.ProcessInstrumentationFunctionTypeCodes
+  .MotorControlCenter` — a ReferenceProperty, not Data, so attribute
+  lookup could never see it (the prior-art viewer had no Abbreviation
+  handling either; only the authoring tool rendered these).
+  parseDiscProfile now collects every named instance Object in the
+  profile's Packages (`DiscProfile.instances`, keyed by qualified name
+  and its model-less suffix), and profile-label resolution falls back
+  to the referenced instance's **Abbreviation** ("MCC", "PSD", "M")
+  when a placeholder matches a References property — both bare and
+  role-path placeholders. Official parity on sheet 08 regression-
+  tested: MCC 1, PSD 4, ESD 1, actuator M 2 (the official SVG's two
+  extra 8px "M"s are border grid letters of the undrawable /Border
+  shape).
+- **2026-08-22** Plant-context attribute fallback: the balloon template
+  `<ProcessPlantIdentificationCode>-<PlantSystemIdentificationCode>`
+  rendered as a bare "-" on balloons whose represented object is an
+  inline flow element (FE tags: the Coriolis meter carries NO
+  references, so the 2-hop related-object search cannot reach
+  ProcessPlant1/PlantSystem1 — instrumentation FUNCTIONS carry
+  ParentStructure/PlantSystem directly and always resolved). These are
+  the DEXPI PlantStructureItem identification attributes — document
+  context, not per-item data — so lookupAttribute gained a final
+  fallback for the `(Site|Enterprise|IndustrialComplex|ProcessPlant|
+  PlantArea|PlantSection|PlantSystem|PlantTrain)(IdentificationCode|
+  Name)` family: resolve from the document's carriers ONLY when they
+  all agree on one value (memoized per document). Multi-system files
+  with differing codes stay unresolved — never guess. Official parity
+  regression-tested: 19 "D-20" texts on sheet 08, same as the pack's
+  SVG.
+- **2026-08-22** Profile break-label placement fixed (two bugs, found via
+  A/B against the pack's official SVG renderings). (1) Multi-line
+  LabelTemplate values were split into per-line primitives stacked
+  DOWNWARD from the template anchor; a bottom-aligned label block must
+  grow UPWARD (official baselines −14.3/−11 vs our −11/−6.38 — the
+  second line collided with the break symbol's arrow wings). Now ONE
+  multi-line text primitive per template; layoutTextLines block-aligns
+  it per vAlign in every renderer. (2) Whitespace parity: real data pads
+  label lines (DISC_EXAMPLE-14-12's BreakValue2 second line carries 48
+  leading spaces); browsers collapse that whitespace when rendering the
+  official SVGs, but CanvasKit drew the literal space glyphs — shoving
+  the line ~44mm sideways onto the pump. layoutTextLines now trims each
+  line, keeping canvas, SVG, PDF and hit-test on the browser-collapsed
+  geometry. Regression-tested against the official sheet-08 anchors and
+  the sheet-12 padding. Known accepted delta: our line spacing is the
+  global 1.4× vs the official tool's 1.0× for these labels (top line
+  ~1.3mm higher).
+- **2026-08-22** Validation rule ids re-categorized and the connectivity
+  rule set expanded (director-approved). Neither the DEXPI 2.0 spec
+  (searched, 1070 pp) nor DEXPI_XML_Schema.xsd defines an error-code
+  catalogue — the XSD is the generic serialization meta-schema (lexical
+  id/name-reference patterns + xsd:ID/IDREF only) — so the app keeps its
+  own stable taxonomy, prefixed by category: **SCH** (schema), **GFX**
+  (graphics), **CON** (connectivity), **META** (meta data). Legacy
+  mapping: V01→SCH-001, V02→SCH-002, V03→GFX-001, V04→GFX-002,
+  V05→CON-001, V06→GFX-003, V07→CON-002, V08→META-001, V09→META-002.
+  New rules: SCH-003/SCH-004 enforce the XSD's identifier and
+  reference-token patterns (DOMParser doesn't); CON-003 unconnected
+  nozzles (info — spares are legitimate; flags Nozzle17/18/19 on the
+  reference P&ID); CON-004 nominal-diameter mismatch across a
+  connection's two nodes — deliberately NOT checked on segment endpoint
+  references (a PipeReducer inside a segment legitimately changes DN;
+  reference_pid seg 5/7 proved this) and only like representations are
+  compared (numeric vs numeric, text vs text — DISC sheets mix "14″"
+  text with numeric mates; the one real DISC finding, 14″ vs 1400, is
+  a genuine inconsistency in the official example); CON-005 piping-class
+  change between segments without a PropertyBreak (info; suppressed when
+  either segment contains one). The panel gained a category filter and a
+  per-rule **severity override** editor (Default/Error/Warning/Info/
+  Ignore — prior-art viewer parity), persisted in localStorage
+  (`src/state/validation/`), applied by `applySeverityOverrides` to the
+  panel, tab count, auto-focus, and the CSV export (which now carries a
+  category column). Raw findings stay untouched on the document; the
+  overrides map at render/export time, so changing them never re-parses.
 - **2026-08-22** Validation refined on real DISC data (the old rules
   flooded the panel with 170+ findings and duplicated React keys):
   V02 exempts namespace-qualified References targets (they reference
@@ -489,18 +605,25 @@ that grow, and record scope changes here.
       PDF (pdf-lib + embedded Carlito/Liberation/DejaVu subsets;
       instancing resolved by `flattenScene`). PNG dropped per director
       ("SVG and PDF is enough").
-- [x] Rule-based validation, expanded to nine rules with per-finding
-      suggestions: V01 duplicate ids (aggregated per id), V02 dangling
-      refs, V03 unknown shapes, V04 undrawable connectors, V05 flow
-      items missing source/target, V07 orphaned piping nodes, V08
-      required EngineeringModel meta data, V09 unresolvable template
-      attribute references, V06 missing diagram extent. **Parity with
-      the prior-art viewer's run on reference_pid.xml is unit-tested**
+- [x] Rule-based validation, now fourteen rules in four categories with
+      per-finding suggestions (see the 2026-08-22 taxonomy entry in the
+      decisions log for the legacy V01–V09 mapping): SCH-001 duplicate
+      ids (aggregated per id), SCH-002 dangling refs, SCH-003 invalid id
+      syntax, SCH-004 invalid reference syntax, GFX-001 unknown shapes,
+      GFX-002 undrawable connectors, GFX-003 missing diagram extent,
+      CON-001 flow items missing source/target, CON-002 orphaned piping
+      nodes, CON-003 unconnected nozzles, CON-004 nominal-diameter
+      mismatch, CON-005 piping-class change without PropertyBreak,
+      META-001 required EngineeringModel meta data, META-002
+      unresolvable template attribute references. **Parity with the
+      prior-art viewer's run on reference_pid.xml is unit-tested**
       (same 2 errors: missing ExportDateTime + NominalCapacity(Volume);
       same orphans PipingNode60/61). Validation panel: severity summary
-      chips, filters, collapsible rule groups, suggestions, CSV button,
-      jump-to-object; auto-expands when a loaded document has findings
-      (panel content mounts lazily — a collapsed node would go stale)
+      chips, severity + category filters, collapsible rule groups,
+      suggestions, CSV button, jump-to-object, per-rule severity
+      overrides (Default/Error/Warning/Info/Ignore, persisted);
+      auto-expands when a loaded document has findings (panel content
+      mounts lazily — a collapsed node would go stale)
 - [x] CSV report export of the findings
 - [x] DISC profile support (DEXPI 2.1): load DiscProfile.xml
       (Profile/Symbol catalogue), Profile/SymbolUsage resolution with
@@ -522,9 +645,10 @@ that grow, and record scope changes here.
       data arrived (superseded 2026-08-22, see below); the
       ribbon Profile tooltip says so. Unit-tested against synthetic
       fixtures.
-- [ ] SignalConveyingFunctionTypeRepresentation (DiscProfile custom
-      attribute): line-style decoration for signal lines — prior-art
-      viewer restyles them; needs the same fixture
+- [x] SignalConveyingFunctionTypeRepresentation line styling (2026-08-22,
+      src/lib/dexpi/signalLines.ts) — see the decisions-log entry; the
+      official convention (recovered from the pack's SVGs) differs from
+      the prior-art viewer's E/O glyph invention
 - [ ] Profile validation (prior-art viewer's PRF-E01…E05 rules on the
       profile file itself + DEXPI×profile cross-checks) — optional
 - [x] 2026-08-19 profile audit small fixes: variant conditions also

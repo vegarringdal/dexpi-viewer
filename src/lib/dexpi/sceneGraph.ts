@@ -8,6 +8,7 @@ import {
 import { parseConnectorPolyline, parsePrimitive } from "./primitives.ts";
 import { buildProfileLabelOverlays, type PendingProfileLabels } from "./profileLabels.ts";
 import { buildLookupIndex, resolveTemplateTexts } from "./resolveTemplates.ts";
+import { buildSignalMarkPrims, signalLineStyle } from "./signalLines.ts";
 import { layoutTextLines } from "./textLayout.ts";
 import type {
   Bounds,
@@ -194,9 +195,18 @@ function walkGroup(
     if (elType === "Core/Diagram.ConnectorLine") {
       const source = ctx.nodePositions.get(referenceTargets(el, "Source")[0] ?? "") ?? null;
       const target = ctx.nodePositions.get(referenceTargets(el, "Target")[0] ?? "") ?? null;
-      const prim = parseConnectorPolyline(el, source, target);
+      let prim = parseConnectorPolyline(el, source, target);
       if (prim.kind === "polyline" && prim.points.length >= 2) {
+        const style = signalLineStyle(objectId ? (ctx.objectsById.get(objectId) ?? null) : null);
+        if (style) {
+          prim = { ...prim, stroke: { ...prim.stroke, dash: style.dash } };
+        }
         ctx.nodes.push({ kind: "prim", prim, objectId, role: "connector" });
+        if (style?.mark) {
+          for (const markPrim of buildSignalMarkPrims(prim.points, style.mark, prim.stroke)) {
+            ctx.nodes.push({ kind: "prim", prim: markPrim, objectId, role: "connector" });
+          }
+        }
       }
       continue;
     }
@@ -431,13 +441,13 @@ export function computeObjectBounds(scene: SceneGraph, objectId: string): Bounds
  */
 export function buildSceneGraph(root: Element, profile: DiscProfile | null = null): SceneGraph {
   const shapes = parseShapeCatalogues(root);
+  // Needed with or without a profile: variant conditions use it when one is
+  // loaded, semantic signal-line styling always does.
   const objectsById = new Map<string, Element>();
-  if (profile) {
-    for (const el of root.querySelectorAll("Object[id]")) {
-      const id = el.getAttribute("id");
-      if (id) {
-        objectsById.set(id, el);
-      }
+  for (const el of root.querySelectorAll("Object[id]")) {
+    const id = el.getAttribute("id");
+    if (id) {
+      objectsById.set(id, el);
     }
   }
   const ctx: WalkContext = {
@@ -487,6 +497,7 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
         buildLookupIndex(root),
         ctx.profileLabels,
         collectExplicitlyLabelledIds(root),
+        profile?.instances,
       ),
     ];
   }

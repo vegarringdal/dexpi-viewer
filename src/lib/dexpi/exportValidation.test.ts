@@ -40,11 +40,11 @@ describe("validateDocument", () => {
   it("reports duplicate ids, dangling references, unknown shapes and missing extent", () => {
     const doc = parseDexpiDocument(BROKEN_XML).data;
     const rules = new Set(doc?.issues.map((i) => i.ruleId));
-    expect(rules.has("V01")).toBe(true); // duplicate id
-    expect(rules.has("V02")).toBe(true); // dangling #Ghost / #NoSuchShape
-    expect(rules.has("V03")).toBe(true); // unknown catalogue shape
-    expect(rules.has("V05")).toBe(true); // pipes without connections
-    expect(rules.has("V06")).toBe(true); // no diagram extent
+    expect(rules.has("SCH-001")).toBe(true); // duplicate id
+    expect(rules.has("SCH-002")).toBe(true); // dangling #Ghost / #NoSuchShape
+    expect(rules.has("GFX-001")).toBe(true); // unknown catalogue shape
+    expect(rules.has("CON-001")).toBe(true); // pipes without connections
+    expect(rules.has("GFX-003")).toBe(true); // no diagram extent
     // errors sort before warnings
     const severities = doc?.issues.map((i) => i.severity) ?? [];
     expect(severities.indexOf("warning")).toBeGreaterThan(severities.lastIndexOf("error") === -1 ? -1 : 0);
@@ -57,12 +57,25 @@ describe("validateDocument", () => {
     const xml = readFileSync(join(__dirname, "../../../refrences/reference_pid.xml"), "utf-8");
     const doc = parseDexpiDocument(xml).data;
     const errors = doc?.issues.filter((i) => i.severity === "error") ?? [];
-    expect(errors.map((i) => i.ruleId).sort()).toEqual(["V08", "V09"]);
+    expect(errors.map((i) => i.ruleId).sort()).toEqual(["META-001", "META-002"]);
     expect(errors.some((i) => i.message.includes("ExportDateTime"))).toBe(true);
     expect(errors.some((i) => i.message.includes("NominalCapacity(Volume)"))).toBe(true);
 
-    const orphanIds = (doc?.issues ?? []).filter((i) => i.ruleId === "V07").map((i) => i.objectId);
+    const orphanIds = (doc?.issues ?? []).filter((i) => i.ruleId === "CON-002").map((i) => i.objectId);
     expect(orphanIds.sort()).toEqual(["PipingNode60", "PipingNode61"]);
+  });
+
+  it("flags the reference P&ID's spare nozzles but no diameter mismatches", () => {
+    const xml = readFileSync(join(__dirname, "../../../refrences/reference_pid.xml"), "utf-8");
+    const doc = parseDexpiDocument(xml).data;
+    const issues = doc?.issues ?? [];
+    const spares = issues.filter((i) => i.ruleId === "CON-003");
+    expect(spares.map((i) => i.objectId).sort()).toEqual(["Nozzle17", "Nozzle18", "Nozzle19"]);
+    expect(spares.every((i) => i.severity === "info")).toBe(true);
+
+    // The file's DN changes all run through PipeReducers, which live inside
+    // segments — segment endpoint references must not be flagged.
+    expect(issues.filter((i) => i.ruleId === "CON-004")).toEqual([]);
   });
 });
 
@@ -110,7 +123,7 @@ describe("V02 profile-symbol references (DISC_EXAMPLE-14-13)", () => {
     // 125 raw placements collapse to one finding per distinct symbol.
     expect(profileFindings.length).toBeLessThan(50);
     for (const finding of profileFindings) {
-      expect(finding.ruleId).toBe("V03");
+      expect(finding.ruleId).toBe("GFX-001");
       expect(finding.severity).toBe("warning");
       expect(finding.message).toContain("no DISC profile is loaded");
     }

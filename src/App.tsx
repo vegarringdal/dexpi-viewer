@@ -5,7 +5,8 @@ import { PANEL_IDS, viewerPanels } from "./components/panels.tsx";
 import { StatusBar } from "./components/StatusBar.tsx";
 import { useFileDrop } from "./components/useFileDrop.ts";
 import { initLayoutPersistence, setDockManager } from "./state/ui/ui.actions.ts";
-import { getLoadedDocument, setViewerError } from "./state/viewer/viewer.actions.ts";
+import { getEffectiveIssues } from "./state/validation/validation.actions.ts";
+import { setViewerError } from "./state/viewer/viewer.actions.ts";
 import { viewerState } from "./state/viewer/viewer.state.ts";
 
 const RIBBON_HEIGHT_PX = 108;
@@ -61,7 +62,7 @@ export function App(): JSX.Element {
       }
 
       seenRevision = revision;
-      if ((getLoadedDocument()?.issues.length ?? 0) > 0) {
+      if (getEffectiveIssues().length > 0) {
         manager.focusPanel(PANEL_IDS.issues);
       }
     });

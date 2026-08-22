@@ -42,9 +42,16 @@ export function baselineOffsetMm(size: number, vAlign: TextAlignV): number {
  * Bottom keeps the last line there and grows upward, Center spreads the
  * block symmetrically. A single-line value yields one line with offset 0,
  * so existing single-line anchoring is untouched.
+ *
+ * Each line is trimmed: browsers collapse leading/trailing whitespace when
+ * rendering SVG text, so the official reference renderings never show it —
+ * but real data carries it (a DISC sheet pads a BreakValue line with 48
+ * spaces), and drawing the literal space glyphs shoves the line ~44mm
+ * sideways on the canvas. Trimming keeps every renderer (canvas, SVG, PDF,
+ * hit-test) on the browser-collapsed geometry.
  */
 export function layoutTextLines(value: string, size: number, vAlign: TextAlignV): TextLayoutLine[] {
-  const lines = value.split(/\r?\n/);
+  const lines = value.split(/\r?\n/).map((line) => line.trim());
   const advance = size * TEXT_LINE_SPACING;
   const blockShift =
     vAlign === "Bottom" ? -(lines.length - 1) : vAlign === "Center" ? -(lines.length - 1) / 2 : 0;

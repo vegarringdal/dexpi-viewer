@@ -65,6 +65,15 @@ describe("layoutTextLines", () => {
     const lines = layoutTextLines("SPEED CONTROL\r\nLIQUID EXPORT PUMP A", SIZE_MM, "Center");
     expect(lines.map((l) => l.value)).toEqual(["SPEED CONTROL", "LIQUID EXPORT PUMP A"]);
   });
+
+  it("trims per-line whitespace like a browser rendering the reference SVGs", () => {
+    // Real DISC data pads a BreakValue line with dozens of leading spaces;
+    // browsers collapse them in SVG text, so drawing the literal glyphs
+    // shoved the canvas line ~44mm sideways (DISC_EXAMPLE-14-12).
+    const padded = `AP310\n${" ".repeat(48)}D-20L00004B  `;
+    const lines = layoutTextLines(padded, SIZE_MM, "Bottom");
+    expect(lines.map((l) => l.value)).toEqual(["AP310", "D-20L00004B"]);
+  });
 });
 
 // -----------------------------------------------------------------------------

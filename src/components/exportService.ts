@@ -1,7 +1,9 @@
 import { sceneToSvg } from "../lib/dexpi/exportSvg.ts";
 import type { DexpiDocument } from "../lib/dexpi/types.ts";
+import { categoryOfRule } from "../lib/dexpi/validation.ts";
 import { downloadBlob } from "../lib/download.ts";
 import { fail, ok, type Result } from "../lib/result.ts";
+import { getEffectiveIssues } from "../state/validation/validation.actions.ts";
 import { getLoadedDocument } from "../state/viewer/viewer.actions.ts";
 import { viewerState } from "../state/viewer/viewer.state.ts";
 import { sceneToPdf } from "./exportPdf.ts";
@@ -51,7 +53,7 @@ export function exportSvg(): Result<void> {
   return ok(undefined);
 }
 
-/** Writes the validation findings as a CSV report. */
+/** Writes the validation findings (severity overrides applied) as a CSV report. */
 export function exportIssuesCsv(): Result<void> {
   const docResult = requireDocument();
   if (!docResult.data) {
@@ -60,9 +62,15 @@ export function exportIssuesCsv(): Result<void> {
 
   const escapeCell = (value: string): string => `"${value.replaceAll('"', '""')}"`;
   const rows = [
-    "rule,severity,objectId,message",
-    ...docResult.data.issues.map((issue) =>
-      [issue.ruleId, issue.severity, issue.objectId ?? "", escapeCell(issue.message)].join(","),
+    "rule,category,severity,objectId,message",
+    ...getEffectiveIssues().map((issue) =>
+      [
+        issue.ruleId,
+        categoryOfRule(issue.ruleId),
+        issue.severity,
+        issue.objectId ?? "",
+        escapeCell(issue.message),
+      ].join(","),
     ),
   ];
   downloadBlob(rows.join("\n"), `${baseName()}-validation.csv`, "text/csv");

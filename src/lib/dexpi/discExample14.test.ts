@@ -11,9 +11,14 @@ const SWEEP_TIMEOUT_MS = 60_000;
 // Smoke sweep over every real DISC_EXAMPLE-14 sheet (15 files, each with an
 // official SVG rendering next to it). Guards the end-to-end claim: real DISC
 // data parses against the official 0.6.3 profile with no errors and no
-// unresolved profile symbols — the only expected findings are the "/Border"
-// well-known shape and genuine off-page pipe warnings (V05).
+// unresolved profile symbols — the expected findings are the "/Border"
+// well-known shape (GFX-001), genuine off-page pipe warnings (CON-001), and
+// genuine connectivity findings the sheets really contain: one spare nozzle
+// (CON-003), one 14″-vs-1400 diameter inconsistency (CON-004) and one
+// piping-class change without a PropertyBreak (CON-005).
 // -----------------------------------------------------------------------------
+
+const EXPECTED_RULES = new Set(["GFX-001", "CON-001", "CON-003", "CON-004", "CON-005"]);
 
 describe("DISC_EXAMPLE-14 sweep (official profile)", () => {
   it(
@@ -43,11 +48,11 @@ describe("DISC_EXAMPLE-14 sweep (official profile)", () => {
           sheet,
         ).toEqual([]);
         const unresolved = doc.issues
-          .filter((i) => i.ruleId === "V03")
+          .filter((i) => i.ruleId === "GFX-001")
           .map((i) => i.message.match(/"([^"]+)"/)?.[1] ?? "?");
         expect(unresolved, sheet).toEqual(["/Border"]);
         expect(
-          doc.issues.every((i) => i.ruleId === "V03" || i.ruleId === "V05"),
+          doc.issues.every((i) => EXPECTED_RULES.has(i.ruleId)),
           sheet,
         ).toBe(true);
       }
