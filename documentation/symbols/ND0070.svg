@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40mm" height="60mm" viewBox="-6 -6 40 60">
+  <rect x="-6" y="-6" width="40" height="60" fill="white"/>
+  <ellipse transform="translate(4,41.875) rotate(0)" rx="1" ry="1" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse transform="translate(24,41.875) rotate(0)" rx="1" ry="1" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="14,12 24,4" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="14,11.9975 4,4" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="24,40.875 24,4" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="4,40.875 4.0062,4.0038" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="0,34 28,34 28,48 0,48" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="0,0 28,0 28,14 0,14" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

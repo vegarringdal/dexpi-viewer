@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28mm" height="30mm" viewBox="-14 -14 28 30">
+  <rect x="-14" y="-14" width="28" height="30" fill="white"/>
+  <polyline points="-5.6569,5.6569 -4.6826,5.0967 -3.8382,4.4945 -3.1238,3.8503 -2.5392,3.1642 -2.0846,2.4361 -1.7598,1.6661 -1.565,0.854 -1.5,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-1.5,0 -1.565,-0.854 -1.7598,-1.6661 -2.0846,-2.4361 -2.5392,-3.1642 -3.1238,-3.8503 -3.8382,-4.4945 -4.6826,-5.0967 -5.6569,-5.6569" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="8,10 5.6569,5.6569" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-8,10 -5.6569,5.6569" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-8,10 8,10" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse transform="translate(0,0) rotate(0)" rx="8" ry="8" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

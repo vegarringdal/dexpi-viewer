@@ -462,6 +462,37 @@ that grow, and record scope changes here.
   silently as a normal-looking stub. buildObjectDiagram takes an
   issuesById map (panel builds it from getEffectiveIssues, so severity
   overrides apply); DiagramCard gained severity/issueRows/broken.
+- **2026-08-22** Manual gained a "Conventions beyond the spec" page
+  (director's ask): documents every place the viewer renders/validates
+  by empirically-recovered convention because NO spec exists — signal-
+  line styling table (incl. the hydraulic project decision and the
+  single-sample bus-circle caveat), profile label placement rules,
+  plant-code/TypeCode resolution, the deliberately-unapplied FC/FM
+  display codes, /Border, and the tuned validation conventions. Framed
+  as candidates for upstream standardization. The signal table carries
+  generated SVG previews (documentation/signals/, rendered by the SAME
+  signalLines.ts code the canvas uses — cannot drift). Docs are also
+  reachable via app URL param `?docs`, the F1 hotkey (help.docs,
+  rebindable), and a direct manual link in the README.
+- **2026-08-22** Generated documentation + manual site (director's ask:
+  "static documentation by loading examples/profile, grabbing
+  screenshots"): `documentation/` holds hand-written guide pages
+  (getting-started, viewing incl. underlay, validation, inspect,
+  topology, exports) plus GENERATED content — `npm run generate:docs`
+  (scripts/generateDocs.mjs, node importing the .ts sources directly
+  with jsdom supplying DOMParser) rebuilds rules.md (all 23 rules with
+  curated prose), metamodel.md (484 classes/89 enums summarized per
+  package) and symbols.md + symbols/*.svg (every DiscProfile 0.6.3
+  symbol rendered through the app's own sceneToSvg — 281 thumbnails);
+  scripts/generateDocScreenshots.mjs re-captures the manual's PNGs by
+  driving the real app (requires playwright + dev server; images are
+  committed). `npm run build` now runs scripts/buildDocsSite.mjs first:
+  markdown → styled static HTML with sidebar nav (marked devDependency)
+  into public/manual/ (gitignored build artifact), shipped with the
+  Pages deploy. Reachable via the new ribbon **Help → Docs** button
+  (wiki icon, director's ask) and an About-tab link. Table cells escape
+  angle brackets — label-template placeholders like <AlarmValue> were
+  being eaten as HTML on the first pass.
 - **2026-08-22** Properties panel gained an "Issues (n)" section below
   Sub-components (director: an element's findings should be obvious when
   you click it): the selected object's validation findings with severity
@@ -731,8 +762,16 @@ that grow, and record scope changes here.
       src/lib/dexpi/signalLines.ts) — see the decisions-log entry; the
       official convention (recovered from the pack's SVGs) differs from
       the prior-art viewer's E/O glyph invention
-- [ ] Profile validation (prior-art viewer's PRF-E01…E05 rules on the
-      profile file itself + DEXPI×profile cross-checks) — optional
+- [ ] Profile validation, narrowed after M10 (which covered the
+      DEXPI×profile cross-check half: extension class ancestry feeds
+      MDL-007, instances resolve in labels/Inspect). Remaining:
+      (a) self-validation of a loaded DiscProfile.xml (the prior-art
+      PRF-E01…E05 territory: symbols without variants, malformed
+      conditions/templates); (b) extension-attribute checking — the MDL
+      walker skips all DiscProfile/-prefixed names, but the profile
+      declares them (ClassExtension/DataProperty + allowed-property
+      whitelist), so a misspelled DiscProfile/ItemTagg passes silently
+      today; the parsing infrastructure for both now exists — optional
 - [x] 2026-08-19 profile audit small fixes: variant conditions also
       match `Plant/Piping.`/`Plant/Instrumentation.`-prefixed instance
       attributes; labels fall back to `DiscProfile/ItemTag` and

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="42mm" height="50mm" viewBox="-21 -6 42 50">
+  <rect x="-21" y="-6" width="42" height="50" fill="white"/>
+  <polyline points="0.9125,0.0138 15,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-15,0 0.9125,0.0138" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,38 0.0146,37.9707 0.0586,37.8828 0.1318,37.7363 0.2344,37.5313 0.3662,37.2676 0.5273,36.9453 0.7178,36.5645 0.9375,36.125 1.1865,35.627 1.4648,35.0703 1.7725,34.4551 2.1094,33.7813 2.4756,33.0488 2.8711,32.2578 3.2959,31.4082 3.75,30.5 4.2334,29.5332 4.7461,28.5078 5.2881,27.4238 5.8594,26.2813 6.46,25.0801 7.0898,23.8203 7.749,22.502 8.4375,21.125 9.1553,19.6895 9.9023,18.1953 10.6787,16.6426 11.4844,15.0313 12.3193,13.3613 13.1836,11.6328 14.0771,9.8457 15,8" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-15,8 0,38" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="15,8 15,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-15,8 -15,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96mm" height="36mm" viewBox="-48 -18 96 36">
+  <rect x="-48" y="-18" width="96" height="36" fill="white"/>
+  <polygon points="-40,-12 -38,-12 -38,12 -40,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="-42,-12 -40,-12 -40,12 -42,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="-28,-12 -26,-12 -26,12 -28,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="-30,-12 -28,-12 -28,12 -30,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="30.07,8 37.9437,8.0325" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="30.07,-8 37.9437,-7.9675" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-37.9537,8 -30,8.0325" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-38.0025,-8.0325 -30,-8" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="28,-12 30,-12 30,12 28,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="26,-12 28,-12 28,12 26,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="38,-12 40,-12 40,12 38,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-25.99,7.9675 25.9675,7.84" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-26,-8.1125 25.9663,-8.1538" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="40,-12 42,-12 42,12 40,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

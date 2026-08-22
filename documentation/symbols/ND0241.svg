@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24mm" height="31mm" viewBox="-12 -25 24 31">
+  <rect x="-12" y="-25" width="24" height="31" fill="white"/>
+  <text transform="translate(2.3438,-9.8438)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="3.625" text-anchor="middle" fill="rgb(0,0,0)" y="0">H</text>
+  <text transform="translate(-2.2188,-14.1563)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="3.625" text-anchor="middle" fill="rgb(0,0,0)" y="0">E</text>
+  <polyline points="-4.2425,-8.7575 4.2425,-17.2425" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,-7 0,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse transform="translate(0,-13) rotate(0)" rx="6" ry="6" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

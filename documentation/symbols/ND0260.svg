@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="21mm" height="29mm" viewBox="-11 -19 21 29">
+  <rect x="-11" y="-19" width="21" height="29" fill="white"/>
+  <polyline points="0,0.0313 0,-7" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="4,2 0,0 4,-2" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="-2,4 0,0.0313 2,4" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-5,4 -2,4" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-5,4 -5,-10" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-5,-10 -3,-10" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <text transform="translate(-0.0313,-8.7813)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="4.25" text-anchor="middle" fill="rgb(0,0,0)" y="0">P</text>
+  <polygon points="-3,-13 3,-13 3,-7 -3,-7" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="22mm" height="18mm" viewBox="-11 -9 22 18">
+  <rect x="-11" y="-9" width="22" height="18" fill="white"/>
+  <polygon points="-5,-3 5,-3 5,-1 -5,-1" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <text transform="translate(-0.0313,-1.7813)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="1.25" text-anchor="middle" fill="rgb(0,0,0)" y="0">TP</text>
+  <polygon points="-5,-1 5,-1 5,3 -5,3" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validation rule reference — DEXPI Viewer manual</title><style>
+:root { color-scheme: light dark; --bg:#f8fafc; --fg:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#2563eb; --side:#eef2f7; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --line:#1e293b; --accent:#60a5fa; --side:#111c31; } }
+* { box-sizing: border-box; }
+body { margin:0; display:flex; min-height:100vh; background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; }
+nav { width:230px; flex-shrink:0; padding:1.2rem 1rem; background:var(--side); border-right:1px solid var(--line); position:sticky; top:0; height:100vh; overflow:auto; }
+nav h2 { font-size:.95rem; margin:0 0 .8rem; }
+nav a { display:block; padding:.28rem .5rem; border-radius:6px; color:var(--fg); text-decoration:none; font-size:.88rem; }
+nav a:hover { background:var(--line); }
+nav a.active { background:var(--accent); color:#fff; }
+main { flex:1; min-width:0; padding:2rem 2.5rem 4rem; max-width:1000px; }
+main img { max-width:100%; border:1px solid var(--line); border-radius:8px; }
+main table { border-collapse:collapse; display:block; overflow-x:auto; max-width:100%; }
+main th, main td { border:1px solid var(--line); padding:.35rem .6rem; text-align:left; vertical-align:top; font-size:.86rem; }
+main th { background:var(--side); }
+main code { background:var(--side); padding:.1rem .3rem; border-radius:4px; font-size:.85em; }
+main h1 { margin-top:0; }
+main a { color:var(--accent); }
+td img { max-width:130px; max-height:60px; border:none; background:#fff; }
+.footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font-size:.8rem; }
+</style></head>
+<body><nav><h2><a href="index.html" style="padding:0">DEXPI Viewer</a></h2><a href="index.html">DEXPI Viewer manual</a>
+<a href="getting-started.html">Getting started</a>
+<a href="viewing.html">Viewing the drawing</a>
+<a href="validation.html">Validation</a>
+<a href="inspect.html">Inspect panel</a>
+<a href="topology.html">Topology & highlighting</a>
+<a href="export.html">Exports</a>
+<a href="conventions.html">Conventions beyond the spec</a>
+<a href="rules.html" class="active">Validation rule reference</a>
+<a href="metamodel.html">DEXPI 2.0 information model</a>
+<a href="symbols.html">DiscProfile 0.6.3 symbol catalogue</a>
+<a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
+<main><h1>Validation rule reference</h1>
+<p>Generated from the app&#39;s rule tables by <code>npm run generate:docs</code> — 23 rules.
+Default severities can be overridden per rule (including <em>Ignore</em>) in the Validation panel&#39;s severity configuration; overrides persist across sessions.</p>
+<h2>Schema</h2>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Title</th>
+<th>Default severity</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SCH-001</code></td>
+<td>Duplicate object ids</td>
+<td>error</td>
+<td>Two objects share one id. Ids must be unique — duplicates break references and selection.</td>
+</tr>
+<tr>
+<td><code>SCH-002</code></td>
+<td>Dangling references</td>
+<td>error</td>
+<td>A References target id does not exist in the document (namespace-qualified published-model targets are exempt).</td>
+</tr>
+<tr>
+<td><code>SCH-003</code></td>
+<td>Invalid object id syntax</td>
+<td>error</td>
+<td>An object id violates the DEXPI XML Schema identifier pattern [A-Za-z_][A-Za-z_0-9]*.</td>
+</tr>
+<tr>
+<td><code>SCH-004</code></td>
+<td>Invalid reference syntax</td>
+<td>error</td>
+<td>A References token is neither &quot;#id&quot; nor a qualified name reference (&quot;Model/Name.Name&quot;).</td>
+</tr>
+</tbody></table>
+<h2>Graphics</h2>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Title</th>
+<th>Default severity</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GFX-001</code></td>
+<td>Unknown catalogue shapes</td>
+<td>error/warning</td>
+<td>A ShapeUsage/SymbolUsage does not resolve to a catalogue Shape or a loaded DISC-profile symbol. Aggregated per symbol; well-known shapes like /Border warn only.</td>
+</tr>
+<tr>
+<td><code>GFX-002</code></td>
+<td>Undrawable connector lines</td>
+<td>warning</td>
+<td>A ConnectorLine has fewer than two resolvable points and cannot be drawn.</td>
+</tr>
+<tr>
+<td><code>GFX-003</code></td>
+<td>Missing diagram extent</td>
+<td>warning</td>
+<td>The Diagram declares no usable Min/Max extent; bounds were computed from geometry.</td>
+</tr>
+</tbody></table>
+<h2>Connectivity</h2>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Title</th>
+<th>Default severity</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CON-001</code></td>
+<td>Unconnected flow items</td>
+<td>warning</td>
+<td>A flow item (Pipe/Stream) is missing its source or target connection. Off-page ends are legitimate — confirm intent.</td>
+</tr>
+<tr>
+<td><code>CON-002</code></td>
+<td>Orphaned piping nodes</td>
+<td>warning</td>
+<td>A PipingNode is not referenced by any SourceNode/TargetNode connection.</td>
+</tr>
+<tr>
+<td><code>CON-003</code></td>
+<td>Unconnected nozzles</td>
+<td>info</td>
+<td>A nozzle has no piping connected to it or its nodes — possibly an intentional spare.</td>
+</tr>
+<tr>
+<td><code>CON-004</code></td>
+<td>Nominal diameter mismatch</td>
+<td>warning</td>
+<td>The two nodes a connection joins declare different nominal diameters (like representations compared only; segment endpoints skipped — a PipeReducer inside legitimately changes DN).</td>
+</tr>
+<tr>
+<td><code>CON-005</code></td>
+<td>Piping class change without property break</td>
+<td>info</td>
+<td>The piping class changes between two connected segments without a PropertyBreak marking the transition.</td>
+</tr>
+</tbody></table>
+<h2>Model</h2>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Title</th>
+<th>Default severity</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MDL-000</code></td>
+<td>Model version not available</td>
+<td>warning</td>
+<td>The document declares a DEXPI model version this build has no tables for; validation fell back to the newest available.</td>
+</tr>
+<tr>
+<td><code>MDL-001</code></td>
+<td>Unknown class</td>
+<td>warning</td>
+<td>An object&#39;s class is not in the DEXPI information model (base-model namespaces only — extension classes are exempt).</td>
+</tr>
+<tr>
+<td><code>MDL-002</code></td>
+<td>Unknown attribute</td>
+<td>warning</td>
+<td>A Data property is not defined for the object&#39;s class (typo detection; namespaced extension attributes are exempt).</td>
+</tr>
+<tr>
+<td><code>MDL-003</code></td>
+<td>Missing required property</td>
+<td>error</td>
+<td>A property with lower bound 1 is missing (an <Undefined/> value counts as missing).</td>
+</tr>
+<tr>
+<td><code>MDL-004</code></td>
+<td>Invalid enumeration value</td>
+<td>error</td>
+<td>An enumeration-typed property carries a literal the model does not define, or references the wrong enumeration.</td>
+</tr>
+<tr>
+<td><code>MDL-005</code></td>
+<td>Unknown reference property</td>
+<td>warning</td>
+<td>A References property is not defined for the object&#39;s class.</td>
+</tr>
+<tr>
+<td><code>MDL-006</code></td>
+<td>Cardinality violation</td>
+<td>error</td>
+<td>A property carries more reference targets or components than its upper bound allows.</td>
+</tr>
+<tr>
+<td><code>MDL-007</code></td>
+<td>Reference target class mismatch</td>
+<td>error</td>
+<td>A reference target&#39;s class is incompatible with the declared target class (profile extension ancestry is honoured; unknown extensions are skipped, never guessed).</td>
+</tr>
+<tr>
+<td><code>MDL-008</code></td>
+<td>Unknown component property</td>
+<td>warning</td>
+<td>A Components property is not defined for the object&#39;s class.</td>
+</tr>
+<tr>
+<td><code>MDL-009</code></td>
+<td>Abstract class instantiated</td>
+<td>error</td>
+<td>An abstract model class is instantiated — the spec requires a concrete subclass.</td>
+</tr>
+</tbody></table>
+<h2>Meta data</h2>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Title</th>
+<th>Default severity</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>META-002</code></td>
+<td>Invalid template attribute references</td>
+<td>error</td>
+<td>An AttributeRepresentation names an attribute that does not resolve on (or near) its object — the template fragment renders blank.</td>
+</tr>
+</tbody></table>
+<p>The <code>MDL-*</code> family is model-driven: every base-model object is checked against the DEXPI information model the document declares via its <code>data.dexpi.org</code> Import URIs (see <a href="metamodel.html">metamodel.md</a>).</p>
+<div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main></body></html>

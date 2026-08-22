@@ -8,6 +8,11 @@ import { applyStoredTheme } from "./state/theme/theme.actions.ts";
 import { applyStoredValidationOverrides } from "./state/validation/validation.actions.ts";
 import "./index.css";
 
+// "?docs" on the app URL jumps straight to the bundled manual (linkable).
+if (new URLSearchParams(window.location.search).has("docs")) {
+  window.location.replace("manual/index.html");
+}
+
 applyStoredTheme();
 applyStoredRenderingSettings();
 applyStoredValidationOverrides();

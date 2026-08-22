@@ -6,6 +6,7 @@ import {
   openExampleDocument,
   requestViewCommand,
 } from "../state/viewer/viewer.actions.ts";
+import { openDocs } from "./ribbon/HelpSection.tsx";
 
 const ZOOM_STEP_FACTOR = 1.5;
 
@@ -33,6 +34,14 @@ export function setOpenFileTrigger(trigger: (() => void) | null): void {
  * (1 File, 2 View, 9 App), the rest is the ordinal within the section.
  */
 const APP_HOTKEYS: HotkeyDef[] = [
+  {
+    id: "help.docs",
+    category: "Help",
+    label: "Open documentation",
+    description: "Open the user manual in a new tab.",
+    defaultKeys: "F1",
+    run: () => openDocs(),
+  },
   {
     id: "file.open",
     category: "File",

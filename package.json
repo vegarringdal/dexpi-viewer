@@ -2,11 +2,11 @@
   "name": "dexpi-viewer",
   "private": true,
   "license": "AGPL-3.0-only",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run docs:site && tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit && tsc -p tsconfig.test.json --noEmit",
     "lint": "biome check src",
@@ -14,7 +14,9 @@
     "check": "npm run typecheck && npm run lint",
     "test": "vitest run",
     "generate:notices": "node scripts/generateNotices.mjs && biome check --write src/lib/generated/thirdPartyNotices.ts",
-    "generate:metamodel": "node scripts/generateMetaModel.mjs && biome check --write src/lib/generated"
+    "generate:metamodel": "node scripts/generateMetaModel.mjs && biome check --write src/lib/generated",
+    "generate:docs": "node scripts/generateDocs.mjs",
+    "docs:site": "node scripts/buildDocsSite.mjs"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "1.1.1",
@@ -34,6 +36,7 @@
     "@types/react-dom": "19.2.4",
     "@vitejs/plugin-react": "5.2.0",
     "jsdom": "30.0.1",
+    "marked": "^18.0.10",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "vite": "7.3.6",

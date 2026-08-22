@@ -5,7 +5,9 @@
 > test a UI library created for the [tredespace.com](https://tredespace.com)
 > application.
 
-**Live app: <https://vegarringdal.github.io/dexpi-viewer/>**
+**Live app: <https://vegarringdal.github.io/dexpi-viewer/>** ·
+**Manual: <https://vegarringdal.github.io/dexpi-viewer/manual/>**
+(also `?docs` on the app URL, ribbon Help → Docs, or F1)
 
 A fast viewer for **DEXPI 2.0 XML** P&ID files: React 19 workbench UI
 (dockable panels + ribbon, light/dark theme) around a Skia
@@ -13,6 +15,11 @@ A fast viewer for **DEXPI 2.0 XML** P&ID files: React 19 workbench UI
 
 See [DESIGN.md](DESIGN.md) for architecture, milestones, and the
 decisions log. Project rules live in [CLAUDE.md](CLAUDE.md).
+The **user manual** lives in [documentation/](documentation/index.md)
+(guide + generated rule reference, information-model summary, and a
+DiscProfile symbol catalogue) and ships with the app as `manual/` —
+ribbon → Help → Docs. Regenerate derived content with
+`npm run generate:docs`; the build converts it to the static site.
 
 ## Status
 

@@ -49,6 +49,14 @@ export function AboutSettingsTab(): JSX.Element {
         >
           Source code on GitHub
         </a>
+        <a
+          href="manual/index.html"
+          target="_blank"
+          rel="noreferrer"
+          className="block text-blue-400 text-xs hover:underline"
+        >
+          User manual
+        </a>
       </div>
 
       <p className="text-slate-400 text-xs leading-relaxed">

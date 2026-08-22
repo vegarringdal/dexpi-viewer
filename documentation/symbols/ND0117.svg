@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="87.9999mm" height="36mm" viewBox="-38 -30 87.9999 36">
+  <rect x="-38" y="-30" width="87.9999" height="36" fill="white"/>
+  <polyline points="-32,0 -32,-8" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-32,-16 -32,-24" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-32,-16 32,-16" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-32,-8 32,-8" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="31.9162,-16 32.7383,-15.9122 33.5035,-15.6761 34.1958,-15.3073 34.799,-14.8214 35.2972,-14.2341 35.6741,-13.561 35.9137,-12.8178 36,-12.02" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="36,-12.02 35.9219,-11.2214 35.69,-10.4759 35.3201,-9.7992 34.8281,-9.2072 34.2299,-8.7156 33.5415,-8.3402 32.7787,-8.0968 31.9575,-8.0012" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-32,0 34.25,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-32,-24 34.25,-24" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="33.8525,-24 34.8892,-23.927 35.8955,-23.7369 36.8664,-23.4354 37.797,-23.0286 38.6822,-22.5221 39.5171,-21.922 40.2967,-21.2341 41.0159,-20.4642 41.6698,-19.6183 42.2535,-18.7021 42.7619,-17.7217 43.19,-16.6827 43.5328,-15.5912 43.7854,-14.453 43.9428,-13.274 44,-12.06" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="44,-12.06 43.9532,-10.8454 43.8059,-9.6646 43.5631,-8.5235 43.2295,-7.428 42.8103,-6.3842 42.3103,-5.3978 41.7345,-4.4749 41.0878,-3.6214 40.3751,-2.8432 39.6015,-2.1462 38.7717,-1.5364 37.8909,-1.0197 36.9638,-0.602 35.9955,-0.2893 34.9909,-0.0875 33.955,-0.0025" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

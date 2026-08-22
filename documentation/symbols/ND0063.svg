@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="52mm" height="62mm" viewBox="-26 -6 52 62">
+  <rect x="-26" y="-6" width="52" height="62" fill="white"/>
+  <polyline points="-20,16 -19.9609,16 -19.8438,16 -19.6484,16 -19.375,16 -19.0234,16 -18.5938,16 -18.0859,16 -17.5,16 -16.8359,16 -16.0938,16 -15.2734,16 -14.375,16 -13.3984,16 -12.3437,16 -11.2109,16 -10,16 -8.7109,16 -7.3437,16 -5.8984,16 -4.375,16 -2.7734,16 -1.0937,16 0.6641,16 2.5,16 4.4141,16 6.4063,16 8.4766,16 10.625,16 12.8516,16 15.1563,16 17.5391,16 20,16" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="5.9125,0.0138 20,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-20,0 5.9125,0.0138" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,50 0.0195,49.9668 0.0781,49.8672 0.1758,49.7012 0.3125,49.4688 0.4883,49.1699 0.7031,48.8047 0.957,48.373 1.25,47.875 1.582,47.3105 1.9531,46.6797 2.3633,45.9824 2.8125,45.2188 3.3008,44.3887 3.8281,43.4922 4.3945,42.5293 5,41.5 5.6445,40.4043 6.3281,39.2422 7.0508,38.0137 7.8125,36.7188 8.6133,35.3574 9.4531,33.9297 10.332,32.4355 11.25,30.875 12.207,29.248 13.2031,27.5547 14.2383,25.7949 15.3125,23.9687 16.4258,22.0762 17.5781,20.1172 18.7695,18.0918 20,16" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-20,16 0,50" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="20,16 20,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-20,16 -20,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

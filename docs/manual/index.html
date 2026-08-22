@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DEXPI Viewer manual — DEXPI Viewer manual</title><style>
+:root { color-scheme: light dark; --bg:#f8fafc; --fg:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#2563eb; --side:#eef2f7; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --line:#1e293b; --accent:#60a5fa; --side:#111c31; } }
+* { box-sizing: border-box; }
+body { margin:0; display:flex; min-height:100vh; background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; }
+nav { width:230px; flex-shrink:0; padding:1.2rem 1rem; background:var(--side); border-right:1px solid var(--line); position:sticky; top:0; height:100vh; overflow:auto; }
+nav h2 { font-size:.95rem; margin:0 0 .8rem; }
+nav a { display:block; padding:.28rem .5rem; border-radius:6px; color:var(--fg); text-decoration:none; font-size:.88rem; }
+nav a:hover { background:var(--line); }
+nav a.active { background:var(--accent); color:#fff; }
+main { flex:1; min-width:0; padding:2rem 2.5rem 4rem; max-width:1000px; }
+main img { max-width:100%; border:1px solid var(--line); border-radius:8px; }
+main table { border-collapse:collapse; display:block; overflow-x:auto; max-width:100%; }
+main th, main td { border:1px solid var(--line); padding:.35rem .6rem; text-align:left; vertical-align:top; font-size:.86rem; }
+main th { background:var(--side); }
+main code { background:var(--side); padding:.1rem .3rem; border-radius:4px; font-size:.85em; }
+main h1 { margin-top:0; }
+main a { color:var(--accent); }
+td img { max-width:130px; max-height:60px; border:none; background:#fff; }
+.footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font-size:.8rem; }
+</style></head>
+<body><nav><h2><a href="index.html" style="padding:0">DEXPI Viewer</a></h2><a href="index.html" class="active">DEXPI Viewer manual</a>
+<a href="getting-started.html">Getting started</a>
+<a href="viewing.html">Viewing the drawing</a>
+<a href="validation.html">Validation</a>
+<a href="inspect.html">Inspect panel</a>
+<a href="topology.html">Topology & highlighting</a>
+<a href="export.html">Exports</a>
+<a href="conventions.html">Conventions beyond the spec</a>
+<a href="rules.html">Validation rule reference</a>
+<a href="metamodel.html">DEXPI 2.0 information model</a>
+<a href="symbols.html">DiscProfile 0.6.3 symbol catalogue</a>
+<a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
+<main><h1>DEXPI Viewer manual</h1>
+<p>A fast, browser-local viewer and verificator for <strong>DEXPI 2.0 XML</strong> P&amp;ID files. Everything runs in your browser — files never leave your machine.</p>
+<h2>Contents</h2>
+<ul>
+<li><a href="getting-started.html">Getting started</a> — opening files, profiles, the workbench layout</li>
+<li><a href="viewing.html">Viewing the drawing</a> — navigation, selection, the verification underlay</li>
+<li><a href="validation.html">Validation</a> — the rule engine, severity configuration, per-object findings</li>
+<li><a href="inspect.html">Inspect panel</a> — the UML-style object diagram for debugging</li>
+<li><a href="topology.html">Topology &amp; highlighting</a> — the semantic graph, tracing, classification tints</li>
+<li><a href="export.html">Exports</a> — SVG, PDF, CSV report</li>
+<li><a href="conventions.html">Conventions beyond the spec</a> — where no spec exists and what this viewer does instead</li>
+</ul>
+<h2>Reference</h2>
+<ul>
+<li><a href="rules.html">Validation rule reference</a> — all rules with defaults and meaning <em>(generated)</em></li>
+<li><a href="metamodel.html">DEXPI 2.0 information model</a> — the classes validation checks against <em>(generated)</em></li>
+<li><a href="symbols.html">DiscProfile 0.6.3 symbol catalogue</a> — every profile symbol rendered <em>(generated)</em></li>
+</ul>
+<div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main></body></html>

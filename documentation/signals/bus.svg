@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72mm" height="16mm" viewBox="-6 -8 72 16">
+  <rect x="-6" y="-8" width="72" height="16" fill="white"/>
+  <polyline points="0,0 60,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2.75 4.75"/>
+  <circle cx="5" cy="0" r="1.25" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="0" r="1.25" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="25" cy="0" r="1.25" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="35" cy="0" r="1.25" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="45" cy="0" r="1.25" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="55" cy="0" r="1.25" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

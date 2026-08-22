@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96mm" height="36mm" viewBox="-54 -18 96 36">
+  <rect x="-54" y="-18" width="96" height="36" fill="white"/>
+  <polygon points="-32,-7.8963 32,-7.8963 32,8.1037 -32,8.1037" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-44,7.9788 -36,7.9788" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="31.9262,-7.88 32.3549,-7.7545 32.7685,-7.563 33.1651,-7.309 33.5431,-6.9957 33.9008,-6.6267 34.2364,-6.2053 34.5482,-5.7348 34.8345,-5.2188 35.3237,-4.0632 35.6903,-2.7658 35.9203,-1.3536 36,0.1462" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="36,0.1462 35.9203,1.6461 35.6903,3.0583 35.3237,4.3557 34.8345,5.5112 34.5482,6.0273 34.2364,6.4978 33.9008,6.9192 33.5431,7.2882 33.1651,7.6015 32.7685,7.8555 32.3549,8.047 31.9262,8.1725" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-44,-8.0213 -35.9225,-7.92" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-34,12 -32,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-32,12 -32,-12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-34,-12 -32,-12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="-36,-12 -34,-12 -34,12 -36,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-46,12 -44,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-44,12 -44,-12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-46,-12 -44,-12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="-48,-12 -46,-12 -46,12 -48,12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28mm" height="28mm" viewBox="-14 -14 28 28">
+  <rect x="-14" y="-14" width="28" height="28" fill="white"/>
+  <ellipse transform="translate(0,0) rotate(0)" rx="6" ry="6" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse transform="translate(0,0) rotate(0)" rx="8" ry="8" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

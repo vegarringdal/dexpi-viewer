@@ -1,0 +1,1753 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DiscProfile 0.6.3 symbol catalogue — DEXPI Viewer manual</title><style>
+:root { color-scheme: light dark; --bg:#f8fafc; --fg:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#2563eb; --side:#eef2f7; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --line:#1e293b; --accent:#60a5fa; --side:#111c31; } }
+* { box-sizing: border-box; }
+body { margin:0; display:flex; min-height:100vh; background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; }
+nav { width:230px; flex-shrink:0; padding:1.2rem 1rem; background:var(--side); border-right:1px solid var(--line); position:sticky; top:0; height:100vh; overflow:auto; }
+nav h2 { font-size:.95rem; margin:0 0 .8rem; }
+nav a { display:block; padding:.28rem .5rem; border-radius:6px; color:var(--fg); text-decoration:none; font-size:.88rem; }
+nav a:hover { background:var(--line); }
+nav a.active { background:var(--accent); color:#fff; }
+main { flex:1; min-width:0; padding:2rem 2.5rem 4rem; max-width:1000px; }
+main img { max-width:100%; border:1px solid var(--line); border-radius:8px; }
+main table { border-collapse:collapse; display:block; overflow-x:auto; max-width:100%; }
+main th, main td { border:1px solid var(--line); padding:.35rem .6rem; text-align:left; vertical-align:top; font-size:.86rem; }
+main th { background:var(--side); }
+main code { background:var(--side); padding:.1rem .3rem; border-radius:4px; font-size:.85em; }
+main h1 { margin-top:0; }
+main a { color:var(--accent); }
+td img { max-width:130px; max-height:60px; border:none; background:#fff; }
+.footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font-size:.8rem; }
+</style></head>
+<body><nav><h2><a href="index.html" style="padding:0">DEXPI Viewer</a></h2><a href="index.html">DEXPI Viewer manual</a>
+<a href="getting-started.html">Getting started</a>
+<a href="viewing.html">Viewing the drawing</a>
+<a href="validation.html">Validation</a>
+<a href="inspect.html">Inspect panel</a>
+<a href="topology.html">Topology & highlighting</a>
+<a href="export.html">Exports</a>
+<a href="conventions.html">Conventions beyond the spec</a>
+<a href="rules.html">Validation rule reference</a>
+<a href="metamodel.html">DEXPI 2.0 information model</a>
+<a href="symbols.html" class="active">DiscProfile 0.6.3 symbol catalogue</a>
+<a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
+<main><h1>DiscProfile 0.6.3 symbol catalogue</h1>
+<p>Generated from the official <code>DiscProfile.xml</code> by <code>npm run generate:docs</code>, rendered with the app&#39;s own SVG emitter — 284 symbols.
+Conditional variants render their default variant; label-template placeholders are listed per symbol.</p>
+<table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Preview</th>
+<th>Variants</th>
+<th>Label templates</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ND0000</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0001</code></td>
+<td><img src="symbols/ND0001.svg" alt="ND0001"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0002</code></td>
+<td><img src="symbols/ND0002.svg" alt="ND0002"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0003</code></td>
+<td><img src="symbols/ND0003.svg" alt="ND0003"></td>
+<td>1</td>
+<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;NonSasFunction&gt;</td>
+</tr>
+<tr>
+<td><code>ND0004</code></td>
+<td><img src="symbols/ND0004.svg" alt="ND0004"></td>
+<td>3 (ValvePosition=NormallyClose; ValvePosition=OneNormallyCloseAngle)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0005</code></td>
+<td><img src="symbols/ND0005.svg" alt="ND0005"></td>
+<td>3 (ValvePosition=NormallyClose; ValvePosition=OneNormallyCloseAngle)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0006</code></td>
+<td><img src="symbols/ND0006.svg" alt="ND0006"></td>
+<td>1</td>
+<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;SetPoint&gt;<br>H=&#39; &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>HH=&#39; &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>L=&#39; &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>LL=&#39; &amp; SignalConveyingFunction:&lt;AlarmValue&gt;</td>
+</tr>
+<tr>
+<td><code>ND0007</code></td>
+<td><img src="symbols/ND0007.svg" alt="ND0007"></td>
+<td>1</td>
+<td>&lt;BreakValue1&gt;<br>&lt;BreakValue2&gt;</td>
+</tr>
+<tr>
+<td><code>ND0008A</code></td>
+<td><img src="symbols/ND0008A.svg" alt="ND0008A"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0008B</code></td>
+<td><img src="symbols/ND0008B.svg" alt="ND0008B"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0009A</code></td>
+<td><img src="symbols/ND0009A.svg" alt="ND0009A"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0009B</code></td>
+<td><img src="symbols/ND0009B.svg" alt="ND0009B"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0010</code></td>
+<td><img src="symbols/ND0010.svg" alt="ND0010"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0012</code></td>
+<td><img src="symbols/ND0012.svg" alt="ND0012"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0012A</code></td>
+<td><img src="symbols/ND0012A.svg" alt="ND0012A"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0013</code></td>
+<td><img src="symbols/ND0013.svg" alt="ND0013"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0014</code></td>
+<td><img src="symbols/ND0014.svg" alt="ND0014"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0015</code></td>
+<td><img src="symbols/ND0015.svg" alt="ND0015"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0016</code></td>
+<td><img src="symbols/ND0016.svg" alt="ND0016"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0017</code></td>
+<td><img src="symbols/ND0017.svg" alt="ND0017"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0018</code></td>
+<td><img src="symbols/ND0018.svg" alt="ND0018"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0019</code></td>
+<td><img src="symbols/ND0019.svg" alt="ND0019"></td>
+<td>1</td>
+<td>&lt;TypeCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0020</code></td>
+<td><img src="symbols/ND0020.svg" alt="ND0020"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0021</code></td>
+<td><img src="symbols/ND0021.svg" alt="ND0021"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0022</code></td>
+<td><img src="symbols/ND0022.svg" alt="ND0022"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0023</code></td>
+<td><img src="symbols/ND0023.svg" alt="ND0023"></td>
+<td>1</td>
+<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;</td>
+</tr>
+<tr>
+<td><code>ND0024</code></td>
+<td><img src="symbols/ND0024.svg" alt="ND0024"></td>
+<td>1</td>
+<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;</td>
+</tr>
+<tr>
+<td><code>ND0025</code></td>
+<td><img src="symbols/ND0025.svg" alt="ND0025"></td>
+<td>1</td>
+<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;</td>
+</tr>
+<tr>
+<td><code>ND0026</code></td>
+<td><img src="symbols/ND0026.svg" alt="ND0026"></td>
+<td>2 (PlugState=Open)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0027</code></td>
+<td><img src="symbols/ND0027.svg" alt="ND0027"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0028</code></td>
+<td><img src="symbols/ND0028.svg" alt="ND0028"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0029</code></td>
+<td><img src="symbols/ND0029.svg" alt="ND0029"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0029A</code></td>
+<td><img src="symbols/ND0029A.svg" alt="ND0029A"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0030</code></td>
+<td><img src="symbols/ND0030.svg" alt="ND0030"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0030A</code></td>
+<td><img src="symbols/ND0030A.svg" alt="ND0030A"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0031</code></td>
+<td><img src="symbols/ND0031.svg" alt="ND0031"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0032</code></td>
+<td><img src="symbols/ND0032.svg" alt="ND0032"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0033</code></td>
+<td><img src="symbols/ND0033.svg" alt="ND0033"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0034A</code></td>
+<td><img src="symbols/ND0034A.svg" alt="ND0034A"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0034B</code></td>
+<td><img src="symbols/ND0034B.svg" alt="ND0034B"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0034C</code></td>
+<td><img src="symbols/ND0034C.svg" alt="ND0034C"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0034D</code></td>
+<td><img src="symbols/ND0034D.svg" alt="ND0034D"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0035</code></td>
+<td><img src="symbols/ND0035.svg" alt="ND0035"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0036</code></td>
+<td><img src="symbols/ND0036.svg" alt="ND0036"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0037</code></td>
+<td><img src="symbols/ND0037.svg" alt="ND0037"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0038</code></td>
+<td><img src="symbols/ND0038.svg" alt="ND0038"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0039</code></td>
+<td><img src="symbols/ND0039.svg" alt="ND0039"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0040</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0041</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>EL: &lt;Elevation&gt;</td>
+</tr>
+<tr>
+<td><code>ND0042A</code></td>
+<td><img src="symbols/ND0042A.svg" alt="ND0042A"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0042B</code></td>
+<td><img src="symbols/ND0042B.svg" alt="ND0042B"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0043</code></td>
+<td><img src="symbols/ND0043.svg" alt="ND0043"></td>
+<td>1</td>
+<td>&lt;TieInPointIdentifier&gt; ⏎ &lt;CommissioningPackage&gt;<br>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0044</code></td>
+<td><img src="symbols/ND0044.svg" alt="ND0044"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0045</code></td>
+<td><img src="symbols/ND0045.svg" alt="ND0045"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;JointConnectionSize&gt;</td>
+</tr>
+<tr>
+<td><code>ND0046</code></td>
+<td><img src="symbols/ND0046.svg" alt="ND0046"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0048</code></td>
+<td><img src="symbols/ND0048.svg" alt="ND0048"></td>
+<td>1</td>
+<td>&lt;SpecialItemNumber&gt;</td>
+</tr>
+<tr>
+<td><code>ND0049</code></td>
+<td><img src="symbols/ND0049.svg" alt="ND0049"></td>
+<td>1</td>
+<td>&lt;TypeCode&gt;<br>&lt;FailAction&gt;</td>
+</tr>
+<tr>
+<td><code>ND0050</code></td>
+<td><img src="symbols/ND0050.svg" alt="ND0050"></td>
+<td>1</td>
+<td>&lt;TypeCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0051</code></td>
+<td><img src="symbols/ND0051.svg" alt="ND0051"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0052</code></td>
+<td><img src="symbols/ND0052.svg" alt="ND0052"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0053</code></td>
+<td><img src="symbols/ND0053.svg" alt="ND0053"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0054</code></td>
+<td><img src="symbols/ND0054.svg" alt="ND0054"></td>
+<td>1</td>
+<td>&lt;FailAction&gt;</td>
+</tr>
+<tr>
+<td><code>ND0055</code></td>
+<td><img src="symbols/ND0055.svg" alt="ND0055"></td>
+<td>1</td>
+<td>&lt;FailAction&gt;</td>
+</tr>
+<tr>
+<td><code>ND0056</code></td>
+<td><img src="symbols/ND0056.svg" alt="ND0056"></td>
+<td>1</td>
+<td>&lt;FailAction&gt;</td>
+</tr>
+<tr>
+<td><code>ND0057</code></td>
+<td><img src="symbols/ND0057.svg" alt="ND0057"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0058</code></td>
+<td><img src="symbols/ND0058.svg" alt="ND0058"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0059</code></td>
+<td><img src="symbols/ND0059.svg" alt="ND0059"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0060</code></td>
+<td><img src="symbols/ND0060.svg" alt="ND0060"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0061</code></td>
+<td><img src="symbols/ND0061.svg" alt="ND0061"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0062</code></td>
+<td><img src="symbols/ND0062.svg" alt="ND0062"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0063</code></td>
+<td><img src="symbols/ND0063.svg" alt="ND0063"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0064</code></td>
+<td><img src="symbols/ND0064.svg" alt="ND0064"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0065</code></td>
+<td><img src="symbols/ND0065.svg" alt="ND0065"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0066</code></td>
+<td><img src="symbols/ND0066.svg" alt="ND0066"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0067</code></td>
+<td><img src="symbols/ND0067.svg" alt="ND0067"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0068</code></td>
+<td><img src="symbols/ND0068.svg" alt="ND0068"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0069</code></td>
+<td><img src="symbols/ND0069.svg" alt="ND0069"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0070</code></td>
+<td><img src="symbols/ND0070.svg" alt="ND0070"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0071</code></td>
+<td><img src="symbols/ND0071.svg" alt="ND0071"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0072</code></td>
+<td><img src="symbols/ND0072.svg" alt="ND0072"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0073</code></td>
+<td><img src="symbols/ND0073.svg" alt="ND0073"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0074</code></td>
+<td><img src="symbols/ND0074.svg" alt="ND0074"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0075</code></td>
+<td><img src="symbols/ND0075.svg" alt="ND0075"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0076</code></td>
+<td><img src="symbols/ND0076.svg" alt="ND0076"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0077</code></td>
+<td><img src="symbols/ND0077.svg" alt="ND0077"></td>
+<td>1</td>
+<td>&lt;NominalDiameterRepresentationIn&gt;x&lt;NominalDiameterRepresentationOut&gt;</td>
+</tr>
+<tr>
+<td><code>ND0078</code></td>
+<td><img src="symbols/ND0078.svg" alt="ND0078"></td>
+<td>1</td>
+<td>&lt;NominalDiameterRepresentationIn&gt;x&lt;NominalDiameterRepresentationOut&gt;</td>
+</tr>
+<tr>
+<td><code>ND0079</code></td>
+<td><img src="symbols/ND0079.svg" alt="ND0079"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0080</code></td>
+<td><img src="symbols/ND0080.svg" alt="ND0080"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0081</code></td>
+<td><img src="symbols/ND0081.svg" alt="ND0081"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0082A</code></td>
+<td><img src="symbols/ND0082A.svg" alt="ND0082A"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0082B</code></td>
+<td><img src="symbols/ND0082B.svg" alt="ND0082B"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0084</code></td>
+<td><img src="symbols/ND0084.svg" alt="ND0084"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0085</code></td>
+<td><img src="symbols/ND0085.svg" alt="ND0085"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0086</code></td>
+<td><img src="symbols/ND0086.svg" alt="ND0086"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0087</code></td>
+<td><img src="symbols/ND0087.svg" alt="ND0087"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0088</code></td>
+<td><img src="symbols/ND0088.svg" alt="ND0088"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0089</code></td>
+<td><img src="symbols/ND0089.svg" alt="ND0089"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0090</code></td>
+<td><img src="symbols/ND0090.svg" alt="ND0090"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0091</code></td>
+<td><img src="symbols/ND0091.svg" alt="ND0091"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0092</code></td>
+<td><img src="symbols/ND0092.svg" alt="ND0092"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0093</code></td>
+<td><img src="symbols/ND0093.svg" alt="ND0093"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0094</code></td>
+<td><img src="symbols/ND0094.svg" alt="ND0094"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0095</code></td>
+<td><img src="symbols/ND0095.svg" alt="ND0095"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0096</code></td>
+<td><img src="symbols/ND0096.svg" alt="ND0096"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0097</code></td>
+<td><img src="symbols/ND0097.svg" alt="ND0097"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;<br>&lt;TypeCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0098</code></td>
+<td><img src="symbols/ND0098.svg" alt="ND0098"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;<br>&lt;TypeCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0099</code></td>
+<td><img src="symbols/ND0099.svg" alt="ND0099"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0100</code></td>
+<td><img src="symbols/ND0100.svg" alt="ND0100"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0101</code></td>
+<td><img src="symbols/ND0101.svg" alt="ND0101"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0102</code></td>
+<td><img src="symbols/ND0102.svg" alt="ND0102"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0103</code></td>
+<td><img src="symbols/ND0103.svg" alt="ND0103"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0104</code></td>
+<td><img src="symbols/ND0104.svg" alt="ND0104"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0105</code></td>
+<td><img src="symbols/ND0105.svg" alt="ND0105"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0106</code></td>
+<td><img src="symbols/ND0106.svg" alt="ND0106"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0107</code></td>
+<td><img src="symbols/ND0107.svg" alt="ND0107"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0108</code></td>
+<td><img src="symbols/ND0108.svg" alt="ND0108"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0109</code></td>
+<td><img src="symbols/ND0109.svg" alt="ND0109"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0110</code></td>
+<td><img src="symbols/ND0110.svg" alt="ND0110"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0111</code></td>
+<td><img src="symbols/ND0111.svg" alt="ND0111"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0112</code></td>
+<td><img src="symbols/ND0112.svg" alt="ND0112"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0113</code></td>
+<td><img src="symbols/ND0113.svg" alt="ND0113"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0114</code></td>
+<td><img src="symbols/ND0114.svg" alt="ND0114"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0115</code></td>
+<td><img src="symbols/ND0115.svg" alt="ND0115"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0116</code></td>
+<td><img src="symbols/ND0116.svg" alt="ND0116"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0117</code></td>
+<td><img src="symbols/ND0117.svg" alt="ND0117"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0118</code></td>
+<td><img src="symbols/ND0118.svg" alt="ND0118"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0119</code></td>
+<td><img src="symbols/ND0119.svg" alt="ND0119"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0120</code></td>
+<td><img src="symbols/ND0120.svg" alt="ND0120"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0121</code></td>
+<td><img src="symbols/ND0121.svg" alt="ND0121"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0122</code></td>
+<td><img src="symbols/ND0122.svg" alt="ND0122"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0123</code></td>
+<td><img src="symbols/ND0123.svg" alt="ND0123"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0124</code></td>
+<td><img src="symbols/ND0124.svg" alt="ND0124"></td>
+<td>1</td>
+<td>&lt;TypeCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0125</code></td>
+<td><img src="symbols/ND0125.svg" alt="ND0125"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0126</code></td>
+<td><img src="symbols/ND0126.svg" alt="ND0126"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0127</code></td>
+<td><img src="symbols/ND0127.svg" alt="ND0127"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0128</code></td>
+<td><img src="symbols/ND0128.svg" alt="ND0128"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0129</code></td>
+<td><img src="symbols/ND0129.svg" alt="ND0129"></td>
+<td>1</td>
+<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;Sequence&gt;&lt;TagSuffix&gt;</td>
+</tr>
+<tr>
+<td><code>ND0130</code></td>
+<td><img src="symbols/ND0130.svg" alt="ND0130"></td>
+<td>1</td>
+<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;Sequence&gt;&lt;TagSuffix&gt;</td>
+</tr>
+<tr>
+<td><code>ND0131</code></td>
+<td><img src="symbols/ND0131.svg" alt="ND0131"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0132</code></td>
+<td><img src="symbols/ND0132.svg" alt="ND0132"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0133</code></td>
+<td><img src="symbols/ND0133.svg" alt="ND0133"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0134</code></td>
+<td><img src="symbols/ND0134.svg" alt="ND0134"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0135</code></td>
+<td><img src="symbols/ND0135.svg" alt="ND0135"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0136</code></td>
+<td><img src="symbols/ND0136.svg" alt="ND0136"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0137</code></td>
+<td><img src="symbols/ND0137.svg" alt="ND0137"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0138</code></td>
+<td><img src="symbols/ND0138.svg" alt="ND0138"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0139</code></td>
+<td><img src="symbols/ND0139.svg" alt="ND0139"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0140</code></td>
+<td><img src="symbols/ND0140.svg" alt="ND0140"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0141</code></td>
+<td><img src="symbols/ND0141.svg" alt="ND0141"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0142</code></td>
+<td><img src="symbols/ND0142.svg" alt="ND0142"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0143</code></td>
+<td><img src="symbols/ND0143.svg" alt="ND0143"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0144</code></td>
+<td><img src="symbols/ND0144.svg" alt="ND0144"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0145</code></td>
+<td><img src="symbols/ND0145.svg" alt="ND0145"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0146</code></td>
+<td><img src="symbols/ND0146.svg" alt="ND0146"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0147</code></td>
+<td><img src="symbols/ND0147.svg" alt="ND0147"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0148</code></td>
+<td><img src="symbols/ND0148.svg" alt="ND0148"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0149</code></td>
+<td><img src="symbols/ND0149.svg" alt="ND0149"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0150</code></td>
+<td><img src="symbols/ND0150.svg" alt="ND0150"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0151</code></td>
+<td><img src="symbols/ND0151.svg" alt="ND0151"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0152</code></td>
+<td><img src="symbols/ND0152.svg" alt="ND0152"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0153</code></td>
+<td><img src="symbols/ND0153.svg" alt="ND0153"></td>
+<td>2 (BlindPosition=NormallyClose)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0154</code></td>
+<td><img src="symbols/ND0154.svg" alt="ND0154"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0155</code></td>
+<td><img src="symbols/ND0155.svg" alt="ND0155"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0156</code></td>
+<td><img src="symbols/ND0156.svg" alt="ND0156"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0157</code></td>
+<td><img src="symbols/ND0157.svg" alt="ND0157"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0158</code></td>
+<td><img src="symbols/ND0158.svg" alt="ND0158"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0159</code></td>
+<td><img src="symbols/ND0159.svg" alt="ND0159"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0160</code></td>
+<td><img src="symbols/ND0160.svg" alt="ND0160"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0161</code></td>
+<td><img src="symbols/ND0161.svg" alt="ND0161"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0162</code></td>
+<td><img src="symbols/ND0162.svg" alt="ND0162"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0163</code></td>
+<td><img src="symbols/ND0163.svg" alt="ND0163"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0164</code></td>
+<td><img src="symbols/ND0164.svg" alt="ND0164"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0165</code></td>
+<td><img src="symbols/ND0165.svg" alt="ND0165"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0166</code></td>
+<td><img src="symbols/ND0166.svg" alt="ND0166"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0167</code></td>
+<td><img src="symbols/ND0167.svg" alt="ND0167"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0168</code></td>
+<td><img src="symbols/ND0168.svg" alt="ND0168"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0169</code></td>
+<td><img src="symbols/ND0169.svg" alt="ND0169"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0170</code></td>
+<td><img src="symbols/ND0170.svg" alt="ND0170"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0171</code></td>
+<td><img src="symbols/ND0171.svg" alt="ND0171"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0172</code></td>
+<td><img src="symbols/ND0172.svg" alt="ND0172"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0173</code></td>
+<td><img src="symbols/ND0173.svg" alt="ND0173"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0174</code></td>
+<td><img src="symbols/ND0174.svg" alt="ND0174"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0175</code></td>
+<td><img src="symbols/ND0175.svg" alt="ND0175"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0176</code></td>
+<td><img src="symbols/ND0176.svg" alt="ND0176"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0177</code></td>
+<td><img src="symbols/ND0177.svg" alt="ND0177"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0178</code></td>
+<td><img src="symbols/ND0178.svg" alt="ND0178"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0179</code></td>
+<td><img src="symbols/ND0179.svg" alt="ND0179"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0180A</code></td>
+<td><img src="symbols/ND0180A.svg" alt="ND0180A"></td>
+<td>3 (ValvePosition=OneNormallyCloseStraight; ValvePosition=OneNormallyCloseAngle)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0180B</code></td>
+<td><img src="symbols/ND0180B.svg" alt="ND0180B"></td>
+<td>3 (ValvePosition=OneNormallyCloseStraight; ValvePosition=OneNormallyCloseAngle)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0181A</code></td>
+<td><img src="symbols/ND0181A.svg" alt="ND0181A"></td>
+<td>4 (ValvePosition=OneNormallyClose; ValvePosition=TwoNormallyCloseStraight; ValvePosition=TwoNormallyCloseAngle)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0181B</code></td>
+<td><img src="symbols/ND0181B.svg" alt="ND0181B"></td>
+<td>4 (ValvePosition=OneNormallyClose; ValvePosition=TwoNormallyCloseStraight; ValvePosition=TwoNormallyCloseAngle)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0182A</code></td>
+<td><img src="symbols/ND0182A.svg" alt="ND0182A"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0182B</code></td>
+<td><img src="symbols/ND0182B.svg" alt="ND0182B"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0183A</code></td>
+<td><img src="symbols/ND0183A.svg" alt="ND0183A"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0183B</code></td>
+<td><img src="symbols/ND0183B.svg" alt="ND0183B"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0184A</code></td>
+<td><img src="symbols/ND0184A.svg" alt="ND0184A"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0184B</code></td>
+<td><img src="symbols/ND0184B.svg" alt="ND0184B"></td>
+<td>1</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0185</code></td>
+<td><img src="symbols/ND0185.svg" alt="ND0185"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0186</code></td>
+<td><img src="symbols/ND0186.svg" alt="ND0186"></td>
+<td>1</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0187</code></td>
+<td><img src="symbols/ND0187.svg" alt="ND0187"></td>
+<td>1</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0188</code></td>
+<td><img src="symbols/ND0188.svg" alt="ND0188"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0189A</code></td>
+<td><img src="symbols/ND0189A.svg" alt="ND0189A"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0189B</code></td>
+<td><img src="symbols/ND0189B.svg" alt="ND0189B"></td>
+<td>1</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0190A</code></td>
+<td><img src="symbols/ND0190A.svg" alt="ND0190A"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0190B</code></td>
+<td><img src="symbols/ND0190B.svg" alt="ND0190B"></td>
+<td>1</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0191A</code></td>
+<td><img src="symbols/ND0191A.svg" alt="ND0191A"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0191B</code></td>
+<td><img src="symbols/ND0191B.svg" alt="ND0191B"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0192A</code></td>
+<td><img src="symbols/ND0192A.svg" alt="ND0192A"></td>
+<td>2 (ValvePosition=NormallyOpen)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0192B</code></td>
+<td><img src="symbols/ND0192B.svg" alt="ND0192B"></td>
+<td>2 (ValvePosition=NormallyOpen)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0193A</code></td>
+<td><img src="symbols/ND0193A.svg" alt="ND0193A"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0193B</code></td>
+<td><img src="symbols/ND0193B.svg" alt="ND0193B"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0194</code></td>
+<td><img src="symbols/ND0194.svg" alt="ND0194"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0195</code></td>
+<td><img src="symbols/ND0195.svg" alt="ND0195"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0196A</code></td>
+<td><img src="symbols/ND0196A.svg" alt="ND0196A"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0196B</code></td>
+<td><img src="symbols/ND0196B.svg" alt="ND0196B"></td>
+<td>2 (ValvePosition=NormallyClose)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0197</code></td>
+<td><img src="symbols/ND0197.svg" alt="ND0197"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0198</code></td>
+<td><img src="symbols/ND0198.svg" alt="ND0198"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0199</code></td>
+<td><img src="symbols/ND0199.svg" alt="ND0199"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0200</code></td>
+<td><img src="symbols/ND0200.svg" alt="ND0200"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0201</code></td>
+<td><img src="symbols/ND0201.svg" alt="ND0201"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0202</code></td>
+<td><img src="symbols/ND0202.svg" alt="ND0202"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0203</code></td>
+<td><img src="symbols/ND0203.svg" alt="ND0203"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0204</code></td>
+<td><img src="symbols/ND0204.svg" alt="ND0204"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0205</code></td>
+<td><img src="symbols/ND0205.svg" alt="ND0205"></td>
+<td>1</td>
+<td>&lt;ComponentIdentifier&gt;</td>
+</tr>
+<tr>
+<td><code>ND0206A</code></td>
+<td><img src="symbols/ND0206A.svg" alt="ND0206A"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0206B</code></td>
+<td><img src="symbols/ND0206B.svg" alt="ND0206B"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0208</code></td>
+<td><img src="symbols/ND0208.svg" alt="ND0208"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0209</code></td>
+<td><img src="symbols/ND0209.svg" alt="ND0209"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0210</code></td>
+<td><img src="symbols/ND0210.svg" alt="ND0210"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0211</code></td>
+<td><img src="symbols/ND0211.svg" alt="ND0211"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0212</code></td>
+<td><img src="symbols/ND0212.svg" alt="ND0212"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0213</code></td>
+<td><img src="symbols/ND0213.svg" alt="ND0213"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0214</code></td>
+<td><img src="symbols/ND0214.svg" alt="ND0214"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0215</code></td>
+<td><img src="symbols/ND0215.svg" alt="ND0215"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0216</code></td>
+<td><img src="symbols/ND0216.svg" alt="ND0216"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0217</code></td>
+<td><img src="symbols/ND0217.svg" alt="ND0217"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0218</code></td>
+<td><img src="symbols/ND0218.svg" alt="ND0218"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0219</code></td>
+<td><img src="symbols/ND0219.svg" alt="ND0219"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0220</code></td>
+<td><img src="symbols/ND0220.svg" alt="ND0220"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0221</code></td>
+<td><img src="symbols/ND0221.svg" alt="ND0221"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0222</code></td>
+<td><img src="symbols/ND0222.svg" alt="ND0222"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0223</code></td>
+<td><img src="symbols/ND0223.svg" alt="ND0223"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0224</code></td>
+<td><img src="symbols/ND0224.svg" alt="ND0224"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0225A</code></td>
+<td><img src="symbols/ND0225A.svg" alt="ND0225A"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;<br>&lt;ReferencedDrawingMainTag&gt;</td>
+</tr>
+<tr>
+<td><code>ND0225B</code></td>
+<td><img src="symbols/ND0225B.svg" alt="ND0225B"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;<br>&lt;ReferencedDrawingMainTag&gt;</td>
+</tr>
+<tr>
+<td><code>ND0226</code></td>
+<td><img src="symbols/ND0226.svg" alt="ND0226"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0227</code></td>
+<td><img src="symbols/ND0227.svg" alt="ND0227"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0228</code></td>
+<td><img src="symbols/ND0228.svg" alt="ND0228"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0236</code></td>
+<td><img src="symbols/ND0236.svg" alt="ND0236"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0237</code></td>
+<td><img src="symbols/ND0237.svg" alt="ND0237"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt;</td>
+</tr>
+<tr>
+<td><code>ND0238</code></td>
+<td><img src="symbols/ND0238.svg" alt="ND0238"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0239</code></td>
+<td><img src="symbols/ND0239.svg" alt="ND0239"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0240</code></td>
+<td><img src="symbols/ND0240.svg" alt="ND0240"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0241</code></td>
+<td><img src="symbols/ND0241.svg" alt="ND0241"></td>
+<td>1</td>
+<td>&lt;FailAction&gt;</td>
+</tr>
+<tr>
+<td><code>ND0242</code></td>
+<td><img src="symbols/ND0242.svg" alt="ND0242"></td>
+<td>1</td>
+<td>&lt;BreakValue1&gt;<br>&lt;BreakValue2&gt;</td>
+</tr>
+<tr>
+<td><code>ND0243</code></td>
+<td><img src="symbols/ND0243.svg" alt="ND0243"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0244A</code></td>
+<td><img src="symbols/ND0244A.svg" alt="ND0244A"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0244B</code></td>
+<td><img src="symbols/ND0244B.svg" alt="ND0244B"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0245A</code></td>
+<td><img src="symbols/ND0245A.svg" alt="ND0245A"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0245B</code></td>
+<td><img src="symbols/ND0245B.svg" alt="ND0245B"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0246</code></td>
+<td><img src="symbols/ND0246.svg" alt="ND0246"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0247</code></td>
+<td><img src="symbols/ND0247.svg" alt="ND0247"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0248A</code></td>
+<td><img src="symbols/ND0248A.svg" alt="ND0248A"></td>
+<td>1</td>
+<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;</td>
+</tr>
+<tr>
+<td><code>ND0248B</code></td>
+<td><img src="symbols/ND0248B.svg" alt="ND0248B"></td>
+<td>1</td>
+<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;Sequence&gt;&lt;TagSuffix&gt;<br>&lt;TypicalReference&gt;<br>&lt;SetPoint&gt;</td>
+</tr>
+<tr>
+<td><code>ND0249A</code></td>
+<td><img src="symbols/ND0249A.svg" alt="ND0249A"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;<br>&lt;TypeCode&gt;<br>&lt;ProcessPlantIdentificationCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0249B</code></td>
+<td><img src="symbols/ND0249B.svg" alt="ND0249B"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;<br>&lt;ProcessPlantIdentificationCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0249C</code></td>
+<td><img src="symbols/ND0249C.svg" alt="ND0249C"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;<br>&lt;TypeCode&gt;<br>&lt;ProcessPlantIdentificationCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0250</code></td>
+<td><img src="symbols/ND0250.svg" alt="ND0250"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0251</code></td>
+<td><img src="symbols/ND0251.svg" alt="ND0251"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0252</code></td>
+<td><img src="symbols/ND0252.svg" alt="ND0252"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0253</code></td>
+<td><img src="symbols/ND0253.svg" alt="ND0253"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0254</code></td>
+<td><img src="symbols/ND0254.svg" alt="ND0254"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0255</code></td>
+<td><img src="symbols/ND0255.svg" alt="ND0255"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0256</code></td>
+<td><img src="symbols/ND0256.svg" alt="ND0256"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0259</code></td>
+<td><img src="symbols/ND0259.svg" alt="ND0259"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0260</code></td>
+<td><img src="symbols/ND0260.svg" alt="ND0260"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0261A</code></td>
+<td><img src="symbols/ND0261A.svg" alt="ND0261A"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0261B</code></td>
+<td><img src="symbols/ND0261B.svg" alt="ND0261B"></td>
+<td>1</td>
+<td>&lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;</td>
+</tr>
+<tr>
+<td><code>ND0262</code></td>
+<td><img src="symbols/ND0262.svg" alt="ND0262"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0263</code></td>
+<td><img src="symbols/ND0263.svg" alt="ND0263"></td>
+<td>1</td>
+<td>&lt;ObjectDisplayName&gt;</td>
+</tr>
+<tr>
+<td><code>ND0264</code></td>
+<td><img src="symbols/ND0264.svg" alt="ND0264"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0265</code></td>
+<td><img src="symbols/ND0265.svg" alt="ND0265"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0266</code></td>
+<td><img src="symbols/ND0266.svg" alt="ND0266"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>ND0267</code></td>
+<td><img src="symbols/ND0267.svg" alt="ND0267"></td>
+<td>1</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main></body></html>

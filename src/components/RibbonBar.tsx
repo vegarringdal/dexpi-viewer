@@ -2,6 +2,7 @@ import { Ribbon } from "@tredespace/ui/widgets";
 import type { JSX } from "react";
 import { ExportSection } from "./ribbon/ExportSection.tsx";
 import { FileSection } from "./ribbon/FileSection.tsx";
+import { HelpSection } from "./ribbon/HelpSection.tsx";
 import { PanelsSection } from "./ribbon/PanelsSection.tsx";
 import { ViewSection } from "./ribbon/ViewSection.tsx";
 
@@ -13,6 +14,7 @@ export function RibbonBar(): JSX.Element {
       <ViewSection />
       <ExportSection />
       <PanelsSection />
+      <HelpSection />
     </Ribbon>
   );
 }
