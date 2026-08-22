@@ -27,7 +27,13 @@ const OVERRIDE_OPTIONS: readonly SelectOption[] = [
   { value: "ignore", label: "Ignore" },
 ];
 
-const CATEGORY_ORDER: readonly ValidationCategory[] = ["schema", "graphics", "connectivity", "metadata"];
+const CATEGORY_ORDER: readonly ValidationCategory[] = [
+  "schema",
+  "graphics",
+  "connectivity",
+  "model",
+  "metadata",
+];
 
 // -----------------------------------------------------------------------------
 // Helper functions

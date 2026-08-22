@@ -50,16 +50,23 @@ describe("validateDocument", () => {
     expect(severities.indexOf("warning")).toBeGreaterThan(severities.lastIndexOf("error") === -1 ? -1 : 0);
   });
 
-  it("matches the reference viewer's findings on the reference P&ID", () => {
-    // Parity targets (from the DEXPIViewer validation run on this file):
-    // 2 errors — missing ExportDateTime, invalid "NominalCapacity(Volume)"
-    // template attribute on Tank1 — and 2 orphaned-node warnings.
+  it("matches (and now exceeds) the reference viewer's findings on the reference P&ID", () => {
+    // Historic parity targets (DEXPIViewer): missing ExportDateTime +
+    // invalid "NominalCapacity(Volume)" template attribute, 2 orphaned
+    // nodes. Model-driven validation (M10) generalizes the first into
+    // MDL-003 and additionally finds 8 Shapes missing their required
+    // SymbolRegistrationNumber — genuine DEXPI 2.0 spec findings the
+    // hand-written rules never covered.
     const xml = readFileSync(join(__dirname, "../../../refrences/reference_pid.xml"), "utf-8");
     const doc = parseDexpiDocument(xml).data;
     const errors = doc?.issues.filter((i) => i.severity === "error") ?? [];
-    expect(errors.map((i) => i.ruleId).sort()).toEqual(["META-001", "META-002"]);
-    expect(errors.some((i) => i.message.includes("ExportDateTime"))).toBe(true);
+    expect(errors.filter((i) => i.ruleId === "META-002").length).toBe(1);
     expect(errors.some((i) => i.message.includes("NominalCapacity(Volume)"))).toBe(true);
+
+    const model = errors.filter((i) => i.ruleId === "MDL-003");
+    expect(model.some((i) => i.message.includes("ExportDateTime"))).toBe(true);
+    expect(model.filter((i) => i.message.includes("SymbolRegistrationNumber")).length).toBe(8);
+    expect(errors.length).toBe(10);
 
     const orphanIds = (doc?.issues ?? []).filter((i) => i.ruleId === "CON-002").map((i) => i.objectId);
     expect(orphanIds.sort()).toEqual(["PipingNode60", "PipingNode61"]);

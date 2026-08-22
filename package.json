@@ -2,7 +2,7 @@
   "name": "dexpi-viewer",
   "private": true,
   "license": "AGPL-3.0-only",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,7 +13,8 @@
     "lint:fix": "biome check --write src",
     "check": "npm run typecheck && npm run lint",
     "test": "vitest run",
-    "generate:notices": "node scripts/generateNotices.mjs && biome check --write src/lib/generated/thirdPartyNotices.ts"
+    "generate:notices": "node scripts/generateNotices.mjs && biome check --write src/lib/generated/thirdPartyNotices.ts",
+    "generate:metamodel": "node scripts/generateMetaModel.mjs && biome check --write src/lib/generated"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "1.1.1",

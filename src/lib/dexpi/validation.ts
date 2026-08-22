@@ -1,4 +1,6 @@
 import { isFlowReferenceProperty } from "./connectivity.ts";
+import type { DiscProfile } from "./discProfile.ts";
+import { validateAgainstModel } from "./modelValidation.ts";
 import { buildLookupIndex, lookupAttribute } from "./resolveTemplates.ts";
 import {
   componentObjects,
@@ -17,7 +19,7 @@ export type IssueSeverity = "error" | "warning" | "info";
 /** A per-rule user override: force a severity, or drop the rule's findings. */
 export type SeverityOverride = IssueSeverity | "ignore";
 
-export type ValidationCategory = "schema" | "graphics" | "connectivity" | "metadata";
+export type ValidationCategory = "schema" | "graphics" | "connectivity" | "model" | "metadata";
 
 export type ValidationIssue = Readonly<{
   ruleId: string;
@@ -48,7 +50,16 @@ export const RULE_TITLES: Readonly<Record<string, string>> = {
   "CON-003": "Unconnected nozzles",
   "CON-004": "Nominal diameter mismatch",
   "CON-005": "Piping class change without property break",
-  "META-001": "Missing required meta data",
+  "MDL-000": "Model version not available",
+  "MDL-001": "Unknown class",
+  "MDL-002": "Unknown attribute",
+  "MDL-003": "Missing required property",
+  "MDL-004": "Invalid enumeration value",
+  "MDL-005": "Unknown reference property",
+  "MDL-006": "Cardinality violation",
+  "MDL-007": "Reference target class mismatch",
+  "MDL-008": "Unknown component property",
+  "MDL-009": "Abstract class instantiated",
   "META-002": "Invalid template attribute references",
 };
 
@@ -56,6 +67,7 @@ export const CATEGORY_LABELS: Readonly<Record<ValidationCategory, string>> = {
   schema: "Schema",
   graphics: "Graphics",
   connectivity: "Connectivity",
+  model: "Model",
   metadata: "Meta data",
 };
 
@@ -71,6 +83,10 @@ export function categoryOfRule(ruleId: string): ValidationCategory {
 
   if (ruleId.startsWith("CON")) {
     return "connectivity";
+  }
+
+  if (ruleId.startsWith("MDL")) {
+    return "model";
   }
 
   return "metadata";
@@ -575,33 +591,6 @@ function hasPropertyBreak(segment: Element): boolean {
 // Meta-data rules (META)
 // -----------------------------------------------------------------------------
 
-const REQUIRED_META_PROPS = [
-  "OriginatingSystemName",
-  "OriginatingSystemVendorName",
-  "OriginatingSystemVersion",
-  "ExportDateTime",
-] as const;
-
-/** META-001 — the DEXPI 2.0 meta model requires the EngineeringModel provenance data. */
-function checkRequiredMetaData(root: Element, issues: ValidationIssue[]): void {
-  const engineering = root.querySelector('Object[type="Core/EngineeringModel"]');
-  if (!engineering) {
-    return;
-  }
-
-  for (const property of REQUIRED_META_PROPS) {
-    if (!stringFromData(engineering, property)) {
-      issues.push({
-        ruleId: "META-001",
-        severity: "error",
-        message: `Required Data property "${property}" is missing on Core/EngineeringModel (lower bound = 1 per the DEXPI 2.0 meta model).`,
-        objectId: engineering.getAttribute("id"),
-        suggestion: `Add Data property "${property}" with a value.`,
-      });
-    }
-  }
-}
-
 /** META-002 — every AttributeRepresentation must resolve on (or near) its object. */
 function checkTemplateAttributeReferences(root: Element, issues: ValidationIssue[]): void {
   const fragments = [...root.querySelectorAll('Object[type="Core/Diagram.AttributeRepresentation"]')];
@@ -679,10 +668,8 @@ export function applySeverityOverrides(
 const NO_PROFILE_SYMBOLS: ReadonlySet<string> = new Set();
 
 /** Runs all rules; errors first, then warnings and infos, in rule order. */
-export function validateDocument(
-  root: Element,
-  profileSymbols: ReadonlySet<string> = NO_PROFILE_SYMBOLS,
-): ValidationIssue[] {
+export function validateDocument(root: Element, profile: DiscProfile | null = null): ValidationIssue[] {
+  const profileSymbols: ReadonlySet<string> = profile ? new Set(profile.symbols.keys()) : NO_PROFILE_SYMBOLS;
   const byId = new Map<string, Element>();
   for (const el of root.querySelectorAll("Object[id]")) {
     const id = el.getAttribute("id");
@@ -704,7 +691,7 @@ export function validateDocument(
   checkUnconnectedNozzles(root, issues);
   checkNominalDiameterMismatch(root, byId, issues);
   checkPipingClassChange(root, byId, issues);
-  checkRequiredMetaData(root, issues);
+  issues.push(...validateAgainstModel(root, profile?.classSupers));
   checkTemplateAttributeReferences(root, issues);
   return sortBySeverity(issues);
 }

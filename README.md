@@ -34,9 +34,15 @@ arcs), node-position-stitched connector lines, and the title block.
 too**: trace upstream (amber) / downstream (green) from any selection;
 export the drawing as spec-mapped **SVG** or vector **PDF** (embedded
 metric-compatible fonts) and the validation findings as **CSV**;
-fourteen validation rules in four categories — Schema (SCH), Graphics
+twenty-three validation rules in five categories — Schema (SCH), Graphics
 (GFX), Connectivity (CON, incl. unconnected nozzles and nominal-diameter
-mismatches at connection points), Meta data (META) — feed the Validation
+mismatches at connection points), **Model (MDL)** — every object checked
+against the DEXPI information model generated from the official XMI:
+unknown classes/properties, missing required properties, illegal enum
+literals, reference cardinality and target-class rules (profile
+extension classes chased through their declared supertypes),
+version-aware via the document's Import URIs — and Meta data (META) —
+feed the Validation
 panel (count in the tab, severity + category filters, click to jump to
 the object, per-rule severity overrides incl. Ignore, persisted); and a
 **DISC profile** (DiscProfile.xml, DEXPI 2.1) can be loaded to resolve

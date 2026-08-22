@@ -929,7 +929,7 @@ that grow, and record scope changes here.
   toggle-again-to-clear semantics unchanged since originId now always
   tracks the selection.
 
-### M10 — Model-driven validation (planned)
+### M10 — Model-driven validation (core landed 2026-08-22)
 
 Validate every object against the DEXPI class model itself instead of
 hand-written per-fact rules. The class tables exist machine-readable in
@@ -941,18 +941,37 @@ and DiscProfile.xml's own ClassExtension/DataProperty declarations +
 allowed-property whitelist (so profile-added attributes validate with
 the same walker, closing the long-open profile-validation item).
 
-- [ ] XMI → TS metamodel generator (classes, supertypes, attributes
-      with type/enum/lower/upper, reference properties with target
-      class + cardinality); regenerating covers new spec versions
-- [ ] Generic walker rule family (MDL-*): unknown attribute (typo
-      detection), missing required attribute (generalizes META-001),
-      cardinality violations, illegal enum literal / wrong value type,
-      reference-to-wrong-class
-- [ ] Tuning pass against reference_pid + the 15 official DISC sheets
-      (DiscProfile/-prefixed spellings and `<Undefined/>` idioms WILL
-      trip naive checks — same empirical loop as every rule so far);
-      findings feed the existing severity-override config, Properties
-      Issues section, Inspect cards and CSV
+- [x] XMI → TS metamodel generator (scripts/generateMetaModel.mjs, run
+      via `npm run generate:metamodel`; source refrences/Dexpi-2.0.xmi,
+      extracted from the official supporting materials): 484 classes,
+      89 enums, supertype chains, per-property kind/target/lower/upper.
+      Output is VERSIONED (src/lib/generated/metaModel-2.0.ts); the
+      registry in src/lib/dexpi/metaModel.ts detects the version a
+      document declares via its data.dexpi.org Import URIs and picks
+      the matching tables — a declared version without tables falls
+      back to the newest and reports MDL-000, so a future 2.1 file is
+      never silently judged by 2.0 rules (director's requirement)
+- [x] Generic walker rule family (src/lib/dexpi/modelValidation.ts):
+      MDL-000 version fallback, MDL-001 unknown class, MDL-002 unknown
+      attribute, MDL-003 missing required property (RETIRES META-001,
+      which it generalizes), MDL-004 illegal enum literal / wrong-enum
+      reference, MDL-005 unknown reference property, MDL-006
+      cardinality, MDL-007 reference-target class mismatch (chases
+      PROFILE-DECLARED extension ancestry — DiscProfile.classSupers
+      parses ConcreteClass/AbstractClass superTypes, so
+      WedgeGateValve→OperatedValve targets validate correctly; unknown
+      extensions are skipped, never guessed), MDL-008 unknown component
+      property, MDL-009 abstract class instantiated. New "Model"
+      category in the severity config. Value-KIND checks (string vs
+      double) deliberately skipped for now — false-positive prone
+- [x] Tuning pass done: DISC sheets (with profile) are MODEL-CLEAN
+      (zero MDL findings once extension ancestry landed — the initial
+      35-55 MDL-007/sheet were all extension-typed targets);
+      reference_pid yields 10 genuine errors (ExportDateTime + 8×
+      Shape.SymbolRegistrationNumber missing — real spec findings the
+      hand-written rules never covered; parity test updated). Findings
+      flow into the severity config, Properties Issues, Inspect cards
+      and CSV automatically
 - [ ] Later by-product: attribute fill-rate/completeness dashboard
 
 Scope note: covers per-object SHAPE only — cross-object semantics

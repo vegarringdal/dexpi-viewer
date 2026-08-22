@@ -96,6 +96,13 @@ export type DiscProfile = Readonly<{
    * reference ("<Model>/<Pkg>.<Pkg>.<Name>") AND its model-less suffix.
    */
   instances: ReadonlyMap<string, ProfileInstanceData>;
+  /**
+   * Extension class hierarchy: qualified class name ("DiscProfile/
+   * InformationModel.WedgeGateValve") → its declared superTypes (relative
+   * "/InformationModel.X" spellings normalized to the qualified form).
+   * Lets model validation judge references that target extension classes.
+   */
+  classSupers: ReadonlyMap<string, readonly string[]>;
 }>;
 
 // -----------------------------------------------------------------------------
@@ -211,6 +218,42 @@ function collectInstances(dom: Document): Map<string, ProfileInstanceData> {
 }
 
 /**
+ * Collects the extension class hierarchy declared by ConcreteClass/
+ * AbstractClass elements (superTypes attribute; space-separated, relative
+ * "/Pkg.Name" spellings resolved against the profile's model name).
+ */
+function collectClassSupers(dom: Document): Map<string, readonly string[]> {
+  const modelName = dom.documentElement.getAttribute("name") ?? "DiscProfile";
+  const supers = new Map<string, readonly string[]>();
+  const walk = (container: Element, path: string): void => {
+    for (const child of container.children) {
+      if (child.tagName === "Package") {
+        const pkgName = child.getAttribute("name");
+        walk(child, pkgName ? (path ? `${path}.${pkgName}` : pkgName) : path);
+        continue;
+      }
+
+      if (child.tagName !== "ConcreteClass" && child.tagName !== "AbstractClass") {
+        continue;
+      }
+
+      const name = child.getAttribute("name");
+      if (!name || !path) {
+        continue;
+      }
+
+      const parents = (child.getAttribute("superTypes") ?? "")
+        .split(/\s+/)
+        .filter((t) => t.length > 0)
+        .map((t) => (t.startsWith("/") ? `${modelName}${t}` : t));
+      supers.set(`${modelName}/${path}.${name}`, parents);
+    }
+  };
+  walk(dom.documentElement, "");
+  return supers;
+}
+
+/**
  * Parses a DiscProfile.xml into a symbol catalogue. Expected failures come
  * back as Result errors, never throws.
  */
@@ -250,7 +293,12 @@ export function parseDiscProfile(xmlText: string): Result<DiscProfile> {
     return fail("The file contains no Profile/Symbol catalogue — not a DISC profile.");
   }
 
-  return ok({ symbols, heatTraceStroke: findHeatTraceStroke(dom), instances: collectInstances(dom) });
+  return ok({
+    symbols,
+    heatTraceStroke: findHeatTraceStroke(dom),
+    instances: collectInstances(dom),
+    classSupers: collectClassSupers(dom),
+  });
 }
 
 // -----------------------------------------------------------------------------
