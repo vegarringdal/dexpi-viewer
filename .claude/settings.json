@@ -26,7 +26,11 @@
       "Bash(node verify-profile063.mjs)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5199)",
       "Bash(node verify-newexample.mjs)",
-      "Bash(echo \"check exit=$?\")"
+      "Bash(echo \"check exit=$?\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5199)",
+      "Bash(node verify-sheets.mjs DISC_EXAMPLE-14-01 DISC_EXAMPLE-14-05 DISC_EXAMPLE-14-08 DISC_EXAMPLE-14-11 DISC_EXAMPLE-14_NOA2 DISC_EXAMPLE-14_NOA3)",
+      "Bash(node verify-sheets.mjs DISC_EXAMPLE-14_NOA2)",
+      "Bash(node verify-sheets.mjs DISC_EXAMPLE-14_NOA3)"
     ]
   }
 }

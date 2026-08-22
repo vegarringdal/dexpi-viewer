@@ -695,6 +695,26 @@ that grow, and record scope changes here.
   fixtures yet), and no published file carries Profile/LineStroke
   instances.
 
+- **2026-08-22** DISC_EXAMPLE-14 xml-vs-svg sweep (director asked what
+  is bug vs spec gap): all 15 sheets parse against the official 0.6.3
+  profile with zero errors and zero unresolved profile symbols
+  (permanent smoke test `discExample14.test.ts`; only findings are the
+  "/Border" well-known shape and genuine off-page V05 warnings).
+  Visual side-by-sides against the official SVGs match, ONE bug found
+  and fixed: off-page connector labels (ReferencedDrawingNumber/
+  -Descriptor) never rendered because the data lives on an ID-LESS
+  `PipeOffPageConnectorReferenceByNumber` child, invisible to the
+  id-keyed lookup index — `ownAttribute` in resolveTemplates.ts now
+  folds id-less component descendants into their owner (Core/* value
+  objects excluded so quantity wrappers can't false-match; same-depth
+  differing values stay ambiguous→unresolved). Regression test
+  `profileLabelsOffpage.test.ts`; NOA2/NOA3 arrows verified against
+  the official SVGs. Remaining visual difference on every sheet is
+  ONLY the "/Border" title block — a spec/profile gap, not a viewer
+  bug. Known smaller gap: id-less conceptual children are also
+  invisible to the plant model/Properties panel (walkPlant requires
+  an id) — unaddressed, low impact.
+
 - **2026-08-22** An active trace FOLLOWS the primary selection
   (director): selecting another object re-traces the same mode from it,
   deselecting everything clears the overlay. Implemented as a

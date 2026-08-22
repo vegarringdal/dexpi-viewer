@@ -66,14 +66,67 @@ export function buildLookupIndex(root: Element): LookupIndex {
   return { byId, childrenOf, referencesOf };
 }
 
-/** Own Data value, tolerating exact, bare and DiscProfile/-prefixed names. */
-function ownAttribute(el: Element, attributeName: string): DataValue | undefined {
+/** Direct Data value on one element, tolerating exact, bare and DiscProfile/-prefixed names. */
+function directData(el: Element, attributeName: string): DataValue | undefined {
   const bare = attributeName.split("/").pop() ?? attributeName;
   for (const name of [attributeName, bare, `DiscProfile/${bare}`]) {
     const data = getData(el, name);
     if (data) {
       return dataValue(data);
     }
+  }
+  return undefined;
+}
+
+/** Component children WITHOUT an id (Core value objects excluded — their
+ *  Data are quantity internals, not attributes of the owner). */
+function idlessComponentChildren(el: Element): Element[] {
+  const out: Element[] = [];
+  for (const comp of directChildrenByTag(el, "Components")) {
+    for (const child of directChildrenByTag(comp, "Object")) {
+      const type = child.getAttribute("type") ?? "";
+      if (!child.getAttribute("id") && !type.startsWith("Core/")) {
+        out.push(child);
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Own Data value of the element INCLUDING its id-less component descendants:
+ * an Object child without an id cannot be referenced or indexed, so its data
+ * belongs to its nearest id-bearing owner (real DISC files model e.g. the
+ * PipeOffPageConnectorReferenceByNumber holding ReferencedDrawingNumber/
+ * -Descriptor as an id-less child of the connector). Differing values at the
+ * same depth are ambiguous → unresolved, mirroring lookupAttribute's rule.
+ */
+function ownAttribute(el: Element, attributeName: string): DataValue | undefined {
+  const direct = directData(el, attributeName);
+  if (direct !== undefined) {
+    return direct;
+  }
+
+  let frontier = idlessComponentChildren(el);
+  while (frontier.length > 0) {
+    let found: Readonly<{ value: DataValue }> | null = null;
+    let isAmbiguous = false;
+    const next: Element[] = [];
+    for (const child of frontier) {
+      const value = directData(child, attributeName);
+      if (value !== undefined) {
+        if (!found) {
+          found = { value };
+        } else if (valueKey(found.value) !== valueKey(value)) {
+          isAmbiguous = true;
+        }
+      }
+      next.push(...idlessComponentChildren(child));
+    }
+    if (found) {
+      return isAmbiguous ? undefined : found.value;
+    }
+    frontier = next;
   }
   return undefined;
 }
