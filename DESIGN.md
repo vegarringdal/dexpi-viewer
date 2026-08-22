@@ -433,6 +433,30 @@ that grow, and record scope changes here.
   rows in panels highlights on canvas. Tree right-click menu copies
   label / type / label+type+id. Director: selecting a grouping object
   does NOT highlight or select its subtree.
+- **2026-08-22** The bundled example is now the real DISC sheet
+  `DISC_EXAMPLE-14-13.xml` from the 2026 Pack (director) — it pairs
+  with the bundled Profile 0.6.3 and carries real HeatTracingType data
+  (the Highlight panel's "Heat traced" mode finally lights up on
+  shipped data). `public/examples/DexpiExamplePid.xml` was removed
+  (C01 stays in `refrences/reference_pid.xml` for all tests); the
+  stale "Tennessee Eastman" hotkey description was fixed. Verified
+  against the sheet's official SVG rendering — layout matches; the
+  missing sheet border is the "/Border" well-known shape (below).
+- **2026-08-22** Validation refined on real DISC data (the old rules
+  flooded the panel with 170+ findings and duplicated React keys):
+  V02 exempts namespace-qualified References targets (they reference
+  PUBLISHED models — enum literals like
+  `DiscProfile/InformationModel.…` — same identifier-only stance as
+  the data.dexpi.org URIs); V03 owns catalogue resolution, is
+  profile-aware (a placement resolved by the loaded profile is fine —
+  regression-tested: ALL 125 placements in DISC_EXAMPLE-14-13 resolve
+  against the official 0.6.3 catalogue), aggregates unresolved
+  profile symbols to one finding per symbol (warning without a
+  profile, error with one), and rootless "/Border"-style well-known
+  representation shapes (Core/Diagram.Border) warn instead of
+  erroring — no published catalogue ships their geometry, the
+  exporting tool draws them. IssuesPanel rows now key on index
+  (identical owner+message pairs exist in real files).
 - **2026-08-19** The ribbon Example button loads the C01 DEXPI example
   P&ID (`public/examples/DexpiExamplePid.xml`, copied from
   refrences/reference_pid.xml) instead of Tennessee Eastman.
@@ -493,8 +517,9 @@ that grow, and record scope changes here.
       positionally; unmatched role-path suppresses the template), and
       VB-style `' & ` formula syntax is stripped. **Caveat (director
       accepted):** semantics reconstructed from the prior-art viewer's
-      source — the DISC profile spec is not publicly available, so this
-      is best-effort until real DiscProfile.xml data arrives; the
+      source — at the time the DISC profile spec was not publicly
+      available, so this was best-effort until real DiscProfile.xml
+      data arrived (superseded 2026-08-22, see below); the
       ribbon Profile tooltip says so. Unit-tested against synthetic
       fixtures.
 - [ ] SignalConveyingFunctionTypeRepresentation (DiscProfile custom
@@ -648,6 +673,27 @@ that grow, and record scope changes here.
       the cached SkPicture so toggles never re-record the body. The
       panel legend derives swatches from the same palette so canvas
       and legend cannot drift. Minimap passes an empty map.
+
+- **2026-08-22** Official DISC Profile 0.6.3 bundled (director): the
+  2026 Pack's `DiscProfile.xml` catalogue is copied to
+  `public/profiles/DiscProfile-0.6.3.xml` (6.4 MB, ships with the
+  build) and a ribbon **"Profile 0.6.3"** button (`file.profile063`,
+  ALT + 1003) loads it in one click; the old picker
+  button is renamed **"Custom profile"** and still loads any
+  DiscProfile.xml (replacing the bundled one). Selected-state: 0.6.3
+  button lights for the bundled profile, Custom for any other
+  (`BUNDLED_PROFILE_NAME` exported from viewer.actions).
+  `discProfileOfficial.test.ts` regression-tests the parser against
+  the official catalogue: 284 symbols / 320 variants (matches the
+  pack's 0.6.0→0.6.3 comparison report), 210 symbols with label
+  templates, conditions honoured by pickVariant, and exactly
+  ND0000/ND0040/ND0041 as legitimately primitive-less (node-/
+  label-only symbols). The "spec isn't publicly available" caveats in
+  the ribbon tooltip and code comments are retired — parsing is now
+  verified against official data; only LabelTemplate placeholder
+  RESOLUTION semantics remain prior-art-derived (no placed-symbol
+  fixtures yet), and no published file carries Profile/LineStroke
+  instances.
 
 - **2026-08-22** An active trace FOLLOWS the primary selection
   (director): selecting another object re-traces the same mode from it,

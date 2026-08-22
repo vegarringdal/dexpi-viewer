@@ -18,8 +18,10 @@ import { dataValue, getData, refLocalName } from "./xml.ts";
 //                       by PortStatus when the text carries an H=/HH=/L=/LL=
 //                       alarm prefix, else positionally. No matching child
 //                       suppresses the whole template (no right answer).
-// Semantics reconstructed from the prior-art viewer (the DISC profile spec
-// is not publicly available) — best-effort until real data says otherwise.
+// Semantics reconstructed from the prior-art viewer. The official 0.6.3
+// catalogue (refrences/discdexpi-2026pack/) now verifies the FORMAT parses
+// (discProfileOfficial.test.ts); the placeholder-resolution semantics here
+// remain prior-art-derived until real placed-symbol fixtures confirm them.
 // -----------------------------------------------------------------------------
 
 /** A pending overlay: which templates to place with which instance transform. */

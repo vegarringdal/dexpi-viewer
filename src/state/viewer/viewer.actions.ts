@@ -11,8 +11,10 @@ import {
   viewerState,
 } from "./viewer.state.ts";
 
-const EXAMPLE_URL = "examples/DexpiExamplePid.xml";
-const EXAMPLE_NAME = "DexpiExamplePid.xml";
+const EXAMPLE_URL = "examples/DISC_EXAMPLE-14-13.xml";
+const EXAMPLE_NAME = "DISC_EXAMPLE-14-13.xml";
+const BUNDLED_PROFILE_URL = "profiles/DiscProfile-0.6.3.xml";
+export const BUNDLED_PROFILE_NAME = "DiscProfile 0.6.3";
 
 // -----------------------------------------------------------------------------
 // Document & profile handles
@@ -129,10 +131,26 @@ export function reparseCurrentDocument(): void {
   }
 }
 
+function applyProfile(xmlText: string, profileName: string): void {
+  const parsed = parseDiscProfile(xmlText);
+  if (parsed.error || !parsed.data) {
+    viewerState.set({ errorMsg: parsed.error?.msg ?? "Could not parse the profile." });
+    return;
+  }
+
+  loadedProfile = parsed.data;
+  viewerState.set({ profileName, errorMsg: null });
+
+  const currentFile = viewerState.get().file;
+  if (currentFile) {
+    applyLoadResult(ok(currentFile));
+  }
+}
+
 /**
- * Loads a DISC profile (DiscProfile.xml, DEXPI 2.1) and re-parses the
- * current document against it so Profile/SymbolUsage references resolve.
- * The profile stays active for every document opened afterwards.
+ * Loads a custom DISC profile (DiscProfile.xml) and re-parses the current
+ * document against it so Profile/SymbolUsage references resolve. The profile
+ * stays active for every document opened afterwards.
  */
 export async function openProfileFile(file: File): Promise<void> {
   const read = await readDocumentFile(file);
@@ -141,17 +159,20 @@ export async function openProfileFile(file: File): Promise<void> {
     return;
   }
 
-  const parsed = parseDiscProfile(read.data.text);
-  if (parsed.error || !parsed.data) {
-    viewerState.set({ errorMsg: parsed.error?.msg ?? "Could not parse the profile." });
-    return;
-  }
+  applyProfile(read.data.text, file.name);
+}
 
-  loadedProfile = parsed.data;
-  viewerState.set({ profileName: file.name, errorMsg: null });
+/** Loads the bundled official DISC Profile 0.6.3 catalogue. */
+export async function openBundledProfile(): Promise<void> {
+  try {
+    const response = await fetch(BUNDLED_PROFILE_URL);
+    if (!response.ok) {
+      viewerState.set({ errorMsg: `Profile fetch failed (HTTP ${response.status}).` });
+      return;
+    }
 
-  const currentFile = viewerState.get().file;
-  if (currentFile) {
-    applyLoadResult(ok(currentFile));
+    applyProfile(await response.text(), BUNDLED_PROFILE_NAME);
+  } catch {
+    viewerState.set({ errorMsg: "Could not load the bundled DISC profile." });
   }
 }

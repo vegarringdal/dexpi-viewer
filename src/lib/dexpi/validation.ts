@@ -66,28 +66,54 @@ function checkDuplicateIds(root: Element, issues: ValidationIssue[]): void {
   }
 }
 
-/** V02 — every References target must exist in the document. */
+/**
+ * V02 — every References target must exist in the document. Namespace-
+ * qualified targets (containing "/") reference PUBLISHED models, not this
+ * document (real DISC sheets reference enum literals like
+ * "DiscProfile/InformationModel.…" — same identifier-only stance as the
+ * data.dexpi.org model URIs): they are exempt, except `property="Symbol"`
+ * catalogue references, which resolve against the loaded DISC profile and
+ * aggregate to ONE finding per symbol otherwise (a sheet references the
+ * same symbol many times).
+ */
 function checkDanglingReferences(root: Element, ids: ReadonlySet<string>, issues: ValidationIssue[]): void {
   for (const refs of root.querySelectorAll("References")) {
     const owner = refs.parentElement;
     const ownerId = owner?.getAttribute("id") ?? null;
+    const property = refs.getAttribute("property") ?? "?";
     for (const raw of (refs.getAttribute("objects") ?? "").split(/\s+/)) {
       const target = raw.startsWith("#") ? raw.slice(1) : raw;
-      if (target && !ids.has(target)) {
-        issues.push({
-          ruleId: "V02",
-          severity: "error",
-          message: `Reference "${refs.getAttribute("property") ?? "?"}" points to missing object "${target}".`,
-          objectId: ownerId,
-          suggestion: "Remove the reference or add the missing object.",
-        });
+      if (!target || ids.has(target)) {
+        continue;
       }
+
+      if (target.includes("/")) {
+        continue; // published-model reference (enum literal, profile symbol) — V03 owns catalogue resolution
+      }
+
+      issues.push({
+        ruleId: "V02",
+        severity: "error",
+        message: `Reference "${property}" points to missing object "${target}".`,
+        objectId: ownerId,
+        suggestion: "Remove the reference or add the missing object.",
+      });
     }
   }
 }
 
-/** V03 — every ShapeUsage/SymbolUsage must resolve to a catalogue Shape. */
-function checkShapeUsages(root: Element, issues: ValidationIssue[]): void {
+/**
+ * V03 — every ShapeUsage/SymbolUsage must resolve to a catalogue Shape,
+ * either the document's own ShapeCatalogue or the loaded DISC profile.
+ * Unresolved PROFILE symbols aggregate to one finding per symbol (a real
+ * DISC sheet places the same symbol many times) and are warnings when no
+ * profile is loaded at all — the fix is loading one, not editing the file.
+ */
+function checkShapeUsages(
+  root: Element,
+  profileSymbols: ReadonlySet<string>,
+  issues: ValidationIssue[],
+): void {
   const shapeIds = new Set<string>();
   for (const catalogue of root.querySelectorAll('Object[type="Core/Diagram.ShapeCatalogue"]')) {
     for (const shape of componentObjects(catalogue, "Shapes")) {
@@ -97,19 +123,52 @@ function checkShapeUsages(root: Element, issues: ValidationIssue[]): void {
       }
     }
   }
+
+  const unresolvedProfileShapes = new Map<string, number>();
   for (const usage of root.querySelectorAll(
     'Object[type="Core/Diagram.ShapeUsage"], Object[type="Profile/SymbolUsage"]',
   )) {
     const ref = [...referenceTargets(usage, "Shape"), ...referenceTargets(usage, "Symbol")][0];
-    if (ref && !shapeIds.has(ref)) {
-      issues.push({
-        ruleId: "V03",
-        severity: "error",
-        message: `Shape usage references unknown catalogue shape "${ref}".`,
-        objectId: nearestId(usage),
-        suggestion: "Add the shape to a ShapeCatalogue, or load the DISC profile that defines it.",
-      });
+    if (!ref || shapeIds.has(ref) || profileSymbols.has(ref)) {
+      continue;
     }
+
+    if (ref.includes("/")) {
+      unresolvedProfileShapes.set(ref, (unresolvedProfileShapes.get(ref) ?? 0) + 1);
+      continue;
+    }
+
+    issues.push({
+      ruleId: "V03",
+      severity: "error",
+      message: `Shape usage references unknown catalogue shape "${ref}".`,
+      objectId: nearestId(usage),
+      suggestion: "Add the shape to a ShapeCatalogue, or load the DISC profile that defines it.",
+    });
+  }
+
+  const hasProfile = profileSymbols.size > 0;
+  for (const [ref, count] of unresolvedProfileShapes) {
+    // Rootless names like "/Border" are well-known representation shapes
+    // (Core/Diagram.Border) whose geometry no published catalogue ships —
+    // the exporting tool draws them. Real files carry them routinely, so
+    // they warn instead of erroring even with a profile loaded.
+    const isWellKnown = ref.startsWith("/");
+    issues.push({
+      ruleId: "V03",
+      severity: hasProfile && !isWellKnown ? "error" : "warning",
+      message: isWellKnown
+        ? `Shape "${ref}" is a well-known representation shape with no published geometry — the viewer cannot draw it.`
+        : hasProfile
+          ? `Profile symbol "${ref}" is placed ${count}× but the loaded DISC profile does not define it.`
+          : `Profile symbol "${ref}" is placed ${count}× but no DISC profile is loaded.`,
+      objectId: null,
+      suggestion: isWellKnown
+        ? "The exporting tool renders this (e.g. the sheet border); no catalogue provides its geometry."
+        : hasProfile
+          ? "Load a DISC profile that defines this symbol."
+          : "Load the bundled Profile 0.6.3 (or a custom DiscProfile.xml) so profile symbols resolve.",
+    });
   }
 }
 
@@ -275,8 +334,13 @@ function nearestId(el: Element): string | null {
   return null;
 }
 
+const NO_PROFILE_SYMBOLS: ReadonlySet<string> = new Set();
+
 /** Runs all rules; errors first, then warnings, in rule order. */
-export function validateDocument(root: Element): ValidationIssue[] {
+export function validateDocument(
+  root: Element,
+  profileSymbols: ReadonlySet<string> = NO_PROFILE_SYMBOLS,
+): ValidationIssue[] {
   const ids = new Set<string>();
   for (const el of root.querySelectorAll("Object[id]")) {
     const id = el.getAttribute("id");
@@ -288,7 +352,7 @@ export function validateDocument(root: Element): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   checkDuplicateIds(root, issues);
   checkDanglingReferences(root, ids, issues);
-  checkShapeUsages(root, issues);
+  checkShapeUsages(root, profileSymbols, issues);
   checkConnectorLines(root, ids, issues);
   checkFlowEndpoints(root, issues);
   checkDiagramExtent(root, issues);

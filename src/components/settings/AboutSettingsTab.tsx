@@ -52,18 +52,7 @@ export function AboutSettingsTab(): JSX.Element {
       </div>
 
       <p className="text-slate-400 text-xs leading-relaxed">
-        A viewer for DEXPI 2.0 P&amp;ID files — just having fun with AI and coding. Rendering is Skia
-        CanvasKit; everything runs locally in your browser, files never leave your machine.
-      </p>
-
-      <p className="text-slate-400 text-xs leading-relaxed">
-        I have limited access to real DEXPI files, so there may be bugs I don&apos;t know about. The app is
-        provided &quot;as is&quot;, without warranty of any kind — use at your own risk and always verify
-        against the source documents.
-      </p>
-
-      <p className="text-slate-400 text-xs leading-relaxed">
-        The UI is also me trying out{" "}
+        A viewer for DEXPI 2.0 P&amp;ID files using{" "}
         <a
           href="https://tredespace.com/docs/widgets"
           target="_blank"
@@ -72,7 +61,16 @@ export function AboutSettingsTab(): JSX.Element {
         >
           tredespaceUI
         </a>
-        , the component library I created for a 3D app in my spare time.
+        , the component library.
+      </p>
+
+      <p className="text-slate-400 text-xs leading-relaxed">
+        Everything runs locally in your browser, files never leave your machine.
+      </p>
+
+      <p className="text-slate-400 text-xs leading-relaxed">
+        The app is provided &quot;as is&quot;, without warranty of any kind — use at your own risk and always
+        verify against the source documents.
       </p>
 
       <div>

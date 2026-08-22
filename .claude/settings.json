@@ -20,7 +20,13 @@
       "Bash(node verify-retrace.mjs)",
       "Bash(rsync -a --exclude=.git --exclude=Profile/html/ /tmp/claude-1000/-home-dev-Documents-github-dexpi/de48aaf0-6921-4340-bbc3-879bd0ab1ec0/scratchpad/pack2026/ /home/dev/Documents/github/dexpi/refrences/discdexpi-2026pack/)",
       "Bash(rm -rf /tmp/claude-1000/-home-dev-Documents-github-dexpi/de48aaf0-6921-4340-bbc3-879bd0ab1ec0/scratchpad/pack2026/.git /tmp/claude-1000/-home-dev-Documents-github-dexpi/de48aaf0-6921-4340-bbc3-879bd0ab1ec0/scratchpad/pack2026/Profile/html)",
-      "Bash(cp -r /tmp/claude-1000/-home-dev-Documents-github-dexpi/de48aaf0-6921-4340-bbc3-879bd0ab1ec0/scratchpad/pack2026/. /home/dev/Documents/github/dexpi/refrences/discdexpi-2026pack/)"
+      "Bash(cp -r /tmp/claude-1000/-home-dev-Documents-github-dexpi/de48aaf0-6921-4340-bbc3-879bd0ab1ec0/scratchpad/pack2026/. /home/dev/Documents/github/dexpi/refrences/discdexpi-2026pack/)",
+      "Bash(grep -v \"^$\")",
+      "Bash(node -e ' *)",
+      "Bash(node verify-profile063.mjs)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5199)",
+      "Bash(node verify-newexample.mjs)",
+      "Bash(echo \"check exit=$?\")"
     ]
   }
 }

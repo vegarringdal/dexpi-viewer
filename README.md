@@ -1,5 +1,10 @@
 # DEXPI Viewer
 
+> Experiment by Vegar Ringdal using AI to speed up
+> development/testing/refactoring. This project also gives me a chance to
+> test a UI library created for the [tredespace.com](https://tredespace.com)
+> application.
+
 **Live app: <https://vegarringdal.github.io/dexpi-viewer/>**
 
 A fast viewer for **DEXPI 2.0 XML** P&ID files: React 19 workbench UI
@@ -20,7 +25,7 @@ theme-adaptive colors, and Liberation Sans text. Click or hover anything
 in the drawing to select/highlight it (hit-testing incl. transformed
 symbol instances); the object tree (searchable) and properties panel
 (formatted physical quantities) stay in sync, with zoom-to-object.
-Verified headless against the bundled Tennessee Eastman example and the
+Verified headless against the Tennessee Eastman example and the
 C01 DEXPI reference P&ID (`refrences/reference_pid.xml`), whose layout
 matches the official rendering — including instrument balloons (ellipse
 arcs), node-position-stitched connector lines, and the title block.

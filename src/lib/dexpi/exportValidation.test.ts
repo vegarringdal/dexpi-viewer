@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { parseDiscProfile } from "./discProfile.ts";
 import { sceneToSvg } from "./exportSvg.ts";
 import { flattenScene } from "./flattenScene.ts";
 import { parseDexpiDocument } from "./parseDocument.ts";
@@ -89,5 +90,53 @@ describe("exporters", () => {
     const flat = flattenScene(scene);
     expect(flat.length).toBeGreaterThan(scene.nodes.length);
     expect(flat.every((p) => p.kind !== undefined)).toBe(true);
+  });
+});
+
+describe("V02 profile-symbol references (DISC_EXAMPLE-14-13)", () => {
+  const xml = readFileSync(
+    join(__dirname, "../../../refrences/discdexpi-2026pack/Blueprint/DISC_EXAMPLE-14/DISC_EXAMPLE-14-13.xml"),
+    "utf-8",
+  );
+
+  it("without a profile: aggregated warnings, never one finding per reference", () => {
+    const doc = parseDexpiDocument(xml).data;
+    if (!doc) {
+      throw new Error("parse failed");
+    }
+
+    const profileFindings = doc.issues.filter((i) => i.message.includes("DiscProfile/"));
+    expect(profileFindings.length).toBeGreaterThan(0);
+    // 125 raw placements collapse to one finding per distinct symbol.
+    expect(profileFindings.length).toBeLessThan(50);
+    for (const finding of profileFindings) {
+      expect(finding.ruleId).toBe("V03");
+      expect(finding.severity).toBe("warning");
+      expect(finding.message).toContain("no DISC profile is loaded");
+    }
+  });
+
+  it("with the official 0.6.3 profile: every symbol reference resolves", () => {
+    const profileXml = readFileSync(
+      join(__dirname, "../../../refrences/discdexpi-2026pack/Profile/xml/DiscProfile.xml"),
+      "utf-8",
+    );
+    const profile = parseDiscProfile(profileXml).data;
+    if (!profile) {
+      throw new Error("profile parse failed");
+    }
+
+    const doc = parseDexpiDocument(xml, profile).data;
+    if (!doc) {
+      throw new Error("parse failed");
+    }
+
+    expect(doc.issues.filter((i) => i.message.includes("DiscProfile/"))).toEqual([]);
+
+    // The sheet's "/Border" is a well-known representation shape with no
+    // published geometry — a warning, never an error.
+    const border = doc.issues.filter((i) => i.message.includes("/Border"));
+    expect(border.length).toBe(1);
+    expect(border[0]?.severity).toBe("warning");
   });
 });

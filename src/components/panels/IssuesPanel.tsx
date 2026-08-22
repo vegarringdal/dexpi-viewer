@@ -107,8 +107,9 @@ export function IssuesPanel(): JSX.Element {
             aside={String(list.length)}
             defaultOpen={groupsOpen.open}
           >
-            {list.map((issue) => (
-              <IssueRow key={`${issue.objectId ?? "doc"}-${issue.message}`} issue={issue} />
+            {list.map((issue, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: the list is static per document, and identical owner+message pairs exist in real files — the index disambiguates.
+              <IssueRow key={`${issue.objectId ?? "doc"}-${index}`} issue={issue} />
             ))}
           </Collapsible>
         ))}

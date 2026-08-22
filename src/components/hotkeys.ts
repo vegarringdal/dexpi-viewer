@@ -1,7 +1,11 @@
 import { type HotkeyDef, hotkeysActions } from "@tredespace/ui/hotkeys";
 import { toggleTheme } from "../state/theme/theme.actions.ts";
 import { openHighlightPanel, openSettings, openTopologyGraphPanel } from "../state/ui/ui.actions.ts";
-import { openExampleDocument, requestViewCommand } from "../state/viewer/viewer.actions.ts";
+import {
+  openBundledProfile,
+  openExampleDocument,
+  requestViewCommand,
+} from "../state/viewer/viewer.actions.ts";
 
 const ZOOM_STEP_FACTOR = 1.5;
 
@@ -41,10 +45,20 @@ const APP_HOTKEYS: HotkeyDef[] = [
     id: "file.example",
     category: "File",
     label: "Load example",
-    description: "Load the bundled Tennessee Eastman example.",
+    description: "Load the bundled DISC example P&ID.",
     defaultKeys: "ALT + 1002",
     run: () => {
       void openExampleDocument();
+    },
+  },
+  {
+    id: "file.profile063",
+    category: "File",
+    label: "Use 0.6.3 profile",
+    description: "Load the bundled official DISC Profile 0.6.3 catalogue.",
+    defaultKeys: "ALT + 1003",
+    run: () => {
+      void openBundledProfile();
     },
   },
   {

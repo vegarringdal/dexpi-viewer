@@ -33,8 +33,10 @@ export type VariantCondition = Readonly<{
 /**
  * A Profile/LabelTemplate: placeholder text plus its full local-space text
  * styling (coordinates in the symbol's own system, like its Primitives).
- * Format reconstructed from the prior-art viewer — the DISC profile spec is
- * not publicly available, so this is best-effort.
+ * Format originally reconstructed from the prior-art viewer; now verified
+ * against the official DiscProfile 0.6.3 catalogue
+ * (refrences/discdexpi-2026pack/, regression-tested in
+ * discProfileOfficial.test.ts).
  */
 export type ProfileLabelTemplate = Readonly<{
   text: string;

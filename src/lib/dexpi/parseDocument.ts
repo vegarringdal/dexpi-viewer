@@ -65,7 +65,7 @@ export function parseDexpiDocument(
     scene,
     plant: buildPlantModel(root),
     connectivity: buildConnectivity(root),
-    issues: validateDocument(root),
+    issues: validateDocument(root, profile ? new Set(profile.symbols.keys()) : undefined),
     objectTypes: indexObjectTypes(root),
   });
 }

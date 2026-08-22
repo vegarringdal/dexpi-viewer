@@ -1,7 +1,13 @@
-import { IconFileTypeXml, IconFolderOpen, IconPuzzle } from "@tabler/icons-react";
+import { IconFileTypeXml, IconFolderOpen, IconPuzzle, IconPuzzleFilled } from "@tabler/icons-react";
 import { RibbonButton, RibbonSection, useFilePicker } from "@tredespace/ui/widgets";
 import { type JSX, useEffect } from "react";
-import { openDocumentFile, openExampleDocument, openProfileFile } from "../../state/viewer/viewer.actions.ts";
+import {
+  BUNDLED_PROFILE_NAME,
+  openBundledProfile,
+  openDocumentFile,
+  openExampleDocument,
+  openProfileFile,
+} from "../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../state/viewer/viewer.state.ts";
 import { setOpenFileTrigger } from "../hotkeys.ts";
 
@@ -42,17 +48,28 @@ export function FileSection(): JSX.Element {
           icon={<IconFileTypeXml />}
           label="Example"
           size="big"
-          tooltip="Load the bundled DEXPI example P&ID"
+          tooltip={"Load the bundled example P&ID\n(DISC_EXAMPLE-14 sheet 13 — pairs with Profile 0.6.3)"}
           shortcut="file.example"
           onClick={handleOpenExample}
         />
         <RibbonButton
-          icon={<IconPuzzle />}
-          label="Profile"
+          icon={<IconPuzzleFilled />}
+          label="Profile 0.6.3"
           size="big"
-          selected={profileName !== null}
+          selected={profileName === BUNDLED_PROFILE_NAME}
           tooltip={
-            "Load a DISC profile (DiscProfile.xml, DEXPI 2.1)\nSymbols apply to the current and future documents\nNote: the DISC profile spec isn't publicly available — support is best-effort and may be buggy"
+            "Use the bundled official DISC Profile 0.6.3 catalogue\n(284 symbols, from the DISC DEXPI 2026 Pack)\nSymbols apply to the current and future documents"
+          }
+          shortcut="file.profile063"
+          onClick={() => void openBundledProfile()}
+        />
+        <RibbonButton
+          icon={<IconPuzzle />}
+          label="Custom profile"
+          size="big"
+          selected={profileName !== null && profileName !== BUNDLED_PROFILE_NAME}
+          tooltip={
+            "Load your own DISC profile (DiscProfile.xml)\nSymbols apply to the current and future documents\nReplaces the bundled 0.6.3 profile if one is active"
           }
           onClick={profilePicker.open}
         />
