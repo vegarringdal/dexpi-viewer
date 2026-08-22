@@ -10,7 +10,17 @@
       "Bash(node verify-hardware.mjs)",
       "Bash(node verify-anchor.mjs)",
       "Bash(node verify-gap-tints.mjs)",
-      "Bash(node verify-legend.mjs)"
+      "Bash(node verify-legend.mjs)",
+      "Bash(grep -rn \"bounds ?? computeSceneBounds\\\\|shapes,$\\\\|SceneGraph = {\" /home/dev/Documents/github/dexpi/src)",
+      "Bash(node verify-highlight.mjs)",
+      "Bash(mkdir -p \"/home/dev/Documents/github/dexpi/refrences/discdexpi-disc-profile\")",
+      "Bash(cp '/tmp/claude-1000/-home-dev-Documents-github-dexpi/de48aaf0-6921-4340-bbc3-879bd0ab1ec0/scratchpad/discdexpi/DISC Profile/*' /home/dev/Documents/github/dexpi/refrences/discdexpi-disc-profile/)",
+      "Bash(unzip -o -q \"DISC Profile 0.5.html.zip\" -d \"DISC-Profile-0.5-html\")",
+      "Bash(unzip -o -q \"DISC Profile 0.5.xml.zip\" -d \"DISC-Profile-0.5-xml\")",
+      "Bash(node verify-retrace.mjs)",
+      "Bash(rsync -a --exclude=.git --exclude=Profile/html/ /tmp/claude-1000/-home-dev-Documents-github-dexpi/de48aaf0-6921-4340-bbc3-879bd0ab1ec0/scratchpad/pack2026/ /home/dev/Documents/github/dexpi/refrences/discdexpi-2026pack/)",
+      "Bash(rm -rf /tmp/claude-1000/-home-dev-Documents-github-dexpi/de48aaf0-6921-4340-bbc3-879bd0ab1ec0/scratchpad/pack2026/.git /tmp/claude-1000/-home-dev-Documents-github-dexpi/de48aaf0-6921-4340-bbc3-879bd0ab1ec0/scratchpad/pack2026/Profile/html)",
+      "Bash(cp -r /tmp/claude-1000/-home-dev-Documents-github-dexpi/de48aaf0-6921-4340-bbc3-879bd0ab1ec0/scratchpad/pack2026/. /home/dev/Documents/github/dexpi/refrences/discdexpi-2026pack/)"
     ]
   }
 }

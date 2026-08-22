@@ -1,6 +1,7 @@
 import {
   IconAlertTriangle,
   IconChartDots3,
+  IconColorFilter,
   IconListDetails,
   IconListTree,
   IconMap,
@@ -49,6 +50,15 @@ export function PanelsSection(): JSX.Element {
         selected={manager.isOpen(PANEL_IDS.properties)}
         tooltip="Show/hide the properties panel"
         onClick={panelToggle(PANEL_IDS.properties)}
+      />
+      <RibbonButton
+        icon={<IconColorFilter />}
+        label="Highlight"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.highlight)}
+        tooltip="Tint the drawing by classification: heat trace, signal, fluid code, piping class"
+        shortcut="app.highlight"
+        onClick={panelToggle(PANEL_IDS.highlight)}
       />
       <RibbonButton
         icon={<IconPlugConnected />}

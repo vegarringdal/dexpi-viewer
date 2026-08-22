@@ -27,6 +27,11 @@ export function openTopologyGraphPanel(): void {
   dockManager?.openPanel("topologyGraph");
 }
 
+/** Opens (or focuses) the Highlight panel in the dock. */
+export function openHighlightPanel(): void {
+  dockManager?.openPanel("highlight");
+}
+
 /**
  * Restores the persisted dock layout (if any) and starts saving every layout
  * change, debounced. Returns the disposer; call once per manager lifetime.

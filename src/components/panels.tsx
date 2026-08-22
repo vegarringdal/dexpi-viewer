@@ -2,6 +2,7 @@ import { definePanel } from "@tredespace/ui/dockable";
 import type { JSX } from "react";
 import { CanvasStage } from "../lib/canvas/CanvasStage.tsx";
 import { ConnectionsPanel } from "./panels/ConnectionsPanel.tsx";
+import { HighlightPanel } from "./panels/HighlightPanel.tsx";
 import { IssuesPanel } from "./panels/IssuesPanel.tsx";
 import { MinimapPanel } from "./panels/MinimapPanel.tsx";
 import { PropertiesPanel } from "./panels/PropertiesPanel.tsx";
@@ -50,6 +51,13 @@ export const viewerPanels = [
     minWidth: 220,
     home: "right",
     component: ConnectionsPanel,
+  }),
+  definePanel({
+    id: PANEL_IDS.highlight,
+    title: "Highlight",
+    minWidth: 220,
+    home: "right",
+    component: HighlightPanel,
   }),
   definePanel({
     id: PANEL_IDS.issues,

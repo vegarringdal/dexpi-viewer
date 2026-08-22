@@ -8,4 +8,5 @@ export const PANEL_IDS = {
   settings: "settings",
   minimap: "minimap",
   connections: "connections",
+  highlight: "highlight",
 } as const;

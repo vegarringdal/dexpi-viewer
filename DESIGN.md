@@ -121,6 +121,8 @@ in `refrences/` when in doubt.
 | `refrences/examples/proteus-1.3/C01/` | Proteus 1.3 reference P&ID (XML + official SVG) — background reference only, out of scope |
 | `refrences/DEXPIViewer/` | The prior-art viewer (JS + SVG); its `src/dexpiParser.js` documents the 2.0 XML shapes in practice |
 | `refrences/spec-model-Core-Diagram.py` | The spec's own Core.Diagram model source (from gitlab dexpi/Specification `src/model/Core/Diagram/Diagram.py`) — authoritative for graphics semantics: SVG mapping, DashStyle table, FillStyle, EllipseArc geometry |
+| `refrences/discdexpi-disc-profile/` | DISC Profile spec from [ToniaPedersen/DISCDEXPI](https://github.com/ToniaPedersen/DISCDEXPI): 0.4/0.5 zips (html + xml) + schema; 0.5 XML extracted (`DISC-Profile-0.5-xml/xml/` — Builtin/Core/Plant/DiscProfile model XML incl. FL0/FL10 variants). The 97 MB html extraction is deliberately NOT committed — unzip on demand |
+| `refrences/discdexpi-2026pack/` | [ToniaPedersen/DISCDEXPI_2026Pack](https://github.com/ToniaPedersen/DISCDEXPI_2026Pack): DISC Profile **0.6.x** (xml + html.zip + schema; changes doc 0.6.0→0.6.3 — newer than the 0.5 copy above), PID Validation Method (docx/drawio/pptx), and `Blueprint/DISC_EXAMPLE-14/` — real DEXPI XML files WITH official SVG renderings (verification fixtures like C01). The 99 MB html extraction is deliberately NOT committed — unzip on demand |
 | `external/tredespace-ui-0.0.56.tgz` | UI library (`@tredespace/ui`); README inside covers setup |
 | `external/tredespace-client.ts` | tredespace embed API reference (not used yet) |
 
@@ -611,6 +613,49 @@ that grow, and record scope changes here.
       the same zoom only when it is off-screen or new to the graph.
       Auto-fit remains for structural changes only (first layout,
       mode switch, depth/edge/hardware toggles) and the Fit button.
+
+### M9 — Highlight by classification ✅
+
+- [x] "Highlight" dockable panel (id `highlight`, home right, ribbon
+      Panels toggle, ALT + 9003; not in the default layout): pick a
+      classification and the CANVAS tints every matching object, the
+      way the trace overlay tints upstream/downstream. Modes: Heat
+      traced, Signal & instrument lines, Fluid code, Piping class.
+      First use of the @tredespace/ui `Select` widget; per-mode option
+      hints show match counts and zero-count modes are disabled —
+      honest empty states, because NO shipped fixture carries
+      HeatTracingType (real DISC files do) and the Tennessee Eastman
+      Process fixture has neither piping codes nor signals.
+- [x] Classification lib (`src/lib/dexpi/classification.ts`,
+      unit-tested on both fixtures + a synthetic heat-traced doc):
+      `buildClassificationGroups(doc, mode)` — heatTrace reads
+      `doc.scene.heatTracedIds` (NEW: `buildSceneGraph` now returns
+      the set it already computed instead of discarding it — the
+      eligibility/descendant rules stay only in heatTracing.ts);
+      signal = typeName contains "Signal" or ends with
+      MeasuringLineFunction/ActuatingFunction; fluidCode/pipingClass
+      group by the EFFECTIVE attribute value (nearest-ancestor
+      inheritance, own value wins — a System's code covers its
+      segments/pipes/valves). Groups sort by size desc then key.
+- [x] State `src/state/highlight/` (mode + groups + hiddenKeys,
+      trace-store idiom): document loads RECOMPUTE groups for the kept
+      mode rather than clearing; legend checkboxes hide single values.
+      Not persisted (session viewing aid, like trace).
+- [x] Canvas: `ScenePalette.classify` — 6-color categorical ramp per
+      theme + `classifyColor(palette, index)`; `SceneHighlight` gained
+      `classification: ReadonlyMap<objectId, PaletteColor>` drawn as
+      one scan BELOW trace/hover/selection (those still win), outside
+      the cached SkPicture so toggles never re-record the body. The
+      panel legend derives swatches from the same palette so canvas
+      and legend cannot drift. Minimap passes an empty map.
+
+- **2026-08-22** An active trace FOLLOWS the primary selection
+  (director): selecting another object re-traces the same mode from it,
+  deselecting everything clears the overlay. Implemented as a
+  selectionState subscription in trace.actions.ts guarded on selectedId
+  (hover/multi-select churn in the same store must not retrace);
+  toggle-again-to-clear semantics unchanged since originId now always
+  tracks the selection.
 
 ## Decisions log
 

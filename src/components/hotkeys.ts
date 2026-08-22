@@ -1,6 +1,6 @@
 import { type HotkeyDef, hotkeysActions } from "@tredespace/ui/hotkeys";
 import { toggleTheme } from "../state/theme/theme.actions.ts";
-import { openSettings, openTopologyGraphPanel } from "../state/ui/ui.actions.ts";
+import { openHighlightPanel, openSettings, openTopologyGraphPanel } from "../state/ui/ui.actions.ts";
 import { openExampleDocument, requestViewCommand } from "../state/viewer/viewer.actions.ts";
 
 const ZOOM_STEP_FACTOR = 1.5;
@@ -102,6 +102,14 @@ const APP_HOTKEYS: HotkeyDef[] = [
     description: "Open the semantic topology graph panel.",
     defaultKeys: "ALT + 9002",
     run: () => openTopologyGraphPanel(),
+  },
+  {
+    id: "app.highlight",
+    category: "Panels",
+    label: "Highlight",
+    description: "Open the classification highlight panel.",
+    defaultKeys: "ALT + 9003",
+    run: () => openHighlightPanel(),
   },
 ];
 

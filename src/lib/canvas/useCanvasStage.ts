@@ -1,5 +1,6 @@
 import type { CanvasKit, SkPicture, Surface } from "canvaskit-wasm";
 import { type RefObject, useEffect, useRef } from "react";
+import { highlightState } from "../../state/highlight/highlight.state.ts";
 import { renderingState } from "../../state/rendering/rendering.state.ts";
 import { selectionState } from "../../state/selection/selection.state.ts";
 import { themeState } from "../../state/theme/theme.state.ts";
@@ -21,7 +22,7 @@ import {
 import { drawPlaceholderScene, SHEET_BOUNDS } from "./drawPlaceholderScene.ts";
 import { createSceneFonts, loadFontData, type SceneFonts } from "./fonts.ts";
 import { loadCanvasKit } from "./loadCanvasKit.ts";
-import { getScenePalette } from "./scenePalette.ts";
+import { classifyColor, getScenePalette, type PaletteColor } from "./scenePalette.ts";
 import { attachStageInput } from "./stageInput.ts";
 import { Viewport } from "./viewport.ts";
 
@@ -118,6 +119,16 @@ export function useCanvasStage(): CanvasStageHandles {
 
       const { selectedIds, hoveredId } = selectionState.get();
       const trace = traceState.get();
+      const highlight = highlightState.get();
+      const classification = new Map<string, PaletteColor>();
+      highlight.groups.forEach((group, index) => {
+        if (!highlight.hiddenKeys.includes(group.key)) {
+          const color = classifyColor(palette, index);
+          for (const id of group.objectIds) {
+            classification.set(id, color);
+          }
+        }
+      });
       const rendering = renderingState.get();
       const options: SceneDrawOptions = {
         minWidthMm: rendering.minStrokePx / Math.max(viewport.scale, 1e-9),
@@ -137,6 +148,7 @@ export function useCanvasStage(): CanvasStageHandles {
         hoveredId,
         upstreamIds: new Set(trace.upstreamIds),
         downstreamIds: new Set(trace.downstreamIds),
+        classification,
       });
       canvas.restore();
     });
@@ -268,6 +280,7 @@ export function useCanvasStage(): CanvasStageHandles {
     const unsubTheme = themeState.subscribe(() => redraw());
     const unsubRendering = renderingState.subscribe(() => redraw());
     const unsubTrace = traceState.subscribe(() => redraw());
+    const unsubHighlight = highlightState.subscribe(() => redraw());
     const unsubViewer = viewerState.subscribe(() => {
       const { docRevision, viewCmdSeq, viewCmd } = viewerState.get();
       if (docRevision !== seenRevision) {
@@ -329,6 +342,7 @@ export function useCanvasStage(): CanvasStageHandles {
       unsubTheme();
       unsubRendering();
       unsubTrace();
+      unsubHighlight();
       unsubViewer();
       unsubSelection();
       observer?.disconnect();

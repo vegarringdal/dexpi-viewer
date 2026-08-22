@@ -8,12 +8,22 @@ import { ThirdPartyNoticesDialog } from "./ThirdPartyNoticesDialog.tsx";
 // Constants
 // -----------------------------------------------------------------------------
 
+const SOURCE_URL = "https://github.com/vegarringdal/dexpi-viewer";
+
 const REFERENCES = [
   { label: "DEXPI specifications", url: "https://dexpi.org/specifications/" },
   { label: "DEXPI specification sources (GitLab)", url: "https://gitlab.com/dexpi/Specification" },
   {
     label: "DEXPIViewer by Tonia Pedersen (prior art)",
     url: "https://github.com/ToniaPedersen/DEXPIViewer",
+  },
+  {
+    label: "DISCDEXPI — DISC Profile spec & examples",
+    url: "https://github.com/ToniaPedersen/DISCDEXPI",
+  },
+  {
+    label: "DISCDEXPI 2026 Pack — Profile 0.6, validation method, blueprints",
+    url: "https://github.com/ToniaPedersen/DISCDEXPI_2026Pack",
   },
 ] as const;
 
@@ -31,6 +41,14 @@ export function AboutSettingsTab(): JSX.Element {
         <h3 className="font-semibold text-slate-200 text-sm">DEXPI Viewer</h3>
         <div className="text-slate-400 text-xs">Made by Vegar Ringdal</div>
         <div className="text-slate-500 text-xs">Version {__APP_VERSION__}</div>
+        <a
+          href={SOURCE_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="text-blue-400 text-xs hover:underline"
+        >
+          Source code on GitHub
+        </a>
       </div>
 
       <p className="text-slate-400 text-xs leading-relaxed">

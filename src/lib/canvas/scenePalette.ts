@@ -19,6 +19,8 @@ export type ScenePalette = Readonly<{
   traceUp: PaletteColor;
   /** Downstream trace overlay (green). */
   traceDown: PaletteColor;
+  /** Categorical ramp for classification highlights (cycled by group index). */
+  classify: readonly PaletteColor[];
 }>;
 
 // -----------------------------------------------------------------------------
@@ -35,6 +37,14 @@ const DARK_PALETTE: ScenePalette = {
   accent: [0.376, 0.647, 0.98, 1],
   traceUp: [0.98, 0.75, 0.14, 1],
   traceDown: [0.29, 0.87, 0.5, 1],
+  classify: [
+    [0.4, 0.65, 1, 1], // blue
+    [1, 0.62, 0.26, 1], // orange
+    [0.2, 0.8, 0.75, 1], // teal
+    [0.93, 0.45, 0.85, 1], // magenta
+    [0.72, 0.82, 0.28, 1], // lime
+    [0.72, 0.55, 1, 1], // purple
+  ],
 };
 
 const LIGHT_PALETTE: ScenePalette = {
@@ -47,8 +57,22 @@ const LIGHT_PALETTE: ScenePalette = {
   accent: [0.145, 0.388, 0.922, 1],
   traceUp: [0.85, 0.55, 0.0, 1],
   traceDown: [0.09, 0.64, 0.29, 1],
+  classify: [
+    [0.13, 0.42, 0.87, 1], // blue
+    [0.85, 0.42, 0.06, 1], // orange
+    [0.05, 0.58, 0.53, 1], // teal
+    [0.78, 0.18, 0.63, 1], // magenta
+    [0.45, 0.55, 0.05, 1], // olive
+    [0.48, 0.3, 0.85, 1], // purple
+  ],
 };
 
 export function getScenePalette(theme: Theme): ScenePalette {
   return theme === "dark" ? DARK_PALETTE : LIGHT_PALETTE;
+}
+
+/** The categorical color for a classification group index (ramp cycles). */
+export function classifyColor(palette: ScenePalette, index: number): PaletteColor {
+  const color = palette.classify[index % palette.classify.length];
+  return color ?? palette.accent;
 }

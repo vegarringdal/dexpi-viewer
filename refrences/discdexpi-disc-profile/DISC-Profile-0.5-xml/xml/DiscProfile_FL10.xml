@@ -1,0 +1,36 @@
+<Model name="DiscProfile_FL10" uri="http://www.to.define_fl10">
+  <Import prefix="Profile" source="http://www.dexpi.org/specification/Temp/Profile"/>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>DiscProfile/InformationModel.Plug</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.Plug.PlugState</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>DiscProfile/InformationModel.SpectacleBlind</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.SpectacleBlind.BlindPosition</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Piping.OperatedValve</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.OperatedValveExtension.ValvePosition</String>
+    </Data>
+  </Object>
+</Model>

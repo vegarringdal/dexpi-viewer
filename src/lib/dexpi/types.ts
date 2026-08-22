@@ -177,6 +177,9 @@ export type SceneGraph = Readonly<{
   nodes: readonly SceneNode[];
   shapes: ReadonlyMap<string, ShapeDef>;
   bounds: Bounds;
+  /** Heat-traced object ids (incl. inherited descendants), computed alongside
+   *  the overlay nodes — the eligibility rules live only in heatTracing.ts. */
+  heatTracedIds: ReadonlySet<string>;
 }>;
 
 // -----------------------------------------------------------------------------

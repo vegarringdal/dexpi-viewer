@@ -81,7 +81,13 @@ global selection both ways, double-click zooms the drawing to the
 object, and the view pans/zooms like the drawing. The tree panel is
 now titled **Explorer**.
 
-All milestones M0–M8 are complete; the open items are niche
+**M9 adds a Highlight panel** (ribbon Panels → Highlight): tint the
+drawing by classification — heat-traced runs, signal/instrument
+lines, or piping service (fluid code / piping class, with ancestor
+inheritance) — each value in its own color with a legend of counts
+and per-value visibility toggles.
+
+All milestones M0–M9 are complete; the open items are niche
 (Proteus-era edge tolerances, profile LabelTemplate overlays, culling
 for truly huge files) and tracked in DESIGN.md.
 

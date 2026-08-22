@@ -501,5 +501,6 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
     nodes,
     shapes,
     bounds: bounds ?? computeSceneBounds(nodes, shapes),
+    heatTracedIds: tracedIds,
   };
 }

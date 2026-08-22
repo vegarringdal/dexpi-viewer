@@ -43,6 +43,8 @@ export type SceneHighlight = Readonly<{
   /** Trace overlay memberships (amber / green passes). */
   upstreamIds: ReadonlySet<string>;
   downstreamIds: ReadonlySet<string>;
+  /** Classification tint per object id — drawn below trace/hover/selection. */
+  classification: ReadonlyMap<string, PaletteColor>;
 }>;
 
 // -----------------------------------------------------------------------------
@@ -429,7 +431,7 @@ export function drawSceneContent(
   }
 }
 
-/** The selection/hover/trace overlays, in raw drawing-mm coordinates. */
+/** The classification/selection/hover/trace overlays, in raw drawing-mm coordinates. */
 export function drawSceneHighlights(
   ck: CanvasKit,
   canvas: Canvas,
@@ -440,6 +442,7 @@ export function drawSceneHighlights(
   highlight: SceneHighlight,
 ): void {
   const ctx = makeContext(ck, canvas, palette, fonts, options);
+  drawClassificationPass(ctx, scene, highlight.classification);
   drawHighlightPass(ctx, scene, highlight.upstreamIds, palette.traceUp);
   drawHighlightPass(ctx, scene, highlight.downstreamIds, palette.traceDown);
   drawHighlightPass(ctx, scene, singleton(highlight.hoveredId), [
@@ -501,6 +504,28 @@ const EMPTY_SET: ReadonlySet<string> = new Set();
 
 function singleton(objectId: string | null): ReadonlySet<string> {
   return objectId ? new Set([objectId]) : EMPTY_SET;
+}
+
+/**
+ * Redraws every node whose object has a classification tint, each in its
+ * group's color, in one scan. Like all override passes this flattens dashes
+ * and drops fills to translucent — acceptable for a highlight.
+ */
+function drawClassificationPass(
+  ctx: DrawContext,
+  scene: SceneGraph,
+  classification: ReadonlyMap<string, PaletteColor>,
+): void {
+  if (classification.size === 0) {
+    return;
+  }
+
+  for (const node of scene.nodes) {
+    const color = node.objectId !== null ? classification.get(node.objectId) : undefined;
+    if (color !== undefined) {
+      drawNode({ ...ctx, overrideColor: color, minWidthMm: ctx.minWidthMm * 2.5 }, scene, node);
+    }
+  }
 }
 
 /** Redraws every node representing one of `objectIds` in the given color, on top. */

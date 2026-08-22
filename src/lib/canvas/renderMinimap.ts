@@ -51,6 +51,7 @@ export async function renderMinimap(scene: SceneGraph, theme: Theme): Promise<Mi
     hoveredId: null,
     upstreamIds: new Set(),
     downstreamIds: new Set(),
+    classification: new Map(),
   });
   surface.flush();
 

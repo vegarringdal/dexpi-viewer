@@ -1,0 +1,390 @@
+<Model name="Profile" uri="http://www.dexpi.org/specification/Temp/Profile">
+  <Import prefix="Core" source="https://data.dexpi.org/models/2.0.0/Core.xml"/>
+  <Import prefix="MetaData" source="https://data.dexpi.org/models/2.0.0/MetaData.xml"/>
+  <ConcreteClass name="AggregatedStroke" superTypes="/Stroke">
+    <ReferenceProperty name="SimpleStrokes" isOrdered="true" isUnique="true" lower="0" oppositeLower="0">
+      <ClassReference type="/SimpleStroke"/>
+    </ReferenceProperty>
+    <Data property="MetaData/description">
+      <String>A :sp:name:`Stroke` that consists of :sp:element:`SimpleStrokes &lt;Profile.SimpleStroke&gt;`.</String>
+    </Data>
+  </ConcreteClass>
+  <AbstractClass name="Constraint"/>
+  <ConcreteClass name="LabelTemplate">
+    <DataProperty name="Alignment" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Core/Diagram.TextAlignment"/>
+    </DataProperty>
+    <DataProperty name="Color" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Core/Diagram.Color"/>
+    </DataProperty>
+    <DataProperty name="Font" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+    <DataProperty name="Index" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+    <DataProperty name="Position" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Core/Diagram.Point"/>
+    </DataProperty>
+    <DataProperty name="Rotation" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+    </DataProperty>
+    <DataProperty name="Size" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+    </DataProperty>
+    <DataProperty name="Text" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+  </ConcreteClass>
+  <Enumeration name="LineRounding">
+    <EnumerationLiteral name="Butt">
+      <Data property="MetaData/symbol">
+        <String>Butt</String>
+      </Data>
+    </EnumerationLiteral>
+    <EnumerationLiteral name="Round">
+      <Data property="MetaData/symbol">
+        <String>Round</String>
+      </Data>
+    </EnumerationLiteral>
+  </Enumeration>
+  <ConcreteClass name="LineStroke" superTypes="/SimpleStroke">
+    <DataProperty name="Color" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Core/Diagram.Color"/>
+      <Data property="MetaData/description">
+        <String>The color of the :sp:name:`LineStroke`.</String>
+      </Data>
+    </DataProperty>
+    <DataProperty name="DashArray" isOrdered="true" isUnique="false" lower="0">
+      <DataTypeReference type="Builtin/Double"/>
+      <Data property="MetaData/description">
+        <String>A pattern of gaps in millimeters, based on the same principle as the SVG attribute `stroke-dasharray &lt;https://developer.mozilla.org/de/docs/Web/SVG/Reference/Attribute/stroke-dasharray&gt;`_.
+
+- An empty :sp:name:`DashArray` corresponds to a solid line without any gaps.
+- Other than in SVG, a :sp:name:`DashArray` must contain an even number of values.</String>
+      </Data>
+    </DataProperty>
+    <DataProperty name="LateralOffset" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+      <Data property="MetaData/description">
+        <String>A lateral offset in millimeters of the stroke, i.e., an offset perpendicular to the drawing direction.
+
+- If LateralOffset is zero, the line is drawn without any offset.
+- If LateralOffset is positive, the line is drawn with an offset *to the right* w.r.t. the drawing direction.
+- If LateralOffset is negative, the line is drawn with an offset *to the left* w.r.t. the drawing direction.
+
+A typical application of LateralOffset could be to define an :sp:Element:`~Profile.AggregatedStroke` for a pipe with heat tracing:
+
+- The first :sp:name:`LineStroke`, corresponding to the actual pipe, would have LateralOffset zero.
+- The second :sp:name:`LineStroke`, corresponding to a dashed heat tracing line, would have a non-zero LateralOffset.</String>
+      </Data>
+    </DataProperty>
+    <DataProperty name="LineRounding" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="/LineRounding"/>
+      <Data property="MetaData/description">
+        <String>The appearance of the end of a line or a line section. This attribute corresponds to the SVG attributes `stroke-linecap &lt;https://developer.mozilla.org/de/docs/Web/SVG/Reference/Attribute/stroke-linecap&gt;`_ and `stroke-linejoin &lt;https://developer.mozilla.org/de/docs/Web/SVG/Reference/Attribute/stroke-linejoin&gt;`_\ :
+
+- The value :sp:element:`~Profile.LineRounding.Butt` corresponds to stroke-linecap="butt" and stroke-linejoin="miter".
+- The value :sp:element:`~Profile.LineRounding.Round` corresponds to stroke-linecap="round" and stroke-linejoin="round".</String>
+      </Data>
+    </DataProperty>
+    <DataProperty name="Offset" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+      <Data property="MetaData/description">
+        <String>An offset in millimeters of the pattern of gaps, using the same principle as the SVG attribute `stroke-dashoffset &lt;https://developer.mozilla.org/de/docs/Web/SVG/Reference/Attribute/stroke-dashoffset&gt;`_\ .</String>
+      </Data>
+    </DataProperty>
+    <DataProperty name="Width" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+      <Data property="MetaData/description">
+        <String>The width of the :sp:name:`LineStroke` in millimeters.</String>
+      </Data>
+    </DataProperty>
+    <Data property="MetaData/description">
+      <String>A :sp:name:`Stroke` that is drawn as a line, optionally with regular gaps.</String>
+    </Data>
+  </ConcreteClass>
+  <ConcreteClass name="NodePosition">
+    <DataProperty name="Directions" isOrdered="false" isUnique="false" lower="0">
+      <DataTypeReference type="Builtin/Double"/>
+    </DataProperty>
+    <DataProperty name="MaxCount" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Integer"/>
+    </DataProperty>
+    <DataProperty name="MinCount" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Integer"/>
+    </DataProperty>
+    <DataProperty name="Position" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Core/Diagram.Point"/>
+    </DataProperty>
+    <DataProperty name="Type" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="/NodePositionType"/>
+    </DataProperty>
+  </ConcreteClass>
+  <Enumeration name="NodePositionType">
+    <EnumerationLiteral name="Auxiliary"/>
+    <EnumerationLiteral name="Instrumentation"/>
+    <EnumerationLiteral name="Label"/>
+    <EnumerationLiteral name="Piping"/>
+  </Enumeration>
+  <ConcreteClass name="PropertyConstraint" superTypes="/Constraint">
+    <DataProperty name="ConstrainedType" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+    <DataProperty name="Lower" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Integer"/>
+    </DataProperty>
+    <DataProperty name="Property" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+    <DataProperty name="Type" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+    <DataProperty name="Upper" isOrdered="false" isUnique="false" lower="0" upper="1">
+      <DataTypeReference type="Builtin/Integer"/>
+    </DataProperty>
+  </ConcreteClass>
+  <ConcreteClass name="Rule">
+    <DataProperty name="ApplyForEach" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+    <DataProperty name="Conditions" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+    <DataProperty name="MessageTemplate" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+    <DataProperty name="Name" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+    <DataProperty name="Target" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+  </ConcreteClass>
+  <AbstractClass name="SimpleStroke" superTypes="/Stroke"/>
+  <AbstractClass name="Stroke">
+    <Data property="MetaData/description">
+      <String>A more flexible generalization of the :sp:element:`~Core.Diagram.Stroke` type in the :sp:element:`Core` model.</String>
+    </Data>
+  </AbstractClass>
+  <ConcreteClass name="Symbol">
+    <CompositionProperty name="Variants" isOrdered="false" lower="0">
+      <ClassReference type="/SymbolVariant"/>
+    </CompositionProperty>
+  </ConcreteClass>
+  <ConcreteClass name="SymbolCatalogue">
+    <CompositionProperty name="Symbols" isOrdered="false" lower="0">
+      <ClassReference type="/Symbol"/>
+    </CompositionProperty>
+  </ConcreteClass>
+  <ConcreteClass name="SymbolStroke" superTypes="/SimpleStroke">
+    <DataProperty name="LateralOffset" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+      <Data property="MetaData/description">
+        <String>A lateral offset in millimeters for the placement of symbols, i.e., an offset perpendicular to the drawing direction.
+
+- If LateralOffset is zero, the symbols are placed without any offset.
+- If LateralOffset is positive, the symbols are placed with an offset *to the right* w.r.t. the drawing direction.
+- If LateralOffset is negative, the symbols are plaved with an offset *to the left* w.r.t. the drawing direction.</String>
+      </Data>
+    </DataProperty>
+    <DataProperty name="MinEndDistance" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+      <Data property="MetaData/description">
+        <String>A minimal distance in millimeters to the end of a line at which a symbol is placed.</String>
+      </Data>
+    </DataProperty>
+    <DataProperty name="Offset" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+      <Data property="MetaData/description">
+        <String>The distance in millimeters from the start of a line and the placements of the first symbol.</String>
+      </Data>
+    </DataProperty>
+    <DataProperty name="Spacing" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+      <Data property="MetaData/description">
+        <String>The distance in millimeters between two placements of the symbol.</String>
+      </Data>
+    </DataProperty>
+    <ReferenceProperty name="Symbol" isOrdered="false" isUnique="false" lower="1" oppositeLower="0" upper="1">
+      <ClassReference type="/Symbol"/>
+      <Data property="MetaData/description">
+        <String>The symbol to be placed.</String>
+      </Data>
+    </ReferenceProperty>
+    <Data property="MetaData/description">
+      <String>A :sp:name:`Stroke` that is drawn by the repeated placement of a symbol.</String>
+    </Data>
+  </ConcreteClass>
+  <ConcreteClass name="SymbolUsage" superTypes="Core/Diagram.GraphicalElement">
+    <DataProperty name="IsMirrored" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Boolean"/>
+    </DataProperty>
+    <DataProperty name="Position" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Core/Diagram.Point"/>
+    </DataProperty>
+    <DataProperty name="Rotation" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+    </DataProperty>
+    <DataProperty name="ScaleX" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+    </DataProperty>
+    <DataProperty name="ScaleY" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+    </DataProperty>
+    <ReferenceProperty name="Symbol" isOrdered="false" isUnique="true" lower="1" oppositeLower="0" upper="1">
+      <ClassReference type="/Symbol"/>
+    </ReferenceProperty>
+  </ConcreteClass>
+  <ConcreteClass name="SymbolVariant" superTypes="Core/Diagram.Shape">
+    <DataProperty name="Condition" isOrdered="false" isUnique="false" lower="0" upper="1">
+      <DataTypeReference type="Builtin/String"/>
+    </DataProperty>
+    <CompositionProperty name="LabelTemplates" isOrdered="false" lower="0">
+      <ClassReference type="/LabelTemplate"/>
+    </CompositionProperty>
+    <DataProperty name="MaxX" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+    </DataProperty>
+    <DataProperty name="MaxY" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+    </DataProperty>
+    <DataProperty name="MinX" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+    </DataProperty>
+    <DataProperty name="MinY" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Double"/>
+    </DataProperty>
+    <DataProperty name="MirroringAllowed" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Boolean"/>
+    </DataProperty>
+    <CompositionProperty name="NodePositions" isOrdered="false" lower="0">
+      <ClassReference type="/NodePosition"/>
+    </CompositionProperty>
+    <DataProperty name="ResizingXAllowed" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Boolean"/>
+    </DataProperty>
+    <DataProperty name="ResizingYAllowed" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Boolean"/>
+    </DataProperty>
+    <DataProperty name="RotationAllowed" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Boolean"/>
+    </DataProperty>
+    <DataProperty name="VariantNumber" isOrdered="false" isUnique="false" lower="1" upper="1">
+      <DataTypeReference type="Builtin/Integer"/>
+    </DataProperty>
+  </ConcreteClass>
+  <Object type="/Rule">
+    <Data property="ApplyForEach">
+      <String>?symbolUsage</String>
+    </Data>
+    <Data property="Conditions">
+      <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
+?symbol Profile:Symbol.Variants ?symbolVariant.  
+?symbolVariant Profile:SymbolVariant.RotationAllowed false.
+?symbolUsage Profile:SymbolUsage.Rotation ?rotation.
+@notEqual(?rotation 0)</String>
+    </Data>
+    <Data property="MessageTemplate">
+      <String>{?symbol} does not allow rotation, but the {?symbolUsage} has Rotation={?rotation}.</String>
+    </Data>
+    <Data property="Name">
+      <String>invalid rotation</String>
+    </Data>
+    <Data property="Target">
+      <String>?symbolUsage</String>
+    </Data>
+  </Object>
+  <Object type="/Rule">
+    <Data property="ApplyForEach">
+      <String>?symbolUsage</String>
+    </Data>
+    <Data property="Conditions">
+      <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
+?symbol Profile:Symbol.Variants ?symbolVariant.  
+?symbolVariant Profile:SymbolVariant.ResizingYAllowed false.
+?symbolUsage Profile:SymbolUsage.ScaleY ?scaleY.
+@notEqual(?scaleY 1)</String>
+    </Data>
+    <Data property="MessageTemplate">
+      <String>{?symbol} does not allow scaling in y-direction, but the {?symbolUsage} has ScaleY={?scaleY}.</String>
+    </Data>
+    <Data property="Name">
+      <String>invalid scaling in y-direction</String>
+    </Data>
+    <Data property="Target">
+      <String>?symbolUsage</String>
+    </Data>
+  </Object>
+  <Object type="/Rule">
+    <Data property="ApplyForEach">
+      <String>?symbolUsage</String>
+    </Data>
+    <Data property="Conditions">
+      <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
+?symbol Profile:Symbol.Variants ?symbolVariant.  
+?symbolVariant Profile:SymbolVariant.ResizingXAllowed false.
+?symbolUsage Profile:SymbolUsage.ScaleX ?scaleX.
+@notEqual(?scaleX 1)</String>
+    </Data>
+    <Data property="MessageTemplate">
+      <String>{?symbol} does not allow scaling in x-direction, but the {?symbolUsage} has ScaleX={?scaleX}.</String>
+    </Data>
+    <Data property="Name">
+      <String>invalid scaling in x-direction</String>
+    </Data>
+    <Data property="Target">
+      <String>?symbolUsage</String>
+    </Data>
+  </Object>
+  <Object type="/Rule">
+    <Data property="ApplyForEach">
+      <String>?symbolUsage</String>
+    </Data>
+    <Data property="Conditions">
+      <String>?obj 
+    meta:type ?cls.
+
+?symbolForCls Profile:Symbol.Usage ?cls.
+
+?reprGroup Core:Diagram.RepresentationGroup.Represents ?obj;
+    Core:Diagram.RepresentationGroup.Groups ?reprTypeGroup.
+
+?reprTypeGroup meta:type Core:Diagram.Static;
+    Core:Diagram.RepresentationTypeGroup.Elements ?symbolUsage.
+
+?symbolUsage Profile:SymbolUsage.Symbol ?actualSymbol.
+
+@noValue(?actualSymbol Profile:Symbol.Usage ?cls).</String>
+    </Data>
+    <Data property="MessageTemplate">
+      <String>The {?symbolUsage} uses {?actualSymbol} to represent an {?obj}. Instead, one of these must be used: {?symbolForCls}.</String>
+    </Data>
+    <Data property="Name">
+      <String>wrong symbol usage</String>
+    </Data>
+    <Data property="Target">
+      <String>?symbolUsage</String>
+    </Data>
+  </Object>
+  <Object type="/Rule">
+    <Data property="ApplyForEach">
+      <String>?symbolUsage</String>
+    </Data>
+    <Data property="Conditions">
+      <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
+?symbol Profile:Symbol.Variants ?symbolVariant.  
+?symbolVariant Profile:SymbolVariant.MirroringAllowed false.
+?symbolUsage Profile:SymbolUsage.IsMirrored true.</String>
+    </Data>
+    <Data property="MessageTemplate">
+      <String>{?symbol} does not allow mirroring, but the {?symbolUsage} has IsMirrored=true.</String>
+    </Data>
+    <Data property="Name">
+      <String>invalid mirroring</String>
+    </Data>
+    <Data property="Target">
+      <String>?symbolUsage</String>
+    </Data>
+  </Object>
+</Model>
