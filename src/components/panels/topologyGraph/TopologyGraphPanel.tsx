@@ -1,10 +1,10 @@
 import { PanelBody } from "@tredespace/ui/dockable";
 import { type JSX, useState } from "react";
+import { useSvgPanZoom } from "../../hooks/useSvgPanZoom.ts";
 import { GraphLegend } from "./GraphLegend.tsx";
 import { GraphToolbar } from "./GraphToolbar.tsx";
 import { GraphViewport } from "./GraphViewport.tsx";
 import { usePinOnRecenter } from "./usePinOnRecenter.ts";
-import { useSvgPanZoom } from "./useSvgPanZoom.ts";
 import { useTopologyGraph } from "./useTopologyGraph.ts";
 
 // -----------------------------------------------------------------------------

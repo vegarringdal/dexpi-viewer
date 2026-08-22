@@ -9,4 +9,5 @@ export const PANEL_IDS = {
   minimap: "minimap",
   connections: "connections",
   highlight: "highlight",
+  inspect: "inspect",
 } as const;

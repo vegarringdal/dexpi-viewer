@@ -7,6 +7,7 @@ import {
   IconMap,
   IconPlugConnected,
   IconRestore,
+  IconSchema,
   IconSettings,
 } from "@tabler/icons-react";
 import { useDockLayout, usePanelContext } from "@tredespace/ui/dockable";
@@ -42,6 +43,14 @@ export function PanelsSection(): JSX.Element {
         tooltip="Semantic topology graph: flow, containment and references"
         shortcut="app.topologyGraph"
         onClick={panelToggle(PANEL_IDS.topologyGraph)}
+      />
+      <RibbonButton
+        icon={<IconSchema />}
+        label="Inspect"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.inspect)}
+        tooltip="UML-style diagram of the selected object: all data and one-hop relations (debug)"
+        onClick={panelToggle(PANEL_IDS.inspect)}
       />
       <RibbonButton
         icon={<IconListDetails />}

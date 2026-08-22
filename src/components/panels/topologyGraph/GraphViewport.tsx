@@ -3,10 +3,10 @@ import type { GraphLayout } from "../../../lib/graph/layeredLayout.ts";
 import { computeLinkedTints } from "../../../lib/graph/linkedTints.ts";
 import type { SemanticNode } from "../../../lib/graph/semanticGraph.ts";
 import { selectionState } from "../../../state/selection/selection.state.ts";
+import type { ViewTransform } from "../../hooks/useSvgPanZoom.ts";
 import { GraphEdgeView } from "./GraphEdgeView.tsx";
 import { GraphNodeView } from "./GraphNodeView.tsx";
 import { topologyGraphState } from "./topologyGraph.state.ts";
-import type { ViewTransform } from "./useSvgPanZoom.ts";
 
 // -----------------------------------------------------------------------------
 // Types

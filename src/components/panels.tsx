@@ -4,6 +4,7 @@ import { CanvasStage } from "../lib/canvas/CanvasStage.tsx";
 import { ConnectionsPanel } from "./panels/ConnectionsPanel.tsx";
 import { HighlightPanel } from "./panels/HighlightPanel.tsx";
 import { IssuesPanel } from "./panels/IssuesPanel.tsx";
+import { InspectPanel } from "./panels/inspect/InspectPanel.tsx";
 import { MinimapPanel } from "./panels/MinimapPanel.tsx";
 import { PropertiesPanel } from "./panels/PropertiesPanel.tsx";
 import { TopologyPanel } from "./panels/TopologyPanel.tsx";
@@ -43,6 +44,13 @@ export const viewerPanels = [
     minWidth: 280,
     home: "center",
     component: TopologyGraphPanel,
+  }),
+  definePanel({
+    id: PANEL_IDS.inspect,
+    title: "Inspect",
+    minWidth: 280,
+    home: "center",
+    component: InspectPanel,
   }),
   definePanel({ id: PANEL_IDS.properties, title: "Properties", minWidth: 220, component: PropertiesPanel }),
   definePanel({

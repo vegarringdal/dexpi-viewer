@@ -29,10 +29,21 @@ export function App(): JSX.Element {
         [
           tabs([PANEL_IDS.topology, PANEL_IDS.issues], { id: "left" }),
           tabs([PANEL_IDS.drawing], { id: "center" }),
+          // All panels are present by default (director's layout): Topology
+          // graph and Inspect stack in their own column, collapsed to their
+          // tab strips until needed — the drawing takes their width.
           split(
             "column",
             [
-              tabs([PANEL_IDS.properties, PANEL_IDS.connections, PANEL_IDS.settings], {
+              tabs([PANEL_IDS.topologyGraph], { id: "graphTop", collapsed: true }),
+              tabs([PANEL_IDS.inspect], { id: "graphBottom", collapsed: true }),
+            ],
+            [50, 50],
+          ),
+          split(
+            "column",
+            [
+              tabs([PANEL_IDS.properties, PANEL_IDS.connections, PANEL_IDS.highlight, PANEL_IDS.settings], {
                 id: "right",
               }),
               tabs([PANEL_IDS.minimap], { id: "rightBottom" }),
@@ -40,7 +51,7 @@ export function App(): JSX.Element {
             [69, 31],
           ),
         ],
-        [26, 50, 24],
+        [13, 45, 30, 12],
       ),
     ]),
   }));

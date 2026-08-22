@@ -442,6 +442,37 @@ that grow, and record scope changes here.
   stale "Tennessee Eastman" hotkey description was fixed. Verified
   against the sheet's official SVG rendering — layout matches; the
   missing sheet border is the "/Border" well-known shape (below).
+- **2026-08-22** Inspect panel (director's idea: "reading XML and how it's
+  connected can be hard" — a debug panel): a UML-style instance diagram of
+  the selected object. Center card shows the object's FULL raw Data plus
+  persistent ids; neighbor cards show every one-hop relation with the edge
+  labeled by the actual property name — outgoing References, reverse
+  referenced-by (from PlantModel.referencedBy, the relation raw XML hides
+  best), containment parent/children (dashed), and published-model targets
+  as profile-instance stub cards carrying the instance's data (violet).
+  Click a neighbor to re-center (syncs the global selection both ways).
+  Model+layout are pure and unit-tested (src/lib/graph/objectDiagram.ts +
+  objectDiagramLayout.ts: three-column deterministic layout, 20-per-side
+  cap with a "+n more" stub, neighbor rows truncated at 5); the panel
+  (src/components/panels/inspect/) reuses useSvgPanZoom, which moved to
+  src/components/hooks/ now that a second panel consumes it. Registered
+  like the Topology graph: center-home dockable, ribbon Panels toggle.
+  Same-day refinements (director feedback): cards show ALL rows (no
+  truncation; the 20-per-level cap stays); clicking a neighbor pins the
+  clicked card's screen position for the new center so the view never
+  jumps (simplified usePinOnRecenter pattern, panel-local); a depth
+  selector (1–3 levels, like the Topology graph's) chains incoming
+  relations leftward and outgoing rightward — the model gained
+  key/fromKey linkage so deep edges connect to their actual source card,
+  with a global place-once rule that also breaks reference cycles. The
+  DEFAULT layout now includes every panel (director's screenshot):
+  four columns — Explorer|Validation, Drawing, a Topology-graph/Inspect
+  column whose two groups start `collapsed: true` (rails; the drawing
+  takes their width until the chevron expands them), and
+  Properties|Connections|Highlight|Settings over Minimap; the side
+  columns are deliberately narrow (13/12 weights vs 45 for the drawing —
+  director: "half the width"). Existing users keep their persisted
+  layout until ribbon Reset.
 - **2026-08-22** Semantic signal-line styling (src/lib/dexpi/signalLines.ts,
   applied at scene build): the official renderings override a signal-family
   ConnectorLine's authored stroke (uniformly LongDash in the XML) by the

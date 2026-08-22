@@ -55,6 +55,13 @@ selected objects highlight in the drawing, hovering any object row in
 a panel highlights it on the canvas, and right-clicking tree rows opens
 copy options (label / type / label+type+id, one row per object).
 
+An **Inspect** panel (ribbon toggle) draws a UML-style instance diagram
+of the selected object for debugging: its full raw data in a center
+card, and every one-hop relation — references, referenced-by,
+containment, DISC-profile instance stubs — as neighbor cards with edges
+labeled by the actual property names; clicking a neighbor re-centers on
+it.
+
 Two finishing pieces: **labels resolve their TextTemplates** — text
 comes from live attribute values (with proper unit symbols: barg, °C,
 m³/h), beating stale literal snapshots; resolution is all-or-nothing,

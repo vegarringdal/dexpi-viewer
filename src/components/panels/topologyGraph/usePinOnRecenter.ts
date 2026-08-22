@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { GraphLayout } from "../../../lib/graph/layeredLayout.ts";
-import type { ViewTransform } from "./useSvgPanZoom.ts";
+import type { ViewTransform } from "../../hooks/useSvgPanZoom.ts";
 import type { TopologyGraphView } from "./useTopologyGraph.ts";
 
 // -----------------------------------------------------------------------------

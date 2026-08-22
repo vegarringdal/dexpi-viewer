@@ -32,6 +32,10 @@ export function getLoadedDocument(): DexpiDocument | null {
   return loadedDocument;
 }
 
+export function getLoadedProfile(): DiscProfile | null {
+  return loadedProfile;
+}
+
 // -----------------------------------------------------------------------------
 // Simple setters
 // -----------------------------------------------------------------------------
