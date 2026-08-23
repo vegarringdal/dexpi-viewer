@@ -1,5 +1,7 @@
 # Exports
 
+![The highlighted Export section of the ribbon](images/export-ribbon.png)
+
 Ribbon → Export:
 
 - **SVG** — a spec-mapped, standalone SVG of the drawing with full visual fidelity.

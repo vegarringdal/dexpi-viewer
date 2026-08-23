@@ -2,7 +2,9 @@
 
 ## Navigation
 
-- Mouse wheel zooms at the cursor; drag pans. Ribbon → View has **Fit**, zoom in/out and **100%** (with hotkeys).
+![The highlighted View section of the ribbon: Fit, zoom, Dark and B/W](images/view-ribbon.png)
+
+- Mouse wheel zooms at the cursor; drag pans. Ribbon → View has **Fit**, zoom in/out and **100%** (with hotkeys), plus the **Dark** theme and **B / W** monochrome toggles.
 - The **Minimap** shows the whole sheet with a live viewport rectangle — click or drag it to navigate.
 - Double-clicking objects in panels zooms the drawing to them.
 

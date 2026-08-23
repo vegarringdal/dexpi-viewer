@@ -125,6 +125,29 @@ await page.waitForTimeout(4500);
   await clearAnnotations();
 }
 
+// Ribbon strips: View, Export, and Panels+Reset sections called out.
+{
+  const RIBBON_CLIP = { x: 0, y: 0, width: 1600, height: 134 };
+  const fit = await boxOf(page.getByRole("button", { name: /^fit$/i }).first());
+  const bw = await boxOf(page.getByRole("button", { name: /b \/ w/i }).first());
+  await annotate([union(fit, bw)]);
+  await page.screenshot({ path: `${OUT}view-ribbon.png`, clip: RIBBON_CLIP });
+  await clearAnnotations();
+
+  const pdf = await boxOf(page.getByRole("button", { name: /^pdf$/i }).first());
+  const report = await boxOf(page.getByRole("button", { name: /^report$/i }).first());
+  await annotate([union(pdf, report)]);
+  await page.screenshot({ path: `${OUT}export-ribbon.png`, clip: RIBBON_CLIP });
+  await clearAnnotations();
+
+  const explorer = await boxOf(page.getByRole("button", { name: /^explorer$/i }).first());
+  const validation = await boxOf(page.getByRole("button", { name: /^validation$/i }).first());
+  const reset = await boxOf(page.getByRole("button", { name: /^reset$/i }).first());
+  await annotate([union(explorer, validation), reset]);
+  await page.screenshot({ path: `${OUT}panels-ribbon.png`, clip: RIBBON_CLIP });
+  await clearAnnotations();
+}
+
 // Validation panel with a callout on the filter/severity-config toolbar.
 await page.getByText("Validation", { exact: false }).nth(1).click().catch(() => {});
 await page.waitForTimeout(600);
@@ -256,6 +279,35 @@ await page.waitForTimeout(500);
   await annotate([toggles, bw]);
   await page.screenshot({ path: `${OUT}highlight-dim.png` });
   await clearAnnotations();
+}
+
+// Panel drag-and-drop: hold a tab drag over the drawing so the dock's
+// drop compass + preview region show, capture, then cancel. Runs last so
+// an accidental drop cannot disturb the captures above.
+{
+  await page.getByText("Dim others", { exact: true }).click();
+  await page.getByText("Black & white drawing", { exact: true }).click();
+  await page.getByText("Signal & instrument lines", { exact: true }).first().click();
+  await page.waitForTimeout(300);
+  await page.getByText("Off", { exact: true }).last().click();
+  await page.waitForTimeout(600);
+  const tab = await boxOf(page.getByText(/^Validation \(/).first());
+  const canvas = await page.locator("canvas").first().boundingBox();
+  const toX = canvas.x + canvas.width / 2;
+  const toY = canvas.y + canvas.height / 2;
+  await page.mouse.move(tab.x + tab.w / 2, tab.y + tab.h / 2);
+  await page.mouse.down();
+  for (let i = 1; i <= 12; i++) {
+    await page.mouse.move(
+      tab.x + tab.w / 2 + ((toX - tab.x - tab.w / 2) * i) / 12,
+      tab.y + tab.h / 2 + ((toY - tab.y - tab.h / 2) * i) / 12,
+    );
+    await page.waitForTimeout(60);
+  }
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: `${OUT}panel-drag.png` });
+  await page.keyboard.press("Escape");
+  await page.mouse.up();
 }
 
 console.log("done");

@@ -43,6 +43,18 @@ main h1 { margin-top:0; }
 main a { color:var(--accent); }
 td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 .footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font-size:.8rem; }
+.nav-toggle, .mobile-bar, .backdrop { display:none; }
+@media (max-width: 820px) {
+  body { display:block; }
+  .mobile-bar { display:flex; align-items:center; gap:.9rem; position:fixed; top:0; left:0; right:0; z-index:30; background:var(--side); border-bottom:1px solid var(--line); padding:.55rem .9rem; font-weight:600; font-size:.95rem; }
+  .mobile-bar label { display:flex; flex-direction:column; justify-content:center; gap:5px; width:38px; height:38px; padding:.45rem .5rem; border-radius:8px; cursor:pointer; }
+  .mobile-bar label:active { background:var(--line); }
+  .mobile-bar label span { display:block; width:22px; height:2px; background:var(--fg); border-radius:2px; }
+  nav { position:fixed; top:0; left:0; bottom:0; height:100dvh; width:min(78vw, 280px); z-index:50; transform:translateX(-100%); transition:transform .25s ease; box-shadow:0 0 24px rgba(15,23,42,.35); }
+  .nav-toggle:checked ~ nav { transform:none; }
+  .nav-toggle:checked ~ .backdrop { display:block; position:fixed; inset:0; z-index:40; background:rgba(15,23,42,.45); }
+  main { padding:4.3rem 1.1rem 3rem; }
+}
 `;
 
 rmSync(OUT, { recursive: true, force: true });
@@ -85,7 +97,10 @@ for (const page of pages) {
     `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${titles.get(page)} — DEXPI Viewer manual</title><style>${CSS}</style></head>
-<body><nav><h2><a href="index.html" style="padding:0">DEXPI Viewer</a></h2>${nav}
+<body><input class="nav-toggle" id="nav-toggle" type="checkbox">
+<header class="mobile-bar"><label for="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></label>DEXPI Viewer manual</header>
+<label class="backdrop" for="nav-toggle" aria-hidden="true"></label>
+<nav><h2><a href="index.html" style="padding:0">DEXPI Viewer</a></h2>${nav}
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
 <main>${html}<div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main></body></html>
 `,

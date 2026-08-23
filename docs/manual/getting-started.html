@@ -20,8 +20,23 @@ main h1 { margin-top:0; }
 main a { color:var(--accent); }
 td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 .footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font-size:.8rem; }
+.nav-toggle, .mobile-bar, .backdrop { display:none; }
+@media (max-width: 820px) {
+  body { display:block; }
+  .mobile-bar { display:flex; align-items:center; gap:.9rem; position:fixed; top:0; left:0; right:0; z-index:30; background:var(--side); border-bottom:1px solid var(--line); padding:.55rem .9rem; font-weight:600; font-size:.95rem; }
+  .mobile-bar label { display:flex; flex-direction:column; justify-content:center; gap:5px; width:38px; height:38px; padding:.45rem .5rem; border-radius:8px; cursor:pointer; }
+  .mobile-bar label:active { background:var(--line); }
+  .mobile-bar label span { display:block; width:22px; height:2px; background:var(--fg); border-radius:2px; }
+  nav { position:fixed; top:0; left:0; bottom:0; height:100dvh; width:min(78vw, 280px); z-index:50; transform:translateX(-100%); transition:transform .25s ease; box-shadow:0 0 24px rgba(15,23,42,.35); }
+  .nav-toggle:checked ~ nav { transform:none; }
+  .nav-toggle:checked ~ .backdrop { display:block; position:fixed; inset:0; z-index:40; background:rgba(15,23,42,.45); }
+  main { padding:4.3rem 1.1rem 3rem; }
+}
 </style></head>
-<body><nav><h2><a href="index.html" style="padding:0">DEXPI Viewer</a></h2><a href="index.html">DEXPI Viewer manual</a>
+<body><input class="nav-toggle" id="nav-toggle" type="checkbox">
+<header class="mobile-bar"><label for="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></label>DEXPI Viewer manual</header>
+<label class="backdrop" for="nav-toggle" aria-hidden="true"></label>
+<nav><h2><a href="index.html" style="padding:0">DEXPI Viewer</a></h2><a href="index.html">DEXPI Viewer manual</a>
 <a href="getting-started.html" class="active">Getting started</a>
 <a href="viewing.html">Viewing the drawing</a>
 <a href="validation.html">Validation</a>
@@ -43,7 +58,18 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 </ul>
 <p>Only the DEXPI 2.0 XML serialization is supported (Proteus 4.x files from the DEXPI 1.x era are out of scope).</p>
 <h2>The workbench</h2>
-<p>Dockable panels around a central drawing: Explorer and Validation on the left, Properties / Connections / Highlight / Settings on the right with the Minimap below, and Topology graph + Inspect as collapsed rails next to the drawing (click their chevron to expand). Every panel can be dragged, tabbed, floated, resized, or toggled from ribbon → Panels; the layout persists across sessions and <strong>Reset</strong> restores the default.</p>
+<p><img src="images/panels-ribbon.png" alt="The highlighted Panels section toggles panels; Reset restores the default layout"></p>
+<p>Dockable panels around a central drawing: Explorer and Validation on the left, Properties / Connections / Highlight / Settings on the right with the Minimap below, and Topology graph + Inspect as collapsed rails next to the drawing (click their chevron to expand).</p>
+<p>The panel shell is the <a href="https://tredespace.com/docs/widgets">tredespace UI</a> workbench, so every panel is fully rearrangeable:</p>
+<p><img src="images/panel-drag.png" alt="Dragging the Validation tab over the drawing: the compass picks the dock side and the blue region previews where the panel will land"></p>
+<ul>
+<li><strong>Drag</strong> a panel by its tab to dock it anywhere — side by side, stacked, or dropped onto another panel to form a <strong>tab group</strong>.</li>
+<li><strong>Float</strong> a panel out of the dock into its own dialog window by dragging it free; re-dock it the same way.</li>
+<li><strong>Collapse</strong> a panel group to a slim rail with the chevron in its header (Topology graph and Inspect start collapsed) and click the rail to expand it; the <code>▾</code> in a group header shrinks or restores the group in place.</li>
+<li><strong>Resize</strong> any column or row by dragging the splitters between panels; close a panel with its tab&#39;s <code>×</code>.</li>
+<li>Toggle any panel on or off from ribbon → <strong>Panels</strong>.</li>
+</ul>
+<p>The layout persists across sessions; if you get lost, ribbon → <strong>Reset</strong> restores the default layout.</p>
 <h2>Status bar</h2>
 <p>File name and size, object count, loaded profile, zoom, and the cursor position in drawing millimetres.</p>
 <div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main></body></html>

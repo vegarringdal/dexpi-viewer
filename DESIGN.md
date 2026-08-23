@@ -532,13 +532,35 @@ that grow, and record scope changes here.
   validation.png (filter/severity toolbar), inspect.png (depth select +
   Fit), topology.png (mode/depth/edge/show toolbar), underlay.png
   (underlay toolbar, with arrow) and highlight-dim.png (panel toggles +
-  ribbon B/W button); image alt texts name what the callout points at. Same round fixed two script bugs: the Fit clicks
+  ribbon B/W button); image alt texts name what the callout points at.
+  Second round added ribbon-strip callout images (clip of the ribbon
+  only): view-ribbon.png (View section, in viewing.md), export-ribbon.png
+  (Export section, in export.md) and panels-ribbon.png (Panels section +
+  Reset, in getting-started.md), and getting-started's workbench section
+  now explains the tredespace UI dock (link to tredespace.com/docs/widgets):
+  drag-to-dock/tab-group, drag-out to a floating dialog, collapse-to-rail
+  chevron + in-place ▾ shrink (probed live: ▾ is a collapse toggle, not a
+  menu), splitter resize, and ribbon → Reset for the default layout.
+  panel-drag.png (director's ask) captures a live tab drag mid-gesture —
+  mouse.down on the Validation tab, stepped moves to the drawing center,
+  screenshot while the dock compass + blue drop preview are showing, then
+  Escape to cancel; it runs last in the script so a stray drop can't
+  disturb the other captures, with highlight/B&W/dim reset first so the
+  drawing shows normal colors. Same round fixed two script bugs: the Fit clicks
   matched three buttons (strict-mode error swallowed by .catch, so Fit
   silently never ran) — now .first() targets the ribbon; and the
   selection-halo block reused the mm→screen mapping computed before the
   Inspect/Topology rails expanded — it now remaps against the current
   canvas box, selects pump D-20PA001 at (170, 254) mm before zooming,
   and clamps the clip inside the canvas.
+- **2026-08-23** Manual is mobile-responsive (director: "people might
+  open documentation on mobile — hamburger/side panel"): below 820px
+  the sidebar becomes an off-canvas drawer behind a fixed hamburger
+  bar, driven by a pure-CSS checkbox toggle — no JavaScript, because
+  the site is multi-page (following a link loads a fresh page with the
+  drawer closed) and a full-screen backdrop label closes it in place.
+  Desktop layout unchanged; tables already scroll horizontally and
+  images cap at 100% width.
 - **2026-08-22** Properties panel gained an "Issues (n)" section below
   Sub-components (director: an element's findings should be obvious when
   you click it): the selected object's validation findings with severity
