@@ -3,7 +3,12 @@ import { Checkbox, Select, type SelectOption } from "@tredespace/ui/widgets";
 import { type JSX, useMemo } from "react";
 import { classifyColor, getScenePalette } from "../../lib/canvas/scenePalette.ts";
 import { buildClassificationGroups, type HighlightMode } from "../../lib/dexpi/classification.ts";
-import { setHighlightMode, toggleHighlightGroup } from "../../state/highlight/highlight.actions.ts";
+import {
+  setHighlightDimOthers,
+  setHighlightMode,
+  setHighlightMonochrome,
+  toggleHighlightGroup,
+} from "../../state/highlight/highlight.actions.ts";
 import { highlightState } from "../../state/highlight/highlight.state.ts";
 import { themeState } from "../../state/theme/theme.state.ts";
 import { getLoadedDocument } from "../../state/viewer/viewer.actions.ts";
@@ -47,7 +52,7 @@ function cssColor(color: readonly [number, number, number, number]): string {
  */
 export function HighlightPanel(): JSX.Element {
   const { file, docRevision } = viewerState.use();
-  const { mode, groups, hiddenKeys } = highlightState.use();
+  const { mode, groups, hiddenKeys, monochrome, dimOthers } = highlightState.use();
   const { theme } = themeState.use();
   const palette = getScenePalette(theme);
 
@@ -95,6 +100,19 @@ export function HighlightPanel(): JSX.Element {
           onChange={(value) => setHighlightMode(isHighlightMode(value) ? value : "off")}
         />
       </div>
+      <Checkbox
+        checked={monochrome}
+        onChange={setHighlightMonochrome}
+        label="Black & white drawing"
+        tooltip="Render all content in ink only, so highlight tints never mix with the file's own colors (also on the ribbon: View → B/W)"
+      />
+      <Checkbox
+        checked={dimOthers}
+        onChange={setHighlightDimOthers}
+        label="Dim others"
+        disabled={mode === "off"}
+        tooltip="Fade everything outside the highlighted groups so the tints stand out"
+      />
       {mode !== "off" && groups.length === 0 && (
         <div className="text-slate-500 text-xs">No {MODE_LABELS[mode]} data in this document.</div>
       )}

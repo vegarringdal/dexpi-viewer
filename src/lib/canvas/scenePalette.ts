@@ -15,6 +15,8 @@ export type ScenePalette = Readonly<{
   grid: PaletteColor;
   ink: PaletteColor;
   accent: PaletteColor;
+  /** Marker-pen yellow: the selection halo stroke and text backdrop. */
+  selectionFill: PaletteColor;
   /** Upstream trace overlay (amber). */
   traceUp: PaletteColor;
   /** Downstream trace overlay (green). */
@@ -35,10 +37,12 @@ const DARK_PALETTE: ScenePalette = {
   grid: [1, 1, 1, 0.045],
   ink: [0.886, 0.91, 0.941, 1],
   accent: [0.376, 0.647, 0.98, 1],
+  selectionFill: [1, 0.85, 0.3, 0.55],
   traceUp: [0.98, 0.75, 0.14, 1],
   traceDown: [0.29, 0.87, 0.5, 1],
+  // No blue in the ramp — selection is blue and must stay unmistakable.
   classify: [
-    [0.4, 0.65, 1, 1], // blue
+    [1, 0.42, 0.45, 1], // crimson
     [1, 0.62, 0.26, 1], // orange
     [0.2, 0.8, 0.75, 1], // teal
     [0.93, 0.45, 0.85, 1], // magenta
@@ -55,10 +59,12 @@ const LIGHT_PALETTE: ScenePalette = {
   grid: [0, 0, 0, 0.05],
   ink: [0.118, 0.161, 0.231, 1],
   accent: [0.145, 0.388, 0.922, 1],
+  selectionFill: [1, 0.84, 0.2, 0.7],
   traceUp: [0.85, 0.55, 0.0, 1],
   traceDown: [0.09, 0.64, 0.29, 1],
+  // No blue in the ramp — selection is blue and must stay unmistakable.
   classify: [
-    [0.13, 0.42, 0.87, 1], // blue
+    [0.8, 0.16, 0.25, 1], // crimson
     [0.85, 0.42, 0.06, 1], // orange
     [0.05, 0.58, 0.53, 1], // teal
     [0.78, 0.18, 0.63, 1], // magenta

@@ -1,6 +1,6 @@
 # Getting started
 
-![The workbench with a DISC example sheet loaded](images/overview.png)
+![The workbench with a DISC example sheet loaded; the highlighted File section opens files and profiles](images/overview.png)
 
 ## Opening files
 

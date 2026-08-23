@@ -2,7 +2,7 @@
 
 A UML-style instance diagram of the selected object — the debug view for "how is this connected", without reading raw XML.
 
-![Inspect panel at depth 2](images/inspect.png)
+![Inspect panel at depth 2; the highlighted controls set the neighbour depth and refit the view](images/inspect.png)
 
 - The **center card** shows the object's complete raw data — every property, including ones carrying `<Undefined/>` values (shown dimmed, never hidden).
 - **Neighbor cards** show every relation with the edge labeled by the actual property name: outgoing References (right), reverse *referenced-by* and the containment parent (left), component children, and DISC-profile instance stubs (violet) carrying the published instance's data.

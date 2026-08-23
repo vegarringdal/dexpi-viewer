@@ -2,7 +2,7 @@
 
 Every loaded document is validated immediately; the Validation tab shows the count and auto-focuses when a document has findings.
 
-![The Validation panel](images/validation.png)
+![The Validation panel; the highlighted toolbar filters by severity and opens the severity configuration](images/validation.png)
 
 ## Rule families
 

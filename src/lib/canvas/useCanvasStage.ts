@@ -148,6 +148,8 @@ export function useCanvasStage(): CanvasStageHandles {
         minWidthMm: rendering.minStrokePx / Math.max(viewport.scale, 1e-9),
         widthScale: rendering.strokeWidthScale,
         hidePaper,
+        monochrome: highlight.monochrome,
+        selectionTextRect: rendering.selectionTextRect,
       };
       const picture = scenePicture(rt, doc.scene, palette, options);
       canvas.clear(ck.Color4f(...palette.background));
@@ -167,6 +169,7 @@ export function useCanvasStage(): CanvasStageHandles {
         upstreamIds: new Set(trace.upstreamIds),
         downstreamIds: new Set(trace.downstreamIds),
         classification,
+        dimOthers: highlight.dimOthers,
       });
       if (underlay.placement === "over") {
         drawUnderlay(rt, canvas, doc.scene.bounds);
@@ -259,7 +262,7 @@ export function useCanvasStage(): CanvasStageHandles {
     palette: ReturnType<typeof getScenePalette>,
     options: SceneDrawOptions,
   ): SkPicture | null {
-    const key = `${viewerState.get().docRevision}:${themeState.get().theme}:${options.minWidthMm.toFixed(5)}:${options.widthScale}:${options.hidePaper === true}`;
+    const key = `${viewerState.get().docRevision}:${themeState.get().theme}:${options.minWidthMm.toFixed(5)}:${options.widthScale}:${options.hidePaper === true}:${options.monochrome === true}`;
     if (runtime.picture && runtime.pictureKey === key) {
       return runtime.picture;
     }

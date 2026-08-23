@@ -81,8 +81,24 @@ export function buildClassificationGroups(
   }
 
   if (mode === "signal") {
-    const ids = [...doc.plant.byId.values()].filter((n) => isSignalType(n.typeName)).map((n) => n.id);
-    return ids.length > 0 ? [{ key: "signal", label: "Signal & instrument lines", objectIds: ids }] : [];
+    // One group per signal SEMANTICS, so each type highlights in its own
+    // color: the SignalConveyingFunctionTypeRepresentation value where the
+    // file carries one, else the bare class name (MeasuringLineFunction…).
+    const groups = new Map<string, string[]>();
+    for (const node of doc.plant.byId.values()) {
+      if (!isSignalType(node.typeName)) {
+        continue;
+      }
+
+      const representation = node.attributes.find((a) =>
+        a.name.endsWith("SignalConveyingFunctionTypeRepresentation"),
+      )?.value;
+      const key = representation ?? node.typeName;
+      groups.set(key, [...(groups.get(key) ?? []), node.id]);
+    }
+    return [...groups.entries()]
+      .map(([key, objectIds]) => ({ key, label: key, objectIds }))
+      .sort((a, b) => b.objectIds.length - a.objectIds.length || a.key.localeCompare(b.key));
   }
 
   const attribute = MODE_ATTRIBUTE[mode];

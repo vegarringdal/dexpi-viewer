@@ -462,6 +462,35 @@ that grow, and record scope changes here.
   silently as a normal-looking stub. buildObjectDiagram takes an
   issuesById map (panel builds it from getEffectiveIssues, so severity
   overrides apply); DiagramCard gained severity/issueRows/broken.
+- **2026-08-23** Highlight visibility follow-ups (director): (5) a "Dim
+  others" checkbox in the Highlight panel (disabled while mode is off)
+  draws a paper-colored veil (alpha 0.8) over the sheet BEFORE the
+  highlight passes, so classification/trace/selection repaint their
+  members at full strength on a faded drawing — tints stand out
+  dramatically; (6) Black & white got a BIG stateful ribbon button
+  (View → B/W, IconContrast, selected-state visible) sharing the same
+  highlightState.monochrome as the panel checkbox.
+- **2026-08-23** Selection & Highlight refinements (four director asks):
+  (1) selection gets a marker-pen YELLOW treatment under the blue
+  re-stroke — first shipped as a bounding-box backdrop, revised same
+  day on director feedback ("rect highlights too big an area"): now a
+  GEOMETRY-FOLLOWING halo (the selected nodes re-stroked at 7× the
+  min-width clamp in palette.selectionFill) plus a filled yellow rect
+  behind TEXT only (glyph doubling reads blurry; the rect is computed
+  from the measured line block, rotates with the text, and has a
+  Settings → Rendering toggle "Backdrop behind selected text",
+  persisted). Highlight/selection re-strokes now PRESERVE dash
+  patterns (previously forced solid) — a selected heat-traced pipe
+  keeps its dashed trace distinguishable from the pipe itself; (2) the classification ramp no longer contains blue
+  (first color is now crimson) so tints can never be mistaken for the
+  blue selection; (3) the signal Highlight mode groups PER SEMANTICS
+  (SignalConveyingFunctionTypeRepresentation value, falling back to the
+  bare class name) — each signal type gets its own legend entry, color
+  and visibility toggle; (4) a "Black & white drawing" toggle in the
+  Highlight panel renders all content in ink/paper only
+  (SceneDrawOptions.monochrome through adaptColor, near-white stays
+  paper so masking fills keep masking; part of the picture cache key) —
+  file colors never mix with highlight tints.
 - **2026-08-22** Manual gained a "Conventions beyond the spec" page
   (director's ask): documents every place the viewer renders/validates
   by empirically-recovered convention because NO spec exists — signal-
@@ -493,6 +522,23 @@ that grow, and record scope changes here.
   (wiki icon, director's ask) and an About-tab link. Table cells escape
   angle brackets — label-template placeholders like <AlarmValue> were
   being eaten as HTML on the first pass.
+- **2026-08-23** Screenshot callouts (director's ask: "yellow/transparent
+  rect and/or arrow, to show what section we are talking about"):
+  generateDocScreenshots.mjs gained an annotate() helper that injects
+  orange-bordered translucent rects (plus optional SVG arrows) over the
+  live page before capture, positioned from Playwright boundingBox() of
+  the real controls — so callouts track the UI instead of drifting.
+  Applied to overview.png (ribbon File section, for getting-started),
+  validation.png (filter/severity toolbar), inspect.png (depth select +
+  Fit), topology.png (mode/depth/edge/show toolbar), underlay.png
+  (underlay toolbar, with arrow) and highlight-dim.png (panel toggles +
+  ribbon B/W button); image alt texts name what the callout points at. Same round fixed two script bugs: the Fit clicks
+  matched three buttons (strict-mode error swallowed by .catch, so Fit
+  silently never ran) — now .first() targets the ribbon; and the
+  selection-halo block reused the mm→screen mapping computed before the
+  Inspect/Topology rails expanded — it now remaps against the current
+  canvas box, selects pump D-20PA001 at (170, 254) mm before zooming,
+  and clamps the clip inside the canvas.
 - **2026-08-22** Properties panel gained an "Issues (n)" section below
   Sub-components (director: an element's findings should be obvious when
   you click it): the selected object's validation findings with severity

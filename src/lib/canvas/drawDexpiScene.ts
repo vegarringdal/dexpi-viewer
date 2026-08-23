@@ -27,6 +27,7 @@ type DrawContext = Readonly<{
   minWidthMm: number;
   widthScale: number;
   darkTheme: boolean;
+  monochrome: boolean;
   /**
    * Spec "scaled symbols" heuristic (vector-effect: non-scaling-stroke):
    * stroke widths inside a scaled ShapeUsage divide by the symbol scale so
@@ -35,6 +36,8 @@ type DrawContext = Readonly<{
   strokeDivisor: number;
   /** When set, everything draws in this color (selection/hover pass). */
   overrideColor: PaletteColor | null;
+  /** Halo pass: text draws as a filled backdrop rect instead of glyphs. */
+  textBackdrop: boolean;
 }>;
 
 export type SceneHighlight = Readonly<{
@@ -45,6 +48,8 @@ export type SceneHighlight = Readonly<{
   downstreamIds: ReadonlySet<string>;
   /** Classification tint per object id — drawn below trace/hover/selection. */
   classification: ReadonlyMap<string, PaletteColor>;
+  /** Veil the non-highlighted content so the classification tints pop. */
+  dimOthers?: boolean;
 }>;
 
 // -----------------------------------------------------------------------------
@@ -59,6 +64,13 @@ export type SceneHighlight = Readonly<{
  */
 function adaptColor(ctx: DrawContext, color: RgbColor): readonly [number, number, number, number] {
   const { r, g, b } = color;
+  if (ctx.monochrome) {
+    // Near-white stays paper — white masking fills must keep masking.
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.85
+      ? [ctx.palette.paper[0], ctx.palette.paper[1], ctx.palette.paper[2], 1]
+      : [ctx.palette.ink[0], ctx.palette.ink[1], ctx.palette.ink[2], 1];
+  }
   if (ctx.darkTheme) {
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     const saturation = (Math.max(r, g, b) - Math.min(r, g, b)) / 255;
@@ -86,7 +98,10 @@ function makeStrokePaint(ctx: DrawContext, stroke: Stroke): Paint {
   paint.setStrokeCap(isButt ? ctx.ck.StrokeCap.Butt : ctx.ck.StrokeCap.Round);
   paint.setStrokeJoin(isButt ? ctx.ck.StrokeJoin.Miter : ctx.ck.StrokeJoin.Round);
   paint.setAntiAlias(true);
-  if (stroke.dash.length > 0 && !ctx.overrideColor) {
+  // Dash patterns survive highlight overrides: a selected heat-trace or
+  // signal line must still read as dashed (director), or the selection
+  // blue makes trace and pipe indistinguishable.
+  if (stroke.dash.length > 0) {
     const effect = ctx.ck.PathEffect.MakeDash([...stroke.dash], stroke.dashOffset ?? 0);
     paint.setPathEffect(effect);
     effect.delete();
@@ -151,6 +166,12 @@ function drawText(ctx: DrawContext, prim: TextPrim): void {
 
   const dy = baselineOffsetMm(prim.size, prim.vAlign);
 
+  if (ctx.textBackdrop && ctx.overrideColor) {
+    drawTextBackdrop(ctx, prim, measure, dy);
+    font.delete();
+    return;
+  }
+
   const paint = new ctx.ck.Paint();
   paint.setColor(ctx.ck.Color4f(...(ctx.overrideColor ?? adaptColor(ctx, prim.color))));
   paint.setStyle(ctx.ck.PaintStyle.Fill);
@@ -174,6 +195,61 @@ function drawText(ctx: DrawContext, prim: TextPrim): void {
   ctx.canvas.restore();
   paint.delete();
   font.delete();
+}
+
+const TEXT_BACKDROP_PAD_MM = 0.4;
+
+/**
+ * The halo pass's stand-in for text: a filled rect behind the block (bold
+ * glyph doubling reads blurry; a marker-pen rect reads as a highlight).
+ */
+function drawTextBackdrop(
+  ctx: DrawContext,
+  prim: TextPrim,
+  measure: (text: string) => number,
+  dy: number,
+): void {
+  const lines = layoutTextLines(prim.value, prim.size, prim.vAlign).filter((l) => l.value.length > 0);
+  if (lines.length === 0 || !ctx.overrideColor) {
+    return;
+  }
+
+  let minX = Infinity;
+  let maxX = -Infinity;
+  for (const line of lines) {
+    const width = measure(line.value);
+    const dx = prim.hAlign === "Center" ? -width / 2 : prim.hAlign === "Right" ? -width : 0;
+    minX = Math.min(minX, dx);
+    maxX = Math.max(maxX, dx + width);
+  }
+  const first = lines[0];
+  const last = lines[lines.length - 1];
+  if (!first || !last) {
+    return;
+  }
+
+  const top = dy + first.offsetY - prim.size * 0.8;
+  const bottom = dy + last.offsetY + prim.size * 0.25;
+  const paint = new ctx.ck.Paint();
+  paint.setColor(ctx.ck.Color4f(...ctx.overrideColor));
+  paint.setStyle(ctx.ck.PaintStyle.Fill);
+  paint.setAntiAlias(true);
+  ctx.canvas.save();
+  ctx.canvas.translate(prim.position.x, prim.position.y);
+  if (prim.rotation !== 0) {
+    ctx.canvas.rotate(prim.rotation, 0, 0);
+  }
+  ctx.canvas.drawRect(
+    ctx.ck.LTRBRect(
+      minX - TEXT_BACKDROP_PAD_MM,
+      top - TEXT_BACKDROP_PAD_MM,
+      maxX + TEXT_BACKDROP_PAD_MM,
+      bottom + TEXT_BACKDROP_PAD_MM,
+    ),
+    paint,
+  );
+  ctx.canvas.restore();
+  paint.delete();
 }
 
 /**
@@ -377,6 +453,11 @@ export type SceneDrawOptions = Readonly<{
   widthScale: number;
   /** Skip the opaque paper rect — an underlay behind the drawing must show through. */
   hidePaper?: boolean;
+  /** Draw all content in ink/paper only, so highlight tints never collide
+   *  with the drawing's own colors (blue signal text, magenta trims…). */
+  monochrome?: boolean;
+  /** Selected TEXT gets a filled yellow backdrop rect (Settings toggle). */
+  selectionTextRect?: boolean;
 }>;
 
 function makeContext(
@@ -394,6 +475,8 @@ function makeContext(
     minWidthMm: options.minWidthMm,
     widthScale: options.widthScale,
     darkTheme: palette.isDark,
+    monochrome: options.monochrome === true,
+    textBackdrop: false,
     strokeDivisor: 1,
     overrideColor: null,
   };
@@ -446,6 +529,9 @@ export function drawSceneHighlights(
   highlight: SceneHighlight,
 ): void {
   const ctx = makeContext(ck, canvas, palette, fonts, options);
+  if (highlight.dimOthers === true && highlight.classification.size > 0) {
+    drawDimVeil(ctx, scene);
+  }
   drawClassificationPass(ctx, scene, highlight.classification);
   drawHighlightPass(ctx, scene, highlight.upstreamIds, palette.traceUp);
   drawHighlightPass(ctx, scene, highlight.downstreamIds, palette.traceDown);
@@ -455,6 +541,13 @@ export function drawSceneHighlights(
     palette.accent[2],
     0.5,
   ]);
+  // Marker-pen halo: the selection's own geometry re-stroked thick in
+  // yellow UNDER the blue pass (a bounding rect covered far too much);
+  // text gets a filled yellow rect instead of doubled glyphs.
+  drawHighlightPass(ctx, scene, highlight.selectedIds, palette.selectionFill, {
+    widthFactor: 7,
+    textBackdrop: options.selectionTextRect !== false,
+  });
   drawHighlightPass(ctx, scene, highlight.selectedIds, palette.accent);
 }
 
@@ -532,12 +625,40 @@ function drawClassificationPass(
   }
 }
 
+const DIM_VEIL_ALPHA = 0.8;
+const DIM_VEIL_PAD_MM = 25;
+
+/**
+ * "Dim others": a paper-colored veil over the whole sheet, drawn before the
+ * highlight passes — everything fades, then the classification/trace/
+ * selection passes repaint their members at full strength on top.
+ */
+function drawDimVeil(ctx: DrawContext, scene: SceneGraph): void {
+  const paint = new ctx.ck.Paint();
+  paint.setColor(
+    ctx.ck.Color4f(ctx.palette.paper[0], ctx.palette.paper[1], ctx.palette.paper[2], DIM_VEIL_ALPHA),
+  );
+  paint.setStyle(ctx.ck.PaintStyle.Fill);
+  const b = scene.bounds;
+  ctx.canvas.drawRect(
+    ctx.ck.LTRBRect(
+      b.minX - DIM_VEIL_PAD_MM,
+      b.minY - DIM_VEIL_PAD_MM,
+      b.maxX + DIM_VEIL_PAD_MM,
+      b.maxY + DIM_VEIL_PAD_MM,
+    ),
+    paint,
+  );
+  paint.delete();
+}
+
 /** Redraws every node representing one of `objectIds` in the given color, on top. */
 function drawHighlightPass(
   ctx: DrawContext,
   scene: SceneGraph,
   objectIds: ReadonlySet<string>,
   color: PaletteColor,
+  pass: Readonly<{ widthFactor?: number; textBackdrop?: boolean }> = {},
 ): void {
   if (objectIds.size === 0) {
     return;
@@ -546,7 +667,8 @@ function drawHighlightPass(
   const highlightCtx: DrawContext = {
     ...ctx,
     overrideColor: color,
-    minWidthMm: ctx.minWidthMm * 2.5,
+    minWidthMm: ctx.minWidthMm * (pass.widthFactor ?? 2.5),
+    textBackdrop: pass.textBackdrop === true,
   };
   for (const node of scene.nodes) {
     if (node.objectId && objectIds.has(node.objectId)) {

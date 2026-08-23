@@ -3,6 +3,7 @@ import type { JSX } from "react";
 import {
   resetRenderingSettings,
   setMinStrokePx,
+  setSelectionTextRect,
   setShowGrid,
   setStrokeWidthScale,
   setUnitDisplay,
@@ -36,7 +37,7 @@ function SettingRow({ label, hint, children }: SettingRowProps): JSX.Element {
 // -----------------------------------------------------------------------------
 
 export function RenderingSettingsTab(): JSX.Element {
-  const { minStrokePx, strokeWidthScale, showGrid, unitDisplay } = renderingState.use();
+  const { minStrokePx, strokeWidthScale, showGrid, unitDisplay, selectionTextRect } = renderingState.use();
 
   return (
     <div className="flex flex-col gap-4 overflow-y-auto p-4">
@@ -54,6 +55,13 @@ export function RenderingSettingsTab(): JSX.Element {
         />
       </SettingRow>
       <Checkbox checked={showGrid} onChange={setShowGrid} label="Show grid" hint="10 mm spacing" />
+      <Checkbox
+        checked={selectionTextRect}
+        onChange={setSelectionTextRect}
+        label="Backdrop behind selected text"
+        hint="Yellow rect under text"
+        info="The selection halo re-strokes the selected geometry in thick yellow; text cannot be emboldened legibly, so it gets a filled yellow rect instead. Turn off to leave selected text unmarked."
+      />
       <Checkbox
         checked={unitDisplay === "name"}
         onChange={(on) => setUnitDisplay(on ? "name" : "symbol")}

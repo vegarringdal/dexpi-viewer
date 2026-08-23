@@ -35,3 +35,13 @@ export function toggleHighlightGroup(key: string): void {
 export function clearHighlight(): void {
   setHighlightMode("off");
 }
+
+/** Monochrome drawing toggle — content renders in ink/paper only. */
+export function setHighlightMonochrome(monochrome: boolean): void {
+  highlightState.set({ monochrome });
+}
+
+/** Fade non-highlighted content while a highlight mode is active. */
+export function setHighlightDimOthers(dimOthers: boolean): void {
+  highlightState.set({ dimOthers });
+}

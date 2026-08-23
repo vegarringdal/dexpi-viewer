@@ -87,11 +87,16 @@ describe("buildClassificationGroups (reference P&ID)", () => {
     expect(groups.map((g) => g.key)).toEqual(["75HB13", "73HG12"]);
   });
 
-  it("collects signal & instrument-line objects into one group", () => {
+  it("groups signal & instrument-line objects per semantics, one color each", () => {
     const groups = buildClassificationGroups(doc, "signal");
-    expect(groups.length).toBe(1);
-    const ids = groups[0]?.objectIds ?? [];
+    expect(groups.length).toBeGreaterThanOrEqual(1);
+    const ids = groups.flatMap((g) => g.objectIds);
     expect(ids.length).toBeGreaterThanOrEqual(9);
+    // Reference P&ID carries no SignalConveyingFunctionTypeRepresentation,
+    // so groups fall back to the bare class names.
+    for (const group of groups) {
+      expect(group.key.length).toBeGreaterThan(0);
+    }
     for (const id of ids) {
       const typeName = doc.plant.byId.get(id)?.typeName ?? "";
       expect(
@@ -100,6 +105,25 @@ describe("buildClassificationGroups (reference P&ID)", () => {
           typeName.endsWith("ActuatingFunction"),
       ).toBe(true);
     }
+  });
+
+  it("splits DISC signals by their type representation", () => {
+    const discXml = readFileSync(
+      join(
+        __dirname,
+        "../../../refrences/discdexpi-2026pack/Blueprint/DISC_EXAMPLE-14/DISC_EXAMPLE-14-08.xml",
+      ),
+      "utf-8",
+    );
+    const discDoc = parseDexpiDocument(discXml).data;
+    if (!discDoc) {
+      throw new Error("parse failed");
+    }
+
+    const keys = buildClassificationGroups(discDoc, "signal").map((g) => g.key);
+    expect(keys).toContain("SignalConveying");
+    expect(keys).toContain("ElectricalSignalConveying");
+    expect(keys).toContain("BusSignalConveying");
   });
 
   it("heatTrace is empty for this fixture and off always is", () => {

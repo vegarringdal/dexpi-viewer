@@ -41,9 +41,11 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <li>Double-clicking objects in panels zooms the drawing to them.</li>
 </ul>
 <h2>Selection</h2>
+<p><img src="images/selection-halo.png" alt="Selection: yellow halo along the geometry, yellow rect behind text"></p>
 <p>Click anything in the drawing to select it — the Explorer tree, Properties, Connections and Inspect all follow. Ctrl/Cmd-click toggles multi-selection (also on the canvas); Shift-click range-selects in the tree. Hovering rows in panels highlights the object on the canvas.</p>
+<p>Selection renders as a <strong>marker-pen yellow halo</strong> tracing the object&#39;s own geometry underneath the blue re-stroke — not a bounding box, so a large exchanger doesn&#39;t flood its whole footprint. Selected <strong>text</strong> gets a filled yellow rect instead (embolden-by-doubling reads blurry); Settings → Rendering → <em>Backdrop behind selected text</em> turns that off. Dashed lines <strong>stay dashed</strong> when selected or highlighted — a selected heat-traced pipe keeps its trace distinguishable from the pipe itself.</p>
 <h2>Verification underlay</h2>
-<p><img src="images/underlay.png" alt="Official SVG as red-tinted underlay behind the drawing"></p>
+<p><img src="images/underlay.png" alt="Official SVG as red-tinted underlay behind the drawing, controlled from the highlighted toolbar"></p>
 <p>The toolbar above the drawing loads a reference <strong>image, SVG or PDF</strong> as an alignment underlay, stretched onto the diagram extent — the official DISC renderings align exactly. Controls:</p>
 <ul>
 <li><strong>Show</strong>, <strong>On top</strong> (draw over instead of under the drawing) and <strong>Opacity</strong>.</li>

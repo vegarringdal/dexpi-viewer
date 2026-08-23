@@ -9,6 +9,8 @@ export type RenderingState = Readonly<{
   showGrid: boolean;
   /** Units as symbols ("kW") or the spec's enumeration names ("Kilowatt"). */
   unitDisplay: UnitDisplayMode;
+  /** Selected text gets a yellow backdrop rect (the halo can't embolden glyphs legibly). */
+  selectionTextRect: boolean;
 }>;
 
 export const DEFAULT_RENDERING_STATE: RenderingState = {
@@ -16,6 +18,7 @@ export const DEFAULT_RENDERING_STATE: RenderingState = {
   strokeWidthScale: 1,
   showGrid: true,
   unitDisplay: "symbol",
+  selectionTextRect: true,
 };
 
 export const renderingState = createStore<RenderingState>(DEFAULT_RENDERING_STATE);

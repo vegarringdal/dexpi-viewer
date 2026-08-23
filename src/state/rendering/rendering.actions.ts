@@ -36,6 +36,10 @@ export function applyStoredRenderingSettings(): void {
       showGrid:
         typeof candidate.showGrid === "boolean" ? candidate.showGrid : DEFAULT_RENDERING_STATE.showGrid,
       unitDisplay: candidate.unitDisplay === "name" ? "name" : DEFAULT_RENDERING_STATE.unitDisplay,
+      selectionTextRect:
+        typeof candidate.selectionTextRect === "boolean"
+          ? candidate.selectionTextRect
+          : DEFAULT_RENDERING_STATE.selectionTextRect,
     });
     setUnitDisplayMode(renderingState.get().unitDisplay);
   } catch {
@@ -55,6 +59,11 @@ export function setStrokeWidthScale(strokeWidthScale: number): void {
 
 export function setShowGrid(showGrid: boolean): void {
   renderingState.set({ showGrid });
+  persist();
+}
+
+export function setSelectionTextRect(selectionTextRect: boolean): void {
+  renderingState.set({ selectionTextRect });
   persist();
 }
 

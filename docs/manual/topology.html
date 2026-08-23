@@ -35,12 +35,13 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
 <main><h1>Topology &amp; highlighting</h1>
 <h2>Topology graph</h2>
-<p><img src="images/topology.png" alt="The semantic topology graph"></p>
+<p><img src="images/topology.png" alt="The semantic topology graph; the highlighted toolbar picks the mode, depth, edge kinds and node kinds"></p>
 <p>The engineering data as a semantic network: plant objects as category-colored nodes with <strong>flow</strong>, <strong>containment</strong> and <strong>reference</strong> edges, laid out along the flow direction. Neighborhood mode graphs the current selection with an adjustable hop depth; Document mode graphs the whole file. Connection hardware (nozzles, chambers, piping nodes, ports) collapses into its owner or shows as mini nodes. Nodes sync with the global selection; double-click zooms the drawing.</p>
 <h2>Connections &amp; tracing</h2>
 <p>The Connections panel lists the selected object&#39;s flow neighbours and traces <strong>upstream</strong> (amber) / <strong>downstream</strong> (green) through the piping — the trace tints the drawing and recirculation loops are called out.</p>
 <h2>Highlight</h2>
-<p>The Highlight panel tints the drawing by classification — heat-traced runs, signal/instrument lines, fluid code or piping class (with ancestor inheritance) — each value in its own color with a legend of counts and per-value visibility toggles.</p>
+<p><img src="images/highlight-dim.png" alt="Signal highlighting per type, black &amp; white drawing, dim others"></p>
+<p>The Highlight panel tints the drawing by classification — heat-traced runs, signal/instrument lines, fluid code or piping class (with ancestor inheritance) — each value in its own color with a legend of counts and per-value visibility toggles. Signal mode groups <strong>per signal semantics</strong> (electrical, bus, measuring, …), so each type highlights in its own color. A <strong>Black &amp; white drawing</strong> toggle (also the big <strong>B/W</strong> button in ribbon → View, which shows when it is on) renders the file&#39;s content in ink only, so highlight tints never mix with the drawing&#39;s own colors, and <strong>Dim others</strong> fades everything outside the highlighted groups so the tints stand out; the palette deliberately contains no blue — blue always means selection.</p>
 <h2>Semantic signal-line styling</h2>
 <p>Signal lines render by their semantics, matching the official DISC renderings: measuring and hydraulic lines solid, plain signal lines dashed, electrical lines solid with bracket marks, bus lines dashed with circle marks.</p>
 <div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main></body></html>
