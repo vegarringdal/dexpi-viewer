@@ -1,5 +1,5 @@
 import { formatDataValue } from "./values.ts";
-import { componentObjects, dataValue, directChildrenByTag, getData } from "./xml.ts";
+import { componentObjects, dataValue, dataValues, directChildrenByTag, getData } from "./xml.ts";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -37,6 +37,8 @@ export type PlantModel = Readonly<{
   byId: ReadonlyMap<string, PlantNode>;
   /** target id → objects referencing it ("Referenced by"). */
   referencedBy: ReadonlyMap<string, readonly IncomingReference[]>;
+  /** id → source element, for raw-data tooling (copy as JSON). */
+  elementsById: ReadonlyMap<string, Element>;
 }>;
 
 // -----------------------------------------------------------------------------
@@ -78,7 +80,9 @@ function elementXPath(el: Element): string {
   return `/${segments.join("/")}`;
 }
 
-function isDiagramObject(type: string): boolean {
+/** Drawing-side objects: excluded from the plant model, kept (with synthetic
+ *  ids) by the diagram-inclusive model — Inspect renders them dashed. */
+export function isDiagramType(type: string): boolean {
   return type.includes("Diagram");
 }
 
@@ -121,7 +125,11 @@ function collectAttributes(node: Element): { attributes: PlantAttribute[]; undef
   const undefinedNames: string[] = [];
   for (const data of directChildrenByTag(node, "Data")) {
     const name = data.getAttribute("property") ?? "";
-    const value = formatDataValue(dataValue(data));
+    // Multi-valued properties (InnerPoints, …) carry one child per value.
+    const value = dataValues(data)
+      .map((v) => formatDataValue(v))
+      .filter((v) => v.length > 0)
+      .join(" ");
     if (name && value) {
       attributes.push({ name, value });
     } else if (name) {
@@ -182,13 +190,22 @@ function walkPlant(
   parentId: string | null,
   byId: Map<string, PlantNode>,
   referencedBy: Map<string, IncomingReference[]>,
+  elementsById: Map<string, Element>,
+  includeDiagram: boolean,
 ): PlantNode | null {
   const type = node.getAttribute("type") ?? "";
-  if (isDiagramObject(type) || isValueObject(type)) {
+  if (isValueObject(type)) {
+    return null;
+  }
+  if (!includeDiagram && isDiagramType(type)) {
     return null;
   }
 
-  const id = node.getAttribute("id") ?? "";
+  const xpath = elementXPath(node);
+  const explicitId = node.getAttribute("id") ?? "";
+  // Drawing objects in real files carry no ids — in diagram mode the
+  // positional XPath stands in as a stable synthetic identity.
+  const id = explicitId || (includeDiagram ? xpath : "");
   if (!id) {
     return null;
   }
@@ -205,23 +222,24 @@ function walkPlant(
     }
   }
   const children = componentObjects(node)
-    .map((child) => walkPlant(child, id, byId, referencedBy))
+    .map((child) => walkPlant(child, id, byId, referencedBy, elementsById, includeDiagram))
     .filter((c): c is PlantNode => c !== null);
 
   const plantNode: PlantNode = {
     id,
     type,
     typeName,
-    label: resolveLabel(attributes, id),
+    label: resolveLabel(attributes, explicitId || typeName),
     parentId,
     persistentIds: collectPersistentIds(node),
     attributes,
     undefinedAttributes: collected.undefined,
     references,
-    xpath: elementXPath(node),
+    xpath,
     children,
   };
   byId.set(id, plantNode);
+  elementsById.set(id, node);
   return plantNode;
 }
 
@@ -234,21 +252,45 @@ function walkPlant(
  * for the tree and properties panels. Diagram objects are excluded; Core
  * value objects (QualifiedValue etc.) are folded into their owner's
  * attributes instead of appearing as tree nodes.
+ *
+ * With `includeDiagram` the walk also keeps Core/Diagram objects (which
+ * carry no ids in real files — their positional XPath becomes a synthetic
+ * id) and starts from the document root so the Diagram trees are reached —
+ * the Inspect panel's "drawing" mode.
  */
-export function buildPlantModel(root: Element): PlantModel {
+export function buildPlantModel(root: Element, includeDiagram = false): PlantModel {
   const byId = new Map<string, PlantNode>();
   const referencedBy = new Map<string, IncomingReference[]>();
+  const elementsById = new Map<string, Element>();
   const roots: PlantNode[] = [];
 
   const engineering = root.querySelector('Object[type="Core/EngineeringModel"]');
-  const conceptualRoots = engineering ? componentObjects(engineering, "ConceptualModel") : [];
-  const startNodes = conceptualRoots.length > 0 ? conceptualRoots : directChildrenByTag(root, "Object");
+  const wrapped = engineering
+    ? includeDiagram
+      ? componentObjects(engineering)
+      : componentObjects(engineering, "ConceptualModel")
+    : [];
+  const startNodes = wrapped.length > 0 ? wrapped : directChildrenByTag(root, "Object");
 
   for (const start of startNodes) {
-    const node = walkPlant(start, null, byId, referencedBy);
+    const node = walkPlant(start, null, byId, referencedBy, elementsById, includeDiagram);
     if (node) {
       roots.push(node);
     }
   }
-  return { roots, byId, referencedBy };
+  return { roots, byId, referencedBy, elementsById };
+}
+
+const fullModels = new WeakMap<Element, PlantModel>();
+
+/** The diagram-inclusive model for Inspect's "drawing" mode, memoized per document root. */
+export function fullPlantModel(root: Element): PlantModel {
+  const cached = fullModels.get(root);
+  if (cached) {
+    return cached;
+  }
+
+  const model = buildPlantModel(root, true);
+  fullModels.set(root, model);
+  return model;
 }

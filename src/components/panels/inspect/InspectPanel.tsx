@@ -1,22 +1,13 @@
 import { PanelBody } from "@tredespace/ui/dockable";
-import { Button, Select, type SelectOption } from "@tredespace/ui/widgets";
-import { type JSX, useEffect, useMemo, useRef, useState } from "react";
-import type { ValidationIssue } from "../../../lib/dexpi/validation.ts";
-import {
-  buildObjectDiagram,
-  MAX_DIAGRAM_DEPTH,
-  MIN_DIAGRAM_DEPTH,
-} from "../../../lib/graph/objectDiagram.ts";
-import { layoutObjectDiagram, type PlacedCard } from "../../../lib/graph/objectDiagramLayout.ts";
-import { setSelectedObject } from "../../../state/selection/selection.actions.ts";
-import { selectionState } from "../../../state/selection/selection.state.ts";
-import { getEffectiveIssues } from "../../../state/validation/validation.actions.ts";
-import { validationConfigState } from "../../../state/validation/validation.state.ts";
-import { getLoadedDocument, getLoadedProfile } from "../../../state/viewer/viewer.actions.ts";
-import { viewerState } from "../../../state/viewer/viewer.state.ts";
+import { Button, Checkbox, Select, type SelectOption } from "@tredespace/ui/widgets";
+import { type JSX, useEffect, useRef, useState } from "react";
+import { MAX_DIAGRAM_DEPTH, MIN_DIAGRAM_DEPTH } from "../../../lib/graph/objectDiagram.ts";
+import type { PlacedCard } from "../../../lib/graph/objectDiagramLayout.ts";
 import { useSvgPanZoom } from "../../hooks/useSvgPanZoom.ts";
 import { InspectCardView } from "./InspectCardView.tsx";
+import { InspectContextMenu } from "./InspectContextMenu.tsx";
 import { InspectEdgeView } from "./InspectEdgeView.tsx";
+import { useInspectDiagram } from "./useInspectDiagram.ts";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -24,9 +15,21 @@ import { InspectEdgeView } from "./InspectEdgeView.tsx";
 
 type PendingPin = Readonly<{ id: string; screenX: number; screenY: number; scale: number }>;
 
+type MenuState = Readonly<{ id: string; x: number; y: number }>;
+
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
+
+/** Expected failure (denied clipboard permission) — reported, never thrown. */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const DEPTH_OPTIONS: readonly SelectOption[] = Array.from(
   { length: MAX_DIAGRAM_DEPTH - MIN_DIAGRAM_DEPTH + 1 },
@@ -45,37 +48,13 @@ const DEPTH_OPTIONS: readonly SelectOption[] = Array.from(
  * raw Data as rows plus its relations up to the chosen depth (references,
  * referenced-by, containment, profile-instance stubs), edges labeled with
  * the actual property names. Clicking a neighbor re-centers on it, pinning
- * the clicked card's screen position so the view does not jump.
+ * the clicked card's screen position so the view does not jump. The Drawing
+ * toggle adds the Core/Diagram objects (labels, representation groups, …).
  */
 export function InspectPanel(): JSX.Element {
-  const { file, docRevision } = viewerState.use();
-  const { selectedId } = selectionState.use();
-  const { overrides } = validationConfigState.use();
-  const [depth, setDepth] = useState(MIN_DIAGRAM_DEPTH);
-
-  const layout = useMemo(() => {
-    void docRevision;
-    const doc = getLoadedDocument();
-    if (!doc || !selectedId) {
-      return null;
-    }
-
-    const issuesById = new Map<string, ValidationIssue[]>();
-    void overrides;
-    for (const issue of getEffectiveIssues()) {
-      if (issue.objectId) {
-        issuesById.set(issue.objectId, [...(issuesById.get(issue.objectId) ?? []), issue]);
-      }
-    }
-    const diagram = buildObjectDiagram(
-      doc.plant,
-      selectedId,
-      getLoadedProfile()?.instances,
-      depth,
-      issuesById,
-    );
-    return diagram ? layoutObjectDiagram(diagram) : null;
-  }, [docRevision, selectedId, depth, overrides]);
+  const { hasFile, layout, depth, setDepth, showDrawing, setShowDrawing, navigate, exportCard } =
+    useInspectDiagram();
+  const [menu, setMenu] = useState<MenuState | null>(null);
 
   const panZoom = useSvgPanZoom(layout?.width ?? 0, layout?.height ?? 0);
   const { fitToContent, setViewTransform, transform } = panZoom;
@@ -100,18 +79,10 @@ export function InspectPanel(): JSX.Element {
     fitToContent();
   }, [layout]);
 
-  if (!file) {
+  if (!hasFile) {
     return (
       <PanelBody className="flex h-full items-center justify-center p-4 text-center text-slate-500 text-xs">
         Open a DEXPI file to get started.
-      </PanelBody>
-    );
-  }
-
-  if (!layout) {
-    return (
-      <PanelBody className="flex h-full items-center justify-center p-4 text-center text-slate-500 text-xs">
-        Select an object (drawing, Explorer, or a neighbor card) to inspect it.
       </PanelBody>
     );
   }
@@ -123,15 +94,41 @@ export function InspectPanel(): JSX.Element {
       screenX: x + placed.x * scale,
       screenY: y + placed.y * scale,
     };
-    setSelectedObject(placed.card.id);
+    navigate(placed.card.id);
   };
+
+  const handleMenu = (id: string, x: number, y: number): void => {
+    if (exportCard(id)) {
+      setMenu({ id, x, y });
+    }
+  };
+
+  // The header always renders: the Drawing toggle must stay reachable even
+  // when the current selection only resolves in the OTHER mode (a drawing
+  // object selected while in plant mode yields no diagram).
+  if (!layout) {
+    return (
+      <PanelBody className="flex h-full flex-col gap-2 p-2">
+        <div className="flex shrink-0 items-center justify-end gap-2">
+          <Checkbox label="Drawing" checked={showDrawing} onChange={(checked) => setShowDrawing(checked)} />
+        </div>
+        <div className="flex min-h-0 flex-1 items-center justify-center p-4 text-center text-slate-500 text-xs">
+          {showDrawing
+            ? "Select an object (drawing, Explorer, or a neighbor card) to inspect it."
+            : "Select an object to inspect it — drawing-side objects need the Drawing toggle."}
+        </div>
+      </PanelBody>
+    );
+  }
 
   return (
     <PanelBody className="flex h-full flex-col gap-2 p-2">
       <div className="flex shrink-0 items-center gap-2">
         <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-slate-400">
+          {showDrawing ? "Drawing · " : ""}
           {layout.center.card.title} — {layout.center.card.subtitle}
         </span>
+        <Checkbox label="Drawing" checked={showDrawing} onChange={(checked) => setShowDrawing(checked)} />
         <div className="w-24 shrink-0">
           <Select
             value={String(depth)}
@@ -140,6 +137,16 @@ export function InspectPanel(): JSX.Element {
           />
         </div>
         <Button onClick={fitToContent}>Fit</Button>
+      </div>
+      {layout.center.card.xpath && (
+        <div className="shrink-0 select-text break-all font-mono text-[10px] text-slate-500">
+          {layout.center.card.xpath}
+        </div>
+      )}
+      <div className="shrink-0 text-[10px] text-slate-500 italic">
+        {layout.center.card.drawing
+          ? "Drawing-side object — shown only here; right-click a card to copy its raw data."
+          : "See the Properties panel for this object's full data."}
       </div>
       <div
         ref={panZoom.containerRef}
@@ -172,12 +179,27 @@ export function InspectPanel(): JSX.Element {
                 placed={placed}
                 isCenter={false}
                 onNavigate={() => handleNavigate(placed)}
+                onMenu={handleMenu}
               />
             ))}
-            <InspectCardView placed={layout.center} isCenter onNavigate={() => undefined} />
+            <InspectCardView
+              placed={layout.center}
+              isCenter
+              onNavigate={() => undefined}
+              onMenu={handleMenu}
+            />
           </g>
         </svg>
       </div>
+      {menu && (
+        <InspectContextMenu
+          x={menu.x}
+          y={menu.y}
+          onCopyJson={() => copyText(exportCard(menu.id)?.json ?? "")}
+          onCopyXpath={() => copyText(exportCard(menu.id)?.xpath ?? "")}
+          onClose={() => setMenu(null)}
+        />
+      )}
     </PanelBody>
   );
 }

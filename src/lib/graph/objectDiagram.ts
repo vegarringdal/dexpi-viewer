@@ -1,5 +1,5 @@
 import type { ProfileInstanceData } from "../dexpi/discProfile.ts";
-import type { PlantModel, PlantNode } from "../dexpi/plantModel.ts";
+import { isDiagramType, type PlantModel, type PlantNode } from "../dexpi/plantModel.ts";
 import type { IssueSeverity, ValidationIssue } from "../dexpi/validation.ts";
 
 // -----------------------------------------------------------------------------
@@ -14,7 +14,15 @@ import type { IssueSeverity, ValidationIssue } from "../dexpi/validation.ts";
 // the profile instance's data.
 // -----------------------------------------------------------------------------
 
-export type DiagramRow = Readonly<{ name: string; value: string }>;
+export type DiagramRowTone = "normal" | "undefined" | "issue";
+
+export type DiagramRow = Readonly<{
+  name: string;
+  value: string;
+  tone: DiagramRowTone;
+  /** Full finding message for "issue" rows, surfaced as a tooltip. */
+  tooltip?: string;
+}>;
 
 export type DiagramCard = Readonly<{
   id: string;
@@ -29,6 +37,10 @@ export type DiagramCard = Readonly<{
   broken: boolean;
   /** False for profile-instance stubs and unresolved targets. */
   navigable: boolean;
+  /** Drawing-side (Core/Diagram) object — rendered with a dashed border. */
+  drawing: boolean;
+  /** Positional XPath of the object's element in the source XML. */
+  xpath: string | null;
 }>;
 
 export type DiagramRelation = "reference" | "referencedBy" | "parent" | "child" | "profile";
@@ -85,21 +97,68 @@ function issueRowsFor(issues: readonly ValidationIssue[]): string[] {
   return rows;
 }
 
+/**
+ * Findings that name a property merge into the card's rows: an existing
+ * row turns red (bad value), a named-but-absent property becomes a red
+ * "(missing)" row — the structural reading of the finding. Only findings
+ * without a property name remain as ⚠ message rows.
+ */
+function buildRows(
+  node: PlantNode,
+  issues: readonly ValidationIssue[],
+): { rows: DiagramRow[]; unmapped: ValidationIssue[] } {
+  const byAttribute = new Map<string, ValidationIssue>();
+  const unmapped: ValidationIssue[] = [];
+  for (const issue of issues) {
+    if (issue.attributeName && !byAttribute.has(issue.attributeName)) {
+      byAttribute.set(issue.attributeName, issue);
+    } else if (!issue.attributeName) {
+      unmapped.push(issue);
+    }
+  }
+
+  const toRow = (name: string, value: string, fallbackTone: DiagramRowTone): DiagramRow => {
+    const issue = byAttribute.get(name);
+    if (!issue) {
+      return { name, value, tone: fallbackTone };
+    }
+
+    byAttribute.delete(name);
+    return { name, value, tone: "issue", tooltip: `${issue.ruleId}: ${issue.message}` };
+  };
+
+  const rows = [
+    ...node.attributes.map((a) => toRow(a.name, a.value, "normal")),
+    ...node.undefinedAttributes.map((name) => toRow(name, "(undefined)", "undefined")),
+    ...node.persistentIds.map(
+      (p): DiagramRow => ({ name: `PersistentId (${p.name})`, value: p.value, tone: "normal" }),
+    ),
+    ...[...byAttribute.values()].map(
+      (issue): DiagramRow => ({
+        name: issue.attributeName ?? "",
+        value: "(missing)",
+        tone: "issue",
+        tooltip: `${issue.ruleId}: ${issue.message}`,
+      }),
+    ),
+  ];
+  return { rows, unmapped };
+}
+
 function cardFor(node: PlantNode, navigable: boolean, issuesById: IssuesById): DiagramCard {
   const issues = issuesById.get(node.id) ?? [];
+  const { rows, unmapped } = buildRows(node, issues);
   return {
     id: node.id,
     title: node.label || node.id,
     subtitle: node.type,
-    rows: [
-      ...node.attributes,
-      ...node.undefinedAttributes.map((name) => ({ name, value: "(undefined)" })),
-      ...node.persistentIds.map((p) => ({ name: `PersistentId (${p.name})`, value: p.value })),
-    ],
+    rows,
     severity: worstSeverity(issues),
-    issueRows: issueRowsFor(issues),
+    issueRows: issueRowsFor(unmapped),
     broken: false,
     navigable,
+    drawing: isDiagramType(node.type),
+    xpath: node.xpath,
   };
 }
 
@@ -109,11 +168,15 @@ function stubCard(target: string, instances: ReadonlyMap<string, ProfileInstance
     id: target,
     title: target.split(".").pop() ?? target,
     subtitle: data ? "profile instance" : "unresolved target",
-    rows: data ? [...data.entries()].map(([name, value]) => ({ name, value })) : [],
+    rows: data
+      ? [...data.entries()].map(([name, value]): DiagramRow => ({ name, value, tone: "normal" }))
+      : [],
     severity: data ? null : "error",
     issueRows: data ? [] : ["Reference target resolves to nothing in this document or the profile"],
     broken: !data,
     navigable: false,
+    drawing: false,
+    xpath: null,
   };
 }
 
@@ -248,6 +311,8 @@ export function buildObjectDiagram(
           issueRows: [],
           broken: false,
           navigable: false,
+          drawing: false,
+          xpath: null,
         },
         property: "",
         relation: "reference",

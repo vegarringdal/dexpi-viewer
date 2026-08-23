@@ -31,6 +31,7 @@ describe("model-driven validation (MDL-*)", () => {
     const unknown = found.filter((i) => i.ruleId === "MDL-002");
     expect(unknown.length).toBe(1);
     expect(unknown[0]?.message).toContain("ValvePostion");
+    expect(unknown[0]?.attributeName).toBe("ValvePostion");
   });
 
   it("flags missing required properties (generalizing the old META-001)", () => {
@@ -41,10 +42,13 @@ describe("model-driven validation (MDL-*)", () => {
         </Object>
       </Model>`),
     );
-    const missing = found.filter((i) => i.ruleId === "MDL-003").map((i) => i.message);
-    expect(missing.some((m) => m.includes("ExportDateTime"))).toBe(true);
-    expect(missing.some((m) => m.includes("OriginatingSystemVersion"))).toBe(true);
-    expect(missing.some((m) => m.includes("OriginatingSystemName"))).toBe(false);
+    const missing = found.filter((i) => i.ruleId === "MDL-003");
+    const messages = missing.map((i) => i.message);
+    expect(messages.some((m) => m.includes("ExportDateTime"))).toBe(true);
+    expect(messages.some((m) => m.includes("OriginatingSystemVersion"))).toBe(true);
+    expect(messages.some((m) => m.includes("OriginatingSystemName"))).toBe(false);
+    // Structural views read the property from attributeName, not the message.
+    expect(missing.some((i) => i.attributeName === "ExportDateTime")).toBe(true);
   });
 
   it("counts an <Undefined/> value as missing for a required property", () => {

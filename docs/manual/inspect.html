@@ -52,10 +52,20 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <p>A UML-style instance diagram of the selected object — the debug view for &quot;how is this connected&quot;, without reading raw XML.</p>
 <p><img src="images/inspect.png" alt="Inspect panel at depth 2; the highlighted controls set the neighbour depth and refit the view"></p>
 <ul>
-<li>The <strong>center card</strong> shows the object&#39;s complete raw data — every property, including ones carrying <code>&lt;Undefined/&gt;</code> values (shown dimmed, never hidden).</li>
-<li><strong>Neighbor cards</strong> show every relation with the edge labeled by the actual property name: outgoing References (right), reverse <em>referenced-by</em> and the containment parent (left), component children, and DISC-profile instance stubs (violet) carrying the published instance&#39;s data.</li>
-<li>The <strong>depth selector</strong> (1–3 levels) chains incoming relations leftward and outgoing rightward.</li>
-<li><strong>Click a neighbor</strong> to re-center on it — the clicked card&#39;s position is pinned so the view never jumps; the global selection follows.</li>
-<li><strong>Problems show in red</strong>: cards carry their object&#39;s validation findings as severity-colored borders and ⚠ rows, and an unresolvable reference target renders as a fully red broken card with a red edge.</li>
+<li><p>The <strong>center card</strong> shows the object&#39;s complete raw data — every property, including ones carrying <code>&lt;Undefined/&gt;</code> values (shown dimmed, never hidden).</p>
+</li>
+<li><p><strong>Neighbor cards</strong> show every relation with the edge labeled by the actual property name: outgoing References (right), reverse <em>referenced-by</em> and the containment parent (left), component children, and DISC-profile instance stubs (violet) carrying the published instance&#39;s data.</p>
+</li>
+<li><p>The <strong>depth selector</strong> (1–3 levels) chains incoming relations leftward and outgoing rightward.</p>
+</li>
+<li><p><strong>Click a neighbor</strong> to re-center on it — the clicked card&#39;s position is pinned so the view never jumps; the global selection follows.</p>
+</li>
+<li><p><strong>Problems show structurally, in red</strong>: a finding that names a property becomes a red <em>row</em> — a red <code>(missing)</code> row for a property that should be there, or the existing row turned red when its value is invalid — with the full finding message in the row&#39;s tooltip. Cards keep their severity-colored border; only findings that don&#39;t map to a property (unknown class, connectivity, …) remain as compact ⚠ rows. An unresolvable reference target renders as a fully red broken card with a red edge.
+<img src="images/inspect-drawing.png" alt="Drawing mode: dashed drawing-side cards and the right-click copy menu; the highlighted toggle switches modes"></p>
+</li>
+<li><p><strong>Drawing toggle</strong> adds the drawing side of the file to the diagram: representation groups, labels, shapes, polylines. Drawing objects carry no ids in real files, so their positional XPath stands in as the identity, and their cards render with a <strong>dashed border</strong> — they never feed the plant-data views. A plant object then shows its <code>Represents</code> group as an incoming neighbor; clicking drawing cards re-centers within Inspect only, since nothing else in the app can address them. The header says <code>Drawing ·</code> while the mode is on, shows the centered object&#39;s <strong>full XPath</strong> (it pastes straight into <code>xmllint --xpath</code>), and a hint line says where the rest of the data lives — the Properties panel for plant objects, Inspect itself for drawing-side ones.</p>
+</li>
+<li><p><strong>Right-click any card</strong> for the copy menu: <strong>Copy data as JSON</strong> puts the object&#39;s complete raw data on the clipboard — every typed value, nested aggregates, multi-valued properties as arrays, references and components recursively, nothing folded into display strings — and <strong>Copy XPath</strong> copies the element&#39;s positional path. Rows that don&#39;t fit the card show their full value in a tooltip.</p>
+</li>
 </ul>
 <div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main></body></html>

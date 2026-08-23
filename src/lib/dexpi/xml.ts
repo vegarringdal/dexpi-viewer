@@ -43,35 +43,41 @@ export function getData(node: Element, property: string): Element | undefined {
   return directChildrenByTag(node, "Data").find((d) => d.getAttribute("property") === property);
 }
 
+function typedValue(el: Element): DataValue {
+  switch (el.tagName) {
+    case "String":
+    case "DateTime":
+      return el.textContent ?? "";
+    case "Boolean":
+      return (el.textContent ?? "").trim() === "true";
+    case "Integer":
+      return Number.parseInt(el.textContent ?? "0", 10);
+    case "Double":
+      return Number.parseFloat(el.textContent ?? "0");
+    case "DataReference":
+      return { kind: "ref", target: el.getAttribute("data") ?? "" };
+    case "AggregatedDataValue":
+      return el;
+    case "Undefined":
+      return null;
+    default:
+      return el.textContent?.trim() ?? null;
+  }
+}
+
 /**
  * The typed value inside a <Data> element. AggregatedDataValue elements are
  * returned as-is for the caller to interpret (points, colors, strokes…).
  */
 export function dataValue(dataNode: Element | undefined): DataValue {
   const first = dataNode?.firstElementChild;
-  if (!first) {
-    return null;
-  }
+  return first ? typedValue(first) : null;
+}
 
-  switch (first.tagName) {
-    case "String":
-    case "DateTime":
-      return first.textContent ?? "";
-    case "Boolean":
-      return (first.textContent ?? "").trim() === "true";
-    case "Integer":
-      return Number.parseInt(first.textContent ?? "0", 10);
-    case "Double":
-      return Number.parseFloat(first.textContent ?? "0");
-    case "DataReference":
-      return { kind: "ref", target: first.getAttribute("data") ?? "" };
-    case "AggregatedDataValue":
-      return first;
-    case "Undefined":
-      return null;
-    default:
-      return first.textContent?.trim() ?? null;
-  }
+/** ALL typed values inside a <Data> element — multi-valued properties
+ *  (InnerPoints, …) carry one child per value. */
+export function dataValues(dataNode: Element | undefined): DataValue[] {
+  return [...(dataNode?.children ?? [])].map(typedValue);
 }
 
 export function stringFromData(node: Element, property: string): string {

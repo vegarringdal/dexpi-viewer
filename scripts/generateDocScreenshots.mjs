@@ -187,6 +187,33 @@ await page.waitForTimeout(900);
   await clearAnnotations();
 }
 
+// Inspect drawing mode: dashed drawing-side cards + the right-click copy
+// menu, with a callout on the Drawing toggle. Depth 1 keeps the cards big.
+{
+  await page.getByText("2 lev", { exact: false }).first().click();
+  await page.waitForTimeout(300);
+  await page.getByText("1 level", { exact: true }).last().click();
+  await page.waitForTimeout(600);
+  await page.getByText("Drawing", { exact: true }).last().click();
+  await page.waitForTimeout(1200);
+  await page
+    .locator("svg[aria-label='Object diagram'] text", { hasText: "RepresentationGroup" })
+    .first()
+    .click({ button: "right" });
+  await page.waitForTimeout(500);
+  await annotate([await boxOf(page.getByText("Drawing", { exact: true }).last())]);
+  const panel = await boxOf(page.locator("svg[aria-label='Object diagram']").first());
+  await page.screenshot({
+    path: `${OUT}inspect-drawing.png`,
+    clip: { x: panel.x, y: 140, width: panel.w, height: panel.y + panel.h - 140 },
+  });
+  await clearAnnotations();
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(300);
+  await page.getByText("Drawing", { exact: true }).last().click();
+  await page.waitForTimeout(600);
+}
+
 // Topology graph tab, with a callout on the mode/depth/edge/show controls.
 await page.getByText("Topology graph", { exact: true }).last().click();
 await page.waitForTimeout(1500);

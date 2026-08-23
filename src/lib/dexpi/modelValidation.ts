@@ -218,6 +218,7 @@ export function validateAgainstModel(
                 : `"${literal}" is not a literal of ${prop.target} (property "${name}" on ${type}).`,
             objectId,
             suggestion: `Use one of the ${String(literals.length)} literals the DEXPI ${model.version} model defines for ${prop.target}.`,
+            attributeName: name,
           });
         }
       }
@@ -310,6 +311,7 @@ export function validateAgainstModel(
           message: `Required property "${name}" is missing on ${type} (lower bound = 1 per the DEXPI ${model.version} information model).`,
           objectId,
           suggestion: `Add "${name}" with a value.`,
+          attributeName: name,
         });
       }
     }
@@ -347,6 +349,7 @@ export function validateAgainstModel(
         message: `${label} "${name ?? ""}" is not defined for ${type ?? ""} (${String(agg.count)}×).`,
         objectId: agg.firstId,
         suggestion: "Check the property name against the spec, or namespace-prefix extension attributes.",
+        ...(name ? { attributeName: name } : {}),
       });
     }
   }

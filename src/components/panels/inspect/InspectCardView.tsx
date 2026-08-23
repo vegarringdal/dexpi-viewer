@@ -1,4 +1,5 @@
-import type { JSX, PointerEvent as ReactPointerEvent } from "react";
+import type { JSX, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
+import type { DiagramRow, DiagramRowTone } from "../../../lib/graph/objectDiagram.ts";
 import {
   CARD_WIDTH,
   HEADER_HEIGHT,
@@ -14,6 +15,8 @@ type InspectCardViewProps = Readonly<{
   placed: PlacedCard;
   isCenter: boolean;
   onNavigate: (id: string) => void;
+  /** Right-click: open the copy menu at the pointer position. */
+  onMenu: (id: string, x: number, y: number) => void;
 }>;
 
 // -----------------------------------------------------------------------------
@@ -36,6 +39,18 @@ const SEVERITY_TEXT: Readonly<Record<string, string>> = {
   info: "fill-sky-400",
 };
 
+const ROW_NAME_FILL: Readonly<Record<DiagramRowTone, string>> = {
+  normal: "fill-slate-400",
+  undefined: "fill-slate-500",
+  issue: "fill-red-400",
+};
+
+const ROW_VALUE_FILL: Readonly<Record<DiagramRowTone, string>> = {
+  normal: "fill-slate-200",
+  undefined: "fill-slate-500",
+  issue: "fill-red-300",
+};
+
 // -----------------------------------------------------------------------------
 // Helper functions
 // -----------------------------------------------------------------------------
@@ -44,12 +59,37 @@ function truncate(value: string, max: number): string {
   return value.length > max ? `${value.slice(0, max - 1)}…` : value;
 }
 
+function rowTooltip(row: DiagramRow): string | undefined {
+  if (row.tooltip) {
+    return row.tooltip;
+  }
+  if (row.name.length > NAME_COLUMN_CHARS || row.value.length > VALUE_COLUMN_CHARS) {
+    return `${row.name}: ${row.value}`;
+  }
+
+  return undefined;
+}
+
+/** Drawing cards have XPath ids — too long for a tooltip; say what the card
+ *  IS instead (right-click still copies the XPath). */
+function cardTooltip(card: PlacedCard["card"]): string | undefined {
+  if (card.drawing) {
+    return "Drawing-side object — not in the Properties panel. Click to inspect; right-click to copy data or XPath.";
+  }
+  if (card.navigable) {
+    return `${card.id} — click to inspect`;
+  }
+
+  return card.id || undefined;
+}
+
 // -----------------------------------------------------------------------------
 // Component
 // -----------------------------------------------------------------------------
 
-/** One UML-style card: title, type, and name/value attribute rows. */
-export function InspectCardView({ placed, isCenter, onNavigate }: InspectCardViewProps): JSX.Element {
+/** One UML-style card: title, type, and name/value attribute rows. Drawing-side
+ *  objects get a dashed border — they never feed the plant-data views. */
+export function InspectCardView({ placed, isCenter, onNavigate, onMenu }: InspectCardViewProps): JSX.Element {
   const { card } = placed;
   const rows = card.rows;
 
@@ -65,6 +105,16 @@ export function InspectCardView({ placed, isCenter, onNavigate }: InspectCardVie
     }
   };
 
+  const handleContextMenu = (e: ReactMouseEvent<SVGGElement>): void => {
+    if (!card.id) {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+    onMenu(card.id, e.clientX, e.clientY);
+  };
+
   return (
     // biome-ignore lint/a11y/useSemanticElements: SVG has no native button element.
     <g
@@ -72,15 +122,17 @@ export function InspectCardView({ placed, isCenter, onNavigate }: InspectCardVie
       tabIndex={-1}
       transform={`translate(${placed.x} ${placed.y})`}
       className={card.navigable ? "cursor-pointer" : ""}
-      data-tooltip={card.navigable ? `${card.id} — click to inspect` : card.id || undefined}
+      data-tooltip={cardTooltip(card)}
       onPointerDown={handlePointerDown}
       onClick={handleClick}
+      onContextMenu={handleContextMenu}
     >
       <rect
         width={placed.width}
         height={placed.height}
         rx={6}
         strokeWidth={card.severity ? 1.5 : isCenter ? 1.5 : 1}
+        strokeDasharray={card.drawing ? "5 3" : undefined}
         className={`${isCenter ? "fill-blue-950" : "fill-slate-900"} ${
           card.severity
             ? SEVERITY_STROKE[card.severity]
@@ -109,9 +161,15 @@ export function InspectCardView({ placed, isCenter, onNavigate }: InspectCardVie
         />
       )}
       {rows.map((row, i) => (
-        <text key={row.name + String(i)} x={8} y={HEADER_HEIGHT + 8 + i * ROW_HEIGHT} className="text-[8px]">
-          <tspan className="fill-slate-400">{truncate(row.name, NAME_COLUMN_CHARS)} </tspan>
-          <tspan className="fill-slate-200">{truncate(row.value, VALUE_COLUMN_CHARS)}</tspan>
+        <text
+          key={row.name + String(i)}
+          x={8}
+          y={HEADER_HEIGHT + 8 + i * ROW_HEIGHT}
+          className="text-[8px]"
+          data-tooltip={rowTooltip(row)}
+        >
+          <tspan className={ROW_NAME_FILL[row.tone]}>{truncate(row.name, NAME_COLUMN_CHARS)} </tspan>
+          <tspan className={ROW_VALUE_FILL[row.tone]}>{truncate(row.value, VALUE_COLUMN_CHARS)}</tspan>
         </text>
       ))}
       {card.issueRows.map((line, i) => (

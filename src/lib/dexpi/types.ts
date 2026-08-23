@@ -207,4 +207,6 @@ export type DexpiDocument = Readonly<{
   issues: readonly ValidationIssue[];
   /** id → type for every id-bearing object. */
   objectTypes: ReadonlyMap<string, string>;
+  /** Source DOM root, for on-demand tooling (Inspect's drawing mode). */
+  root: Element;
 }>;

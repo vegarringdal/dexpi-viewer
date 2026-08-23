@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPlantModel } from "../dexpi/plantModel.ts";
+import { buildPlantModel, fullPlantModel } from "../dexpi/plantModel.ts";
 import { buildObjectDiagram } from "./objectDiagram.ts";
 import { layoutObjectDiagram } from "./objectDiagramLayout.ts";
 
@@ -69,7 +69,7 @@ describe("buildObjectDiagram", () => {
     const stub = outgoing.find((n) => n.relation === "profile");
     expect(stub?.card.navigable).toBe(false);
     expect(stub?.card.broken).toBe(false);
-    expect(stub?.card.rows).toEqual([{ name: "Abbreviation", value: "MCC" }]);
+    expect(stub?.card.rows).toEqual([{ name: "Abbreviation", value: "MCC", tone: "normal" }]);
   });
 
   it("shows unresolvable reference targets as broken error cards instead of hiding them", () => {
@@ -93,6 +93,47 @@ describe("buildObjectDiagram", () => {
     const diagram = buildObjectDiagram(plant, "PIF1", instances, 1, issuesById);
     expect(diagram?.center.severity).toBe("error");
     expect(diagram?.center.issueRows).toEqual(["CON-001: missing target", "SCH-001: duplicate id"]);
+  });
+
+  it("renders findings that name a property as red rows instead of message rows", () => {
+    const issuesById = new Map([
+      [
+        "PIF1",
+        [
+          {
+            ruleId: "META-002",
+            severity: "error" as const,
+            message: 'AttributeName "TIPS: UnitCode" is not a valid or reachable attribute…',
+            objectId: "PIF1",
+            attributeName: "TIPS: UnitCode",
+          },
+          {
+            ruleId: "MDL-002",
+            severity: "warning" as const,
+            message: "Data property is not defined for this class",
+            objectId: "PIF1",
+            attributeName: "DiscProfile/TagType",
+          },
+        ],
+      ],
+    ]);
+    const diagram = buildObjectDiagram(plant, "PIF1", instances, 1, issuesById);
+    const rows = diagram?.center.rows ?? [];
+
+    // Named-but-absent property → a red "(missing)" row carrying the message.
+    const missing = rows.find((r) => r.name === "TIPS: UnitCode");
+    expect(missing?.value).toBe("(missing)");
+    expect(missing?.tone).toBe("issue");
+    expect(missing?.tooltip).toContain("META-002");
+
+    // Existing attribute row turns red in place, keeping its value.
+    const tagType = rows.find((r) => r.name === "DiscProfile/TagType");
+    expect(tagType?.value).toBe("FE");
+    expect(tagType?.tone).toBe("issue");
+
+    // Neither finding is duplicated as a ⚠ message row.
+    expect(diagram?.center.issueRows).toEqual([]);
+    expect(diagram?.center.severity).toBe("error");
   });
 
   it("expands level 2 outward, chaining edges to the level-1 card", () => {
@@ -163,7 +204,76 @@ describe("undefined-valued data properties", () => {
     const plant = buildPlantModel(rootOf(xml));
     const diagram = buildObjectDiagram(plant, "PIF9");
     const rows = diagram?.center.rows ?? [];
-    expect(rows).toContainEqual({ name: "Vendor/CustomThing", value: "hello" });
-    expect(rows).toContainEqual({ name: "DiscProfile/ItemTag", value: "(undefined)" });
+    expect(rows).toContainEqual({ name: "Vendor/CustomThing", value: "hello", tone: "normal" });
+    expect(rows).toContainEqual({ name: "DiscProfile/ItemTag", value: "(undefined)", tone: "undefined" });
+  });
+});
+
+describe("drawing mode (fullPlantModel)", () => {
+  const DRAWING_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object type="Core/EngineeringModel">
+    <Components property="ConceptualModel">
+      <Object id="Valve1" type="Plant/Piping.BallValve"/>
+    </Components>
+    <Components property="Diagram">
+      <Object type="Core/Diagram.Diagram">
+        <Components property="Groups">
+          <Object type="Core/Diagram.RepresentationGroup">
+            <References objects="#Valve1" property="Represents"/>
+            <Components property="Elements">
+              <Object type="Core/Diagram.Label">
+                <Components property="Elements">
+                  <Object type="Core/Diagram.AttributeRepresentation">
+                    <Data property="AttributeName"><String>TagName</String></Data>
+                    <References objects="#Valve1" property="Object"/>
+                  </Object>
+                </Components>
+              </Object>
+            </Components>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+  const root = rootOf(DRAWING_XML);
+
+  it("keeps drawing objects out of the base model but in the full model, memoized", () => {
+    const base = buildPlantModel(root);
+    expect(base.byId.has("Valve1")).toBe(true);
+    expect([...base.byId.values()].some((n) => n.type.startsWith("Core/Diagram"))).toBe(false);
+
+    const full = fullPlantModel(root);
+    expect(full.byId.has("Valve1")).toBe(true);
+    expect([...full.byId.values()].some((n) => n.type === "Core/Diagram.RepresentationGroup")).toBe(true);
+    expect(fullPlantModel(root)).toBe(full);
+  });
+
+  it("gives id-less drawing objects synthetic XPath ids and links them via Represents", () => {
+    const full = fullPlantModel(root);
+    const incoming = full.referencedBy.get("Valve1") ?? [];
+    const represents = incoming.find((r) => r.property === "Represents");
+    expect(represents?.fromId.startsWith("/Model/")).toBe(true);
+
+    const diagram = buildObjectDiagram(full, "Valve1");
+    const group = diagram?.neighbors.find((n) => n.card.subtitle === "Core/Diagram.RepresentationGroup");
+    expect(group?.side).toBe("in");
+    expect(group?.property).toBe("Represents");
+    expect(group?.card.navigable).toBe(true);
+  });
+
+  it("centers on a synthetic drawing object and walks into its labels", () => {
+    const full = fullPlantModel(root);
+    const groupId = (full.referencedBy.get("Valve1") ?? []).find((r) => r.property === "Represents")?.fromId;
+    if (!groupId) {
+      throw new Error("Represents edge missing");
+    }
+
+    const diagram = buildObjectDiagram(full, groupId, undefined, 2);
+    expect(diagram?.center.subtitle).toBe("Core/Diagram.RepresentationGroup");
+    const subtitles = (diagram?.neighbors ?? []).map((n) => n.card.subtitle);
+    expect(subtitles).toContain("Core/Diagram.Label");
+    expect(subtitles).toContain("Core/Diagram.AttributeRepresentation");
   });
 });

@@ -553,6 +553,58 @@ that grow, and record scope changes here.
   Inspect/Topology rails expanded — it now remaps against the current
   canvas box, selects pump D-20PA001 at (170, 254) mm before zooming,
   and clamps the clip inside the canvas.
+- **2026-08-23** Inspect shows problems structurally, not as error blobs
+  (director: "should show a property just red text to show it should be
+  there instead of error … not obscure data"): ValidationIssue gained an
+  optional `attributeName` — set by META-002 (template attribute), MDL-002
+  (unknown property), MDL-003 (missing required) and MDL-004 (bad enum
+  literal) — and the object-diagram card builder merges such findings into
+  the ROWS: a named-but-absent property becomes a red "(missing)" row, an
+  existing row turns red in place, the full message moves to the row
+  tooltip, and only unmappable findings remain as ⚠ rows. Messages and the
+  Issues/Properties panels are unchanged — those are for reading findings;
+  Inspect is for structure.
+- **2026-08-23** Inspect "Drawing" toggle: a second, diagram-inclusive
+  plant model (`fullPlantModel`, WeakMap-memoized per DOM root — the root
+  Element now travels on DexpiDocument) keeps Core/Diagram objects.
+  Drawing objects carry NO ids in real DISC files, so their positional
+  XPath becomes the synthetic id (pastes into xmllint; shown in the card
+  tooltip). With the wrapper form, diagram trees hang off
+  Core/EngineeringModel's other Components — diagram mode starts from ALL
+  of them, not just ConceptualModel. Clicking a synthetic card re-centers
+  Inspect LOCALLY (a panel-level centerOverride) instead of touching
+  global selection, which nothing else could resolve; a new global
+  selection or leaving drawing mode drops the override. The panel header
+  (with the toggle) now renders even when the current selection yields no
+  diagram — a drawing-side object selected in plant mode would otherwise
+  leave the toggle unreachable. State/layout logic moved to
+  useInspectDiagram (component stays render-focused).
+- **2026-08-23** Inspect data fidelity + copy menu (director: "not really
+  showing the data … right click to copy out data as json, xpath"):
+  (1) multi-valued Data properties were silently truncated to their FIRST
+  value everywhere (dataValue reads firstElementChild) — new dataValues()
+  reads all children and collectAttributes joins them, so a ConnectorLine
+  shows every InnerPoint; rows that overflow the card carry their full
+  value as a tooltip. (2) Right-click on any card → "Copy data as JSON" /
+  "Copy XPath". JSON comes from objectJson.ts working on the SOURCE
+  element (PlantModel now carries elementsById) — full fidelity: typed
+  values, DataReference as {$ref}, aggregates/components recursive,
+  multi-values as arrays — deliberately NOT the display strings.
+  InspectContextMenu is a plain fixed-position div (tredespace UI has no
+  menu widget); dismiss listeners are capture-phase with an
+  inside-the-menu guard. (3) Director's mid-round asks: drawing-side
+  cards render with a DASHED border (they never feed plant-data views;
+  isDiagramType exported from plantModel), the header prefixes
+  "Drawing ·" while the mode is on, and the centered object's full XPath
+  shows as a selectable line under the header. Follow-ups the same round:
+  a header hint line says where the data lives ("See the Properties panel
+  for this object's full data" for plant objects vs "Drawing-side object —
+  shown only here; right-click to copy" for drawing ones), and card
+  tooltips no longer leak the XPath id (it overflows) — drawing cards'
+  tooltips state what the card is instead; the XPath stays available via
+  right-click → Copy XPath and the header line. Documented with a new
+  reproducible inspect-drawing.png capture (depth 1 for card size, menu
+  held open, Drawing toggle called out).
 - **2026-08-23** Manual is mobile-responsive (director: "people might
   open documentation on mobile — hamburger/side panel"): below 820px
   the sidebar becomes an off-canvas drawer behind a fixed hamburger

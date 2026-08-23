@@ -67,5 +67,6 @@ export function parseDexpiDocument(
     connectivity: buildConnectivity(root),
     issues: validateDocument(root, profile),
     objectTypes: indexObjectTypes(root),
+    root,
   });
 }

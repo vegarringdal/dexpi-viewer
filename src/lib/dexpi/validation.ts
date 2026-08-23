@@ -29,6 +29,10 @@ export type ValidationIssue = Readonly<{
   objectId: string | null;
   /** How to fix it. */
   suggestion?: string;
+  /** The property on `objectId` the finding is about, when the rule knows
+   *  it — lets structural views (Inspect) mark the row instead of dumping
+   *  the message. */
+  attributeName?: string;
 }>;
 
 /**
@@ -615,6 +619,7 @@ function checkTemplateAttributeReferences(root: Element, issues: ValidationIssue
         objectId,
         suggestion:
           "Correct the AttributeName to a valid property of the object (or one it directly references), or remove the fragment.",
+        attributeName,
       });
     }
   }
