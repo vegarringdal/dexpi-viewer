@@ -217,13 +217,11 @@ describe("property-break labels on the real sheet 08", () => {
     expect((svg.match(/>ESD</g) ?? []).length).toBe(1);
     expect((svg.match(/>M</g) ?? []).length).toBe(2);
 
-    // Semantic signal-line styling, official parity: 12 plain signal lines
-    // dash 3/3, the one bus line dash 2.75/4.75 with its circle mark 5mm in
-    // at (321,54), and the electrical line's bracket marks (first one at
-    // world (347.25,64.25), matching the official glyph at 348.5/rot 180).
+    // Semantic signal-line styling per the DISC decoration table: 12 plain
+    // signal lines dash 3/3; the bus and electrical lines draw solid with
+    // marks — the bus circle keeps its observed spot 5mm in at (321,54).
     expect((svg.match(/stroke-dasharray="3 3"/g) ?? []).length).toBe(12);
-    expect((svg.match(/stroke-dasharray="2.75 4.75"/g) ?? []).length).toBe(1);
+    expect((svg.match(/stroke-dasharray="2.75 4.75"/g) ?? []).length).toBe(0);
     expect(svg).toContain('<circle cx="321" cy="54" r="1.25"');
-    expect(svg).toContain("347.25,64.25");
   });
 });

@@ -32,8 +32,13 @@ const { signalLineStyle, buildSignalMarkPrims } = await import("../src/lib/dexpi
     ["measuring", "Plant/Instrumentation.MeasuringLineFunction", null],
     ["signal", "Plant/Instrumentation.SignalConveyingFunction", "SignalConveying"],
     ["electrical", "Plant/Instrumentation.SignalConveyingFunction", "ElectricalSignalConveying"],
-    ["bus", "Plant/Instrumentation.SignalConveyingFunction", "BusSignalConveying"],
     ["hydraulic", "Plant/Instrumentation.SignalConveyingFunction", "HydraulicSignalConveying"],
+    ["bus", "Plant/Instrumentation.SignalConveyingFunction", "BusSignalConveying"],
+    ["pneumatic", "Plant/Instrumentation.SignalConveyingFunction", "PneumaticSignalConveying"],
+    ["capillary", "Plant/Instrumentation.SignalConveyingFunction", "CapillarySignalConveying"],
+    ["undefined", "Plant/Instrumentation.SignalConveyingFunction", "UndefinedSignalConveying"],
+    ["em-guided", "Plant/Instrumentation.SignalConveyingFunction", "ElectromagneticGuidedSignalConveying"],
+    ["em-unguided", "Plant/Instrumentation.SignalConveyingFunction", "ElectromagneticUnguidedSignalConveying"],
     ["authored", "Plant/Instrumentation.SignalConveyingFunction", "SomeFutureSignalConveying"],
   ];
   for (const [key, type, representation] of cases) {
@@ -48,7 +53,7 @@ const { signalLineStyle, buildSignalMarkPrims } = await import("../src/lib/dexpi
     const points = [{ x: 0, y: 0 }, { x: 60, y: 0 }];
     const stroke = { color: { r: 0, g: 0, b: 0 }, width: 0.25, dash };
     const prims = [
-      { kind: "polyline", points, stroke },
+      ...(style?.hideLine ? [] : [{ kind: "polyline", points, stroke }]),
       ...(style?.mark ? buildSignalMarkPrims(points, style.mark, stroke) : []),
     ];
     const scene = {

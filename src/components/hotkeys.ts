@@ -1,11 +1,17 @@
 import { type HotkeyDef, hotkeysActions } from "@tredespace/ui/hotkeys";
+import type { Result } from "../lib/result.ts";
+import { setHighlightMonochrome } from "../state/highlight/highlight.actions.ts";
+import { highlightState } from "../state/highlight/highlight.state.ts";
 import { toggleTheme } from "../state/theme/theme.actions.ts";
-import { openHighlightPanel, openSettings, openTopologyGraphPanel } from "../state/ui/ui.actions.ts";
+import { resetDockLayout, toggleDockPanel } from "../state/ui/ui.actions.ts";
 import {
   openBundledProfile,
   openExampleDocument,
   requestViewCommand,
+  setViewerError,
 } from "../state/viewer/viewer.actions.ts";
+import { exportIssuesCsv, exportPdf, exportSvg } from "./exportService.ts";
+import { PANEL_IDS } from "./panelIds.ts";
 import { openDocs } from "./ribbon/HelpSection.tsx";
 
 const ZOOM_STEP_FACTOR = 1.5;
@@ -24,30 +30,29 @@ export function setOpenFileTrigger(trigger: (() => void) | null): void {
   openFileTrigger = trigger;
 }
 
+function reportError(result: Result<void>): void {
+  if (result.error) {
+    setViewerError(result.error.msg);
+  }
+}
+
 // -----------------------------------------------------------------------------
 // Registration
 // -----------------------------------------------------------------------------
 
 /**
- * Placeholder default bindings: every ribbon action is ALT then a 4-digit
- * number (rebindable in Settings → Shortcuts). First digit = ribbon section
- * (1 File, 2 View, 9 App), the rest is the ordinal within the section.
+ * Default keymap (every binding rebindable in Settings → Shortcuts):
+ * plain letters/digits for app actions (they can never collide with browser
+ * chords), leader sequences for grouped ones — E then P/S/C exports,
+ * Z then I/O zooms — and Ctrl-combos only for the file-open family.
  */
 const APP_HOTKEYS: HotkeyDef[] = [
-  {
-    id: "help.docs",
-    category: "Help",
-    label: "Open documentation",
-    description: "Open the user manual in a new tab.",
-    defaultKeys: "F1",
-    run: () => openDocs(),
-  },
   {
     id: "file.open",
     category: "File",
     label: "Open file",
     description: "Open a DEXPI 2.0 XML file.",
-    defaultKeys: "ALT + 1001",
+    defaultKeys: "CTRL&O",
     run: () => openFileTrigger?.(),
   },
   {
@@ -55,7 +60,7 @@ const APP_HOTKEYS: HotkeyDef[] = [
     category: "File",
     label: "Load example",
     description: "Load the bundled DISC example P&ID.",
-    defaultKeys: "ALT + 1002",
+    defaultKeys: "CTRL&SHIFT&O",
     run: () => {
       void openExampleDocument();
     },
@@ -65,25 +70,17 @@ const APP_HOTKEYS: HotkeyDef[] = [
     category: "File",
     label: "Use 0.6.3 profile",
     description: "Load the bundled official DISC Profile 0.6.3 catalogue.",
-    defaultKeys: "ALT + 1003",
+    defaultKeys: "CTRL&SHIFT&L",
     run: () => {
       void openBundledProfile();
     },
-  },
-  {
-    id: "view.theme",
-    category: "View",
-    label: "Toggle theme",
-    description: "Switch between the light and dark theme.",
-    defaultKeys: "ALT + 2001",
-    run: () => toggleTheme(),
   },
   {
     id: "view.fit",
     category: "View",
     label: "Fit drawing",
     description: "Fit the whole drawing into the viewport.",
-    defaultKeys: "ALT + 2002",
+    defaultKeys: "F",
     run: () => requestViewCommand({ kind: "fit" }),
   },
   {
@@ -91,7 +88,7 @@ const APP_HOTKEYS: HotkeyDef[] = [
     category: "View",
     label: "Zoom in",
     description: "Zoom in around the viewport center.",
-    defaultKeys: "ALT + 2003",
+    defaultKeys: "Z + I",
     run: () => requestViewCommand({ kind: "zoom", factor: ZOOM_STEP_FACTOR }),
   },
   {
@@ -99,7 +96,7 @@ const APP_HOTKEYS: HotkeyDef[] = [
     category: "View",
     label: "Zoom out",
     description: "Zoom out around the viewport center.",
-    defaultKeys: "ALT + 2004",
+    defaultKeys: "Z + O",
     run: () => requestViewCommand({ kind: "zoom", factor: 1 / ZOOM_STEP_FACTOR }),
   },
   {
@@ -107,34 +104,145 @@ const APP_HOTKEYS: HotkeyDef[] = [
     category: "View",
     label: "Zoom 100%",
     description: "Reset the zoom to 100% (1 mm per 1/96 inch).",
-    defaultKeys: "ALT + 2005",
+    defaultKeys: "0",
     run: () => requestViewCommand({ kind: "zoom100" }),
   },
   {
-    id: "app.settings",
-    category: "Panels",
-    label: "Settings",
-    description: "Open the Settings panel.",
-    defaultKeys: "ALT + 9001",
-    run: () => openSettings(),
+    id: "view.theme",
+    category: "View",
+    label: "Toggle theme",
+    description: "Switch between the light and dark theme.",
+    defaultKeys: "D",
+    run: () => toggleTheme(),
   },
   {
-    id: "app.topologyGraph",
+    id: "view.monochrome",
+    category: "View",
+    label: "Black & white drawing",
+    description: "Toggle the monochrome drawing mode (highlight colors stand alone).",
+    defaultKeys: "B",
+    run: () => setHighlightMonochrome(!highlightState.get().monochrome),
+  },
+  {
+    id: "export.pdf",
+    category: "Export",
+    label: "Export PDF",
+    description: "Export the drawing as a vector PDF.",
+    defaultKeys: "E + P",
+    run: () => {
+      void exportPdf().then(reportError);
+    },
+  },
+  {
+    id: "export.svg",
+    category: "Export",
+    label: "Export SVG",
+    description: "Export the drawing as a standalone SVG.",
+    defaultKeys: "E + S",
+    run: () => reportError(exportSvg()),
+  },
+  {
+    id: "export.report",
+    category: "Export",
+    label: "Export validation report",
+    description: "Export the validation findings as CSV.",
+    defaultKeys: "E + C",
+    run: () => reportError(exportIssuesCsv()),
+  },
+  {
+    id: "panel.explorer",
     category: "Panels",
-    label: "Topology graph",
-    description: "Open the semantic topology graph panel.",
-    defaultKeys: "ALT + 9002",
-    run: () => openTopologyGraphPanel(),
+    label: "Explorer",
+    description: "Toggle the object explorer tree.",
+    defaultKeys: "1",
+    run: () => toggleDockPanel(PANEL_IDS.topology),
+  },
+  {
+    id: "panel.properties",
+    category: "Panels",
+    label: "Properties",
+    description: "Toggle the properties panel.",
+    defaultKeys: "2",
+    run: () => toggleDockPanel(PANEL_IDS.properties),
+  },
+  {
+    id: "panel.validation",
+    category: "Panels",
+    label: "Validation",
+    description: "Toggle the validation findings panel.",
+    defaultKeys: "3",
+    run: () => toggleDockPanel(PANEL_IDS.issues),
+  },
+  {
+    id: "panel.connections",
+    category: "Panels",
+    label: "Connections",
+    description: "Toggle the upstream/downstream connections panel.",
+    defaultKeys: "4",
+    run: () => toggleDockPanel(PANEL_IDS.connections),
   },
   {
     id: "app.highlight",
     category: "Panels",
     label: "Highlight",
-    description: "Open the classification highlight panel.",
-    defaultKeys: "ALT + 9003",
-    run: () => openHighlightPanel(),
+    description: "Toggle the classification highlight panel.",
+    defaultKeys: "5",
+    run: () => toggleDockPanel(PANEL_IDS.highlight),
+  },
+  {
+    id: "app.topologyGraph",
+    category: "Panels",
+    label: "Topology graph",
+    description: "Toggle the semantic topology graph panel.",
+    defaultKeys: "6",
+    run: () => toggleDockPanel(PANEL_IDS.topologyGraph),
+  },
+  {
+    id: "panel.inspect",
+    category: "Panels",
+    label: "Inspect",
+    description: "Toggle the UML-style instance diagram panel.",
+    defaultKeys: "7",
+    run: () => toggleDockPanel(PANEL_IDS.inspect),
+  },
+  {
+    id: "panel.minimap",
+    category: "Panels",
+    label: "Minimap",
+    description: "Toggle the minimap panel.",
+    defaultKeys: "8",
+    run: () => toggleDockPanel(PANEL_IDS.minimap),
+  },
+  {
+    id: "app.settings",
+    category: "Panels",
+    label: "Settings",
+    description: "Toggle the Settings panel.",
+    defaultKeys: "9",
+    run: () => toggleDockPanel(PANEL_IDS.settings),
+  },
+  {
+    id: "panel.resetLayout",
+    category: "Panels",
+    label: "Reset layout",
+    description: "Restore the default panel layout.",
+    defaultKeys: "CTRL&ALT&R",
+    run: () => resetDockLayout(),
+  },
+  {
+    id: "help.docs",
+    category: "Help",
+    label: "Open documentation",
+    description: "Open the user manual in a new tab.",
+    defaultKeys: "F1",
+    run: () => openDocs(),
   },
 ];
+
+/** The binding table, exposed for the boot-time validation test. */
+export function appHotkeyDefs(): readonly HotkeyDef[] {
+  return APP_HOTKEYS;
+}
 
 /** Call once at boot — also starts the key engine. */
 export function registerAppHotkeys(): void {

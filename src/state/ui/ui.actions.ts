@@ -32,6 +32,12 @@ export function openHighlightPanel(): void {
   dockManager?.openPanel("highlight");
 }
 
+/** Toggles a dock panel open/closed — the ribbon Panels buttons' semantics,
+ *  shared by the panel hotkeys. */
+export function toggleDockPanel(panelId: string): void {
+  dockManager?.togglePanel(panelId);
+}
+
 /**
  * Restores the persisted dock layout (if any) and starts saving every layout
  * change, debounced. Returns the disposer; call once per manager lifetime.

@@ -3,6 +3,7 @@ import type { JSX } from "react";
 import {
   resetRenderingSettings,
   setMinStrokePx,
+  setPreferBuiltinSignalStyle,
   setSelectionTextRect,
   setShowGrid,
   setStrokeWidthScale,
@@ -37,7 +38,14 @@ function SettingRow({ label, hint, children }: SettingRowProps): JSX.Element {
 // -----------------------------------------------------------------------------
 
 export function RenderingSettingsTab(): JSX.Element {
-  const { minStrokePx, strokeWidthScale, showGrid, unitDisplay, selectionTextRect } = renderingState.use();
+  const {
+    minStrokePx,
+    strokeWidthScale,
+    showGrid,
+    unitDisplay,
+    selectionTextRect,
+    preferBuiltinSignalStyle,
+  } = renderingState.use();
 
   return (
     <div className="flex flex-col gap-4 overflow-y-auto p-4">
@@ -68,6 +76,13 @@ export function RenderingSettingsTab(): JSX.Element {
         label="Spec unit names"
         hint="Kilowatt instead of kW"
         info="Show units as the DEXPI specification's enumeration literals (Kilowatt, DegreeCelsius) instead of conventional symbols (kW, °C). Applies to the Properties panel only — drawing labels always use symbols. The document re-parses on change."
+      />
+      <Checkbox
+        checked={preferBuiltinSignalStyle}
+        onChange={setPreferBuiltinSignalStyle}
+        label="Built-in signal-line styling"
+        hint="Ignore profile LineStrokes"
+        info="Signal lines are styled by semantics (repeated E, L, circles, …). When the loaded DISC profile publishes its own LineStroke styling for signal types, the profile wins by default; turn this on to force the viewer's built-in convention — useful while profile styling is early-stage. The document re-parses on change."
       />
       <div>
         <Button onClick={() => resetRenderingSettings()}>Reset to defaults</Button>

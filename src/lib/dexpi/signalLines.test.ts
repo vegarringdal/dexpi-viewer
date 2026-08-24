@@ -1,5 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import type { ProfileLineStroke } from "./discProfile.ts";
 import { parseDexpiDocument } from "./parseDocument.ts";
+import { setPreferBuiltinSignalStyle, signalLineStyle } from "./signalLines.ts";
 import type { CirclePrim, PolylinePrim, SceneNode } from "./types.ts";
 
 // -----------------------------------------------------------------------------
@@ -56,6 +58,9 @@ const MAIN_XML = `<?xml version="1.0" encoding="UTF-8"?>
   <Object id="SCF5" type="Plant/Instrumentation.SignalConveyingFunction">
     <Data property="DiscProfile/SignalConveyingFunctionTypeRepresentation"><String>HydraulicSignalConveying</String></Data>
   </Object>
+  <Object id="SCF6" type="Plant/Instrumentation.SignalConveyingFunction">
+    <Data property="DiscProfile/SignalConveyingFunctionTypeRepresentation"><String>ElectromagneticUnguidedSignalConveying</String></Data>
+  </Object>
   <Object id="D1" type="Core/Diagram.Diagram">
     <Data property="MinX"><Double>0</Double></Data>
     <Data property="MinY"><Double>0</Double></Data>
@@ -68,6 +73,7 @@ const MAIN_XML = `<?xml version="1.0" encoding="UTF-8"?>
       ${connectorGroup("SCF3", "NP7", "NP8")}
       ${connectorGroup("SCF4", "NP9", "NP10")}
       ${connectorGroup("SCF5", "NP11", "NP12")}
+      ${connectorGroup("SCF6", "NP13", "NP14")}
       <Object type="Core/Diagram.RepresentationGroup">
         <Components property="NodePositions">
           ${nodePosition("NP1", 0, 10)}
@@ -82,6 +88,8 @@ const MAIN_XML = `<?xml version="1.0" encoding="UTF-8"?>
           ${nodePosition("NP10", 20, 50)}
           ${nodePosition("NP11", 0, 60)}
           ${nodePosition("NP12", 20, 60)}
+          ${nodePosition("NP13", 0, 70)}
+          ${nodePosition("NP14", 20, 70)}
         </Components>
       </Object>
     </Components>
@@ -113,36 +121,108 @@ describe("semantic signal-line styling", () => {
     expect(line?.stroke.dash).toEqual([2, 0.75]);
   });
 
-  it("draws a hydraulic line solid (fluid-filled, like a measuring line)", () => {
+  it("draws a hydraulic line solid with repeated L marks", () => {
     const nodes = nodesFor("SCF5");
-    const [line] = linesOf(nodes);
-    expect(line?.stroke.dash).toEqual([]);
-    expect(nodes.length).toBe(1);
+    const lines = linesOf(nodes);
+    expect(lines[0]?.stroke.dash).toEqual([]);
+    // 20mm line, glyph cadence 2.5 + n*6.5 → 3 L glyphs (one stroke each).
+    expect(lines.length).toBe(1 + 3);
   });
 
-  it("draws an electrical line solid with bracket marks every 6.5mm from 2.5mm in", () => {
+  it("draws an electrical line solid with italic-E marks every 6.5mm from 2.5mm in", () => {
     const lines = linesOf(nodesFor("SCF1"));
     expect(lines[0]?.stroke.dash).toEqual([]);
-    const brackets = lines.slice(1);
-    expect(brackets.map((b) => b.points[1]?.x)).toEqual([2.5, 9, 15.5]);
-    // Glyph frame follows the line direction; arms extend along travel.
-    expect(brackets[0]?.points).toEqual([
-      { x: 3.75, y: 18.75 },
-      { x: 2.5, y: 18.75 },
-      { x: 2.5, y: 21.25 },
-      { x: 3.75, y: 21.25 },
+    // Each E is four strokes (spine + three arms) → 3 glyphs of 4.
+    const glyphStrokes = lines.slice(1);
+    expect(glyphStrokes.length).toBe(12);
+    // First E's slanted spine, rotated to the (horizontal) line at y=20.
+    expect(glyphStrokes[0]?.points).toEqual([
+      { x: 2.35, y: 18.75 },
+      { x: 1.75, y: 21.25 },
     ]);
   });
 
-  it("draws a bus line dashed 2.75/4.75 with a circle mark 5mm in", () => {
+  it("draws a bus line solid with a circle mark 5mm in", () => {
     const nodes = nodesFor("SCF2");
     const [line] = linesOf(nodes);
-    expect(line?.stroke.dash).toEqual([2.75, 4.75]);
+    expect(line?.stroke.dash).toEqual([]);
     const circles = nodes.flatMap((n): CirclePrim[] =>
       n.kind === "prim" && n.prim.kind === "circle" ? [n.prim] : [],
     );
     expect(circles.length).toBe(1);
     expect(circles[0]?.center).toEqual({ x: 5, y: 30 });
     expect(circles[0]?.radius).toBe(1.25);
+  });
+
+  it("hides the electromagnetic-unguided line entirely — only squiggles draw", () => {
+    const nodes = nodesFor("SCF6");
+    const lines = linesOf(nodes);
+    // No conductor: none of the polylines is the 20mm line itself.
+    expect(lines.length).toBe(3);
+    for (const squiggle of lines) {
+      expect(squiggle.points.length).toBe(6);
+    }
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Style mapping + profile precedence (pure function level)
+// -----------------------------------------------------------------------------
+
+function signalEl(representation: string): Element {
+  return new DOMParser().parseFromString(
+    `<Object type="Plant/Instrumentation.SignalConveyingFunction">
+      <Data property="SignalConveyingFunctionTypeRepresentation"><String>${representation}</String></Data>
+    </Object>`,
+    "text/xml",
+  ).documentElement;
+}
+
+describe("signalLineStyle mapping (DISC decoration table)", () => {
+  afterEach(() => setPreferBuiltinSignalStyle(false));
+
+  const expected: ReadonlyArray<readonly [string, string | null, boolean]> = [
+    ["SignalConveying", null, false],
+    ["ElectricalSignalConveying", "E", false],
+    ["HydraulicSignalConveying", "L", false],
+    ["BusSignalConveying", "circle", false],
+    ["PneumaticSignalConveying", "chevron", false],
+    ["CapillarySignalConveying", "x", false],
+    ["UndefinedSignalConveying", "slash", false],
+    ["ElectromagneticGuidedSignalConveying", "squiggle", false],
+    ["ElectromagneticUnguidedSignalConveying", "squiggle", true],
+  ];
+
+  it.each(expected)("%s → mark %s", (representation, mark, hideLine) => {
+    const style = signalLineStyle(signalEl(representation));
+    expect(style?.mark ?? null).toBe(mark);
+    expect(style?.hideLine).toBe(hideLine);
+    expect(style?.dash).toEqual(representation === "SignalConveying" ? [3, 3] : []);
+  });
+
+  it("profile LineStrokes override the built-in convention by default", () => {
+    const stroke: ProfileLineStroke = {
+      color: { r: 0.2, g: 0.2, b: 0.2 },
+      dashArray: [1, 1],
+      lateralOffsetMm: 0,
+      rounding: null,
+      dashOffsetMm: 0,
+      widthMm: 0.5,
+    };
+    const strokes = new Map([["ElectricalSignalConveying", stroke]]);
+    const fromProfile = signalLineStyle(signalEl("ElectricalSignalConveying"), strokes);
+    expect(fromProfile).toEqual({
+      dash: [1, 1],
+      mark: null,
+      hideLine: false,
+      color: { r: 0.2, g: 0.2, b: 0.2 },
+      width: 0.5,
+    });
+
+    // The setting forces the built-in convention back.
+    setPreferBuiltinSignalStyle(true);
+    const builtin = signalLineStyle(signalEl("ElectricalSignalConveying"), strokes);
+    expect(builtin?.mark).toBe("E");
+    expect(builtin?.dash).toEqual([]);
   });
 });

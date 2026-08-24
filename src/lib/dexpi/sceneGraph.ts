@@ -197,11 +197,24 @@ function walkGroup(
       const target = ctx.nodePositions.get(referenceTargets(el, "Target")[0] ?? "") ?? null;
       let prim = parseConnectorPolyline(el, source, target);
       if (prim.kind === "polyline" && prim.points.length >= 2) {
-        const style = signalLineStyle(objectId ? (ctx.objectsById.get(objectId) ?? null) : null);
+        const style = signalLineStyle(
+          objectId ? (ctx.objectsById.get(objectId) ?? null) : null,
+          ctx.profile?.signalStrokes,
+        );
         if (style) {
-          prim = { ...prim, stroke: { ...prim.stroke, dash: style.dash } };
+          prim = {
+            ...prim,
+            stroke: {
+              ...prim.stroke,
+              dash: style.dash,
+              ...(style.color ? { color: style.color } : {}),
+              ...(style.width !== undefined ? { width: style.width } : {}),
+            },
+          };
         }
-        ctx.nodes.push({ kind: "prim", prim, objectId, role: "connector" });
+        if (!style?.hideLine) {
+          ctx.nodes.push({ kind: "prim", prim, objectId, role: "connector" });
+        }
         if (style?.mark) {
           for (const markPrim of buildSignalMarkPrims(prim.points, style.mark, prim.stroke)) {
             ctx.nodes.push({ kind: "prim", prim: markPrim, objectId, role: "connector" });

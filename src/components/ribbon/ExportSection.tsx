@@ -29,6 +29,7 @@ export function ExportSection(): JSX.Element {
         size="mini"
         disabled={!hasDocument}
         tooltip="Save the drawing as a vector PDF"
+        shortcut="export.pdf"
         onClick={handleExportPdf}
       />
       <RibbonButton
@@ -37,6 +38,7 @@ export function ExportSection(): JSX.Element {
         size="mini"
         disabled={!hasDocument}
         tooltip="Save the drawing as an SVG vector file"
+        shortcut="export.svg"
         onClick={() => reportError(exportSvg())}
       />
       <RibbonButton
@@ -45,6 +47,7 @@ export function ExportSection(): JSX.Element {
         size="mini"
         disabled={!hasDocument}
         tooltip="Save the validation findings as CSV"
+        shortcut="export.report"
         onClick={() => reportError(exportIssuesCsv())}
       />
     </RibbonSection>

@@ -33,6 +33,7 @@ export function PanelsSection(): JSX.Element {
         size="mini"
         selected={manager.isOpen(PANEL_IDS.topology)}
         tooltip="Show/hide the object explorer tree"
+        shortcut="panel.explorer"
         onClick={panelToggle(PANEL_IDS.topology)}
       />
       <RibbonButton
@@ -50,6 +51,7 @@ export function PanelsSection(): JSX.Element {
         size="mini"
         selected={manager.isOpen(PANEL_IDS.inspect)}
         tooltip="UML-style diagram of the selected object: all data and one-hop relations (debug)"
+        shortcut="panel.inspect"
         onClick={panelToggle(PANEL_IDS.inspect)}
       />
       <RibbonButton
@@ -58,6 +60,7 @@ export function PanelsSection(): JSX.Element {
         size="mini"
         selected={manager.isOpen(PANEL_IDS.properties)}
         tooltip="Show/hide the properties panel"
+        shortcut="panel.properties"
         onClick={panelToggle(PANEL_IDS.properties)}
       />
       <RibbonButton
@@ -75,6 +78,7 @@ export function PanelsSection(): JSX.Element {
         size="mini"
         selected={manager.isOpen(PANEL_IDS.connections)}
         tooltip="Direct upstream/downstream neighbours of the selection"
+        shortcut="panel.connections"
         onClick={panelToggle(PANEL_IDS.connections)}
       />
       <RibbonButton
@@ -92,6 +96,7 @@ export function PanelsSection(): JSX.Element {
         size="mini"
         selected={manager.isOpen(PANEL_IDS.minimap)}
         tooltip="Show/hide the drawing overview"
+        shortcut="panel.minimap"
         onClick={panelToggle(PANEL_IDS.minimap)}
       />
       <RibbonButton
@@ -100,6 +105,7 @@ export function PanelsSection(): JSX.Element {
         size="mini"
         selected={manager.isOpen(PANEL_IDS.issues)}
         tooltip="Show/hide the validation findings"
+        shortcut="panel.validation"
         onClick={panelToggle(PANEL_IDS.issues)}
       />
       <RibbonButton
@@ -107,6 +113,7 @@ export function PanelsSection(): JSX.Element {
         label="Reset"
         size="big"
         tooltip="Restore the default panel layout"
+        shortcut="panel.resetLayout"
         onClick={resetDockLayout}
       />
     </RibbonSection>

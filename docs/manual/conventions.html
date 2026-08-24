@@ -51,47 +51,73 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <main><h1>Conventions beyond the spec</h1>
 <p>Several things every reader of DEXPI files must decide are <strong>not defined by any spec</strong>: neither the DEXPI 2.0 specification, the XML schema, nor the DISC profile says how to draw them. This page documents where this viewer follows <em>conventions recovered empirically</em> from the official DISC_EXAMPLE-14 renderings (15 sheets with authoritative SVGs), what the evidence was, and which known deltas remain. Everything here is a candidate for standardization upstream.</p>
 <h2>Signal-line styling</h2>
-<p>The XML gives <strong>every</strong> signal-family ConnectorLine the same authored stroke (<code>LongDash</code>, 248 lines across all 15 sheets), and the DiscProfile defines only the <code>SignalConveyingFunctionTypeRepresentation</code> <em>attribute</em> — no line graphics. The official renderings override the stroke by semantics and synthesize mark glyphs that exist in no XML. Recovered mapping (zero exceptions across all sheets):</p>
+<p>The XML gives <strong>every</strong> signal-family ConnectorLine the same authored stroke (<code>LongDash</code>, 248 lines across all 15 sheets), and DiscProfile 0.6.3 defines only the <code>SignalConveyingFunctionTypeRepresentation</code> <em>attribute</em> — no line graphics. The viewer styles the line by semantics and synthesizes repeated mark glyphs, following the DISC decoration table:</p>
 <table>
 <thead>
 <tr>
-<th>Semantics</th>
+<th><code>SignalConveyingFunctionTypeRepresentation</code></th>
 <th>Preview</th>
 <th>Rendering</th>
 </tr>
 </thead>
 <tbody><tr>
-<td><code>MeasuringLineFunction</code></td>
+<td>— (<code>MeasuringLineFunction</code>)</td>
 <td><img src="signals/measuring.svg" alt="measuring"></td>
-<td>solid</td>
+<td>solid, no marks</td>
 </tr>
 <tr>
-<td><code>SignalConveying</code></td>
+<td><code>SignalConveying</code> (plain, no sub-type)</td>
 <td><img src="signals/signal.svg" alt="signal"></td>
-<td>dashed 3/3</td>
+<td>dashed 3/3, no marks</td>
 </tr>
 <tr>
 <td><code>ElectricalSignalConveying</code></td>
 <td><img src="signals/electrical.svg" alt="electrical"></td>
-<td>solid + square-bracket glyphs every 6.5 mm, rotated to the line direction</td>
-</tr>
-<tr>
-<td><code>BusSignalConveying</code></td>
-<td><img src="signals/bus.svg" alt="bus"></td>
-<td>dashed 2.75/4.75 + hollow circle marks (r 1.25 mm)</td>
+<td>solid + repeated italic <strong>E</strong></td>
 </tr>
 <tr>
 <td><code>HydraulicSignalConveying</code></td>
 <td><img src="signals/hydraulic.svg" alt="hydraulic"></td>
-<td>solid — <strong>no official sample exists</strong>; project decision: a hydraulic signal is a fluid-filled line like a measuring line</td>
+<td>solid + repeated upright <strong>L</strong></td>
 </tr>
 <tr>
-<td>any other value</td>
+<td><code>BusSignalConveying</code></td>
+<td><img src="signals/bus.svg" alt="bus"></td>
+<td>solid + repeated small circle</td>
+</tr>
+<tr>
+<td><code>PneumaticSignalConveying</code></td>
+<td><img src="signals/pneumatic.svg" alt="pneumatic"></td>
+<td>solid + repeated <strong>^</strong> chevron</td>
+</tr>
+<tr>
+<td><code>CapillarySignalConveying</code></td>
+<td><img src="signals/capillary.svg" alt="capillary"></td>
+<td>solid + repeated small <strong>x</strong></td>
+</tr>
+<tr>
+<td><code>UndefinedSignalConveying</code></td>
+<td><img src="signals/undefined.svg" alt="undefined"></td>
+<td>solid + repeated <strong>/</strong> slash</td>
+</tr>
+<tr>
+<td><code>ElectromagneticGuidedSignalConveying</code></td>
+<td><img src="signals/em-guided.svg" alt="em-guided"></td>
+<td>solid + repeated <strong>~</strong> squiggle</td>
+</tr>
+<tr>
+<td><code>ElectromagneticUnguidedSignalConveying</code></td>
+<td><img src="signals/em-unguided.svg" alt="em-unguided"></td>
+<td>line hidden entirely — only the repeated <strong>~</strong> squiggle draws (no physical conductor to depict)</td>
+</tr>
+<tr>
+<td>attribute absent / unknown value</td>
 <td><img src="signals/authored.svg" alt="authored"></td>
 <td>the file&#39;s authored stroke is kept unchanged (LongDash shown)</td>
 </tr>
 </tbody></table>
-<p>Known uncertainty: the bus-circle cadence rests on a single 9 mm sample (one circle, 5 mm in — modelled as a 10 mm cadence).</p>
+<p>Marks repeat every 6.5 mm starting 2.5 mm in (cadence measured from the official electrical samples), rotated to the local line direction; circles keep the observed 10 mm cadence starting 5 mm in. Glyphs are hand-drawn vectors (~2.5 mm tall) so SVG/PDF exports need no font.</p>
+<p><strong>Profile precedence:</strong> if a loaded DISC profile publishes <code>Profile/LineStroke</code> styling for signal types (0.6.3 publishes none), the profile&#39;s styling wins by default. Settings → Rendering → <em>Built-in signal-line styling</em> forces the table above instead — useful while profile styling is early-stage.</p>
 <h2>Profile label placement</h2>
 <p>The profile defines label templates but not how a placement&#39;s rotation affects them. Recovered rules:</p>
 <ul>

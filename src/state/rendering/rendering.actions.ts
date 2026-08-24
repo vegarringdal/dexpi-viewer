@@ -1,3 +1,4 @@
+import { setPreferBuiltinSignalStyle as applySignalStylePreference } from "../../lib/dexpi/signalLines.ts";
 import { setUnitDisplayMode, type UnitDisplayMode } from "../../lib/dexpi/values.ts";
 import { reparseCurrentDocument } from "../viewer/viewer.actions.ts";
 import { DEFAULT_RENDERING_STATE, type RenderingState, renderingState } from "./rendering.state.ts";
@@ -40,8 +41,13 @@ export function applyStoredRenderingSettings(): void {
         typeof candidate.selectionTextRect === "boolean"
           ? candidate.selectionTextRect
           : DEFAULT_RENDERING_STATE.selectionTextRect,
+      preferBuiltinSignalStyle:
+        typeof candidate.preferBuiltinSignalStyle === "boolean"
+          ? candidate.preferBuiltinSignalStyle
+          : DEFAULT_RENDERING_STATE.preferBuiltinSignalStyle,
     });
     setUnitDisplayMode(renderingState.get().unitDisplay);
+    applySignalStylePreference(renderingState.get().preferBuiltinSignalStyle);
   } catch {
     localStorage.removeItem(RENDERING_STORAGE_KEY);
   }
@@ -78,12 +84,27 @@ export function setUnitDisplay(unitDisplay: UnitDisplayMode): void {
   reparseCurrentDocument();
 }
 
+/**
+ * Signal styling bakes into the scene at parse time, so flipping the
+ * profile-vs-builtin preference re-parses the current document.
+ */
+export function setPreferBuiltinSignalStyle(preferBuiltinSignalStyle: boolean): void {
+  renderingState.set({ preferBuiltinSignalStyle });
+  applySignalStylePreference(preferBuiltinSignalStyle);
+  persist();
+  reparseCurrentDocument();
+}
+
 export function resetRenderingSettings(): void {
-  const modeChanged = renderingState.get().unitDisplay !== DEFAULT_RENDERING_STATE.unitDisplay;
+  const previous = renderingState.get();
+  const parseBakedChanged =
+    previous.unitDisplay !== DEFAULT_RENDERING_STATE.unitDisplay ||
+    previous.preferBuiltinSignalStyle !== DEFAULT_RENDERING_STATE.preferBuiltinSignalStyle;
   renderingState.set(DEFAULT_RENDERING_STATE);
   setUnitDisplayMode(DEFAULT_RENDERING_STATE.unitDisplay);
+  applySignalStylePreference(DEFAULT_RENDERING_STATE.preferBuiltinSignalStyle);
   persist();
-  if (modeChanged) {
+  if (parseBakedChanged) {
     reparseCurrentDocument();
   }
 }

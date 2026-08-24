@@ -553,6 +553,46 @@ that grow, and record scope changes here.
   Inspect/Topology rails expanded — it now remaps against the current
   canvas box, selects pump D-20PA001 at (170, 254) mm before zooming,
   and clamps the clip inside the canvas.
+- **2026-08-24** Shortcut cleanup + keymap I/O (director's ask): the
+  placeholder ALT+4-digit bindings are gone. New defaults lean on plain
+  keys (they can never collide with browser chords): F fit, 0 zoom100,
+  Z+I/Z+O zoom (the sequence grammar has no +/- key tokens), D theme,
+  B monochrome, digits 1–9 toggle panels in ribbon order, E+P/E+S/E+C
+  exports, Ctrl+O/Ctrl+Shift+O/Ctrl+Shift+L for the file family,
+  Ctrl+Alt+R layout reset, F1 docs. Previously-missing actions (exports,
+  B/W, Explorer/Properties/Validation/Connections/Inspect/Minimap
+  panels, layout reset) are now bound and every ribbon button carries its
+  shortcut id (tooltips show the binding). Panel hotkeys TOGGLE via a new
+  ui.actions toggleDockPanel (same semantics as the ribbon buttons).
+  Settings → Shortcuts gained Export/Import keymap using the library's
+  exportJson/importJson ({version:1, bindings:{id:{keys}}} — overrides
+  only, human-readable); import shows an applied/skipped/conflicts
+  report. hotkeys.test.ts pins the table with validateBindings
+  (unique ids, parseable, conflict-free); vitest now inlines
+  @tredespace/ui (its ESM ships extensionless relative imports Node's
+  resolver rejects). Old user overrides survive where ids were kept
+  (file.*, view.*, app.*, help.docs).
+  (director-supplied; replaces the empirically-recovered guesses):
+  electrical solid + repeated italic E (the old "square bracket" reading
+  of the official SVGs was that E), hydraulic solid + upright L
+  (supersedes the fluid-filled-so-solid call), bus SOLID + circles (was
+  dashed), pneumatic ^ chevron, capillary x, undefined /, EM-guided ~,
+  EM-unguided marks-only with the line hidden (no conductor to depict),
+  plain SignalConveying stays dashed 3/3, attribute absent stays
+  as-authored. Marks are hand-drawn vector glyphs (no font dependency for
+  exports), 6.5mm cadence from 2.5mm in (measured), circles 10mm from
+  5mm; rotation normalizes to the readable half-plane (right-to-left
+  segments were drawing upside-down Es); lines shorter than the cadence
+  get one centered mark (vital when the line itself is hidden).
+  PRECEDENCE (director's call): a profile-published Profile/LineStroke
+  for a representation literal overrides the built-in style by default —
+  DiscProfile.signalStrokes collects them (0.6.3 publishes none; matcher
+  keys on an ancestor named after the literal, best-effort until the
+  container format ships) — and Settings → Rendering → "Built-in
+  signal-line styling" forces the table back (parse-baked via a
+  setPreferBuiltinSignalStyle module setter mirroring setUnitDisplayMode;
+  toggling re-parses). conventions.md table + signals/*.svg previews
+  regenerated (11 rows).
 - **2026-08-23** Inspect shows problems structurally, not as error blobs
   (director: "should show a property just red text to show it should be
   there instead of error … not obscure data"): ValidationIssue gained an

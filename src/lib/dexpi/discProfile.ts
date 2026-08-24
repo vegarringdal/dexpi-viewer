@@ -90,6 +90,13 @@ export type DiscProfile = Readonly<{
   /** The profile's heat-trace stroke (non-zero LateralOffset), if any. */
   heatTraceStroke: ProfileLineStroke | null;
   /**
+   * Profile-published signal-line strokes keyed by the representation
+   * literal ("ElectricalSignalConveying" → stroke). Empty for Profile
+   * 0.6.3; when populated, these override the viewer's built-in signal
+   * convention unless Settings prefers the built-in.
+   */
+  signalStrokes: ReadonlyMap<string, ProfileLineStroke>;
+  /**
    * Published instances from the profile's packages (e.g. the TypeCode
    * catalogues: ProcessInstrumentationFunctionTypeCodes.MotorControlCenter
    * carries Abbreviation "MCC"). Keyed by the qualified name drawings
@@ -176,6 +183,36 @@ function findHeatTraceStroke(dom: Document): ProfileLineStroke | null {
     }
   }
   return null;
+}
+
+/**
+ * Profile-published signal-line strokes, keyed by the
+ * SignalConveyingFunctionTypeRepresentation literal they style. Profile
+ * 0.6.3 publishes none (the viewer's built-in convention applies); when a
+ * future profile does, it wins by default — a LineStroke counts as a
+ * signal style when it (or an ancestor) is named after a representation
+ * literal ("…ElectricalSignalConveying"). Best-effort until the container
+ * format is published.
+ */
+function collectSignalStrokes(dom: Document): Map<string, ProfileLineStroke> {
+  const out = new Map<string, ProfileLineStroke>();
+  const literal = /((?:[A-Z][a-z]*)*SignalConveying)$/;
+  for (const el of dom.querySelectorAll('Object[type="Profile/LineStroke"]')) {
+    let current: Element | null = el;
+    while (current) {
+      const match = literal.exec(current.getAttribute("name") ?? "");
+      const key = match?.[1];
+      if (key) {
+        if (!out.has(key)) {
+          out.set(key, parseLineStroke(el));
+        }
+        break;
+      }
+
+      current = current.parentElement;
+    }
+  }
+  return out;
 }
 
 /**
@@ -296,6 +333,7 @@ export function parseDiscProfile(xmlText: string): Result<DiscProfile> {
   return ok({
     symbols,
     heatTraceStroke: findHeatTraceStroke(dom),
+    signalStrokes: collectSignalStrokes(dom),
     instances: collectInstances(dom),
     classSupers: collectClassSupers(dom),
   });

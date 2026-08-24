@@ -4,18 +4,25 @@ Several things every reader of DEXPI files must decide are **not defined by any 
 
 ## Signal-line styling
 
-The XML gives **every** signal-family ConnectorLine the same authored stroke (`LongDash`, 248 lines across all 15 sheets), and the DiscProfile defines only the `SignalConveyingFunctionTypeRepresentation` *attribute* — no line graphics. The official renderings override the stroke by semantics and synthesize mark glyphs that exist in no XML. Recovered mapping (zero exceptions across all sheets):
+The XML gives **every** signal-family ConnectorLine the same authored stroke (`LongDash`, 248 lines across all 15 sheets), and DiscProfile 0.6.3 defines only the `SignalConveyingFunctionTypeRepresentation` *attribute* — no line graphics. The viewer styles the line by semantics and synthesizes repeated mark glyphs, following the DISC decoration table:
 
-| Semantics | Preview | Rendering |
+| `SignalConveyingFunctionTypeRepresentation` | Preview | Rendering |
 | --- | --- | --- |
-| `MeasuringLineFunction` | ![measuring](signals/measuring.svg) | solid |
-| `SignalConveying` | ![signal](signals/signal.svg) | dashed 3/3 |
-| `ElectricalSignalConveying` | ![electrical](signals/electrical.svg) | solid + square-bracket glyphs every 6.5 mm, rotated to the line direction |
-| `BusSignalConveying` | ![bus](signals/bus.svg) | dashed 2.75/4.75 + hollow circle marks (r 1.25 mm) |
-| `HydraulicSignalConveying` | ![hydraulic](signals/hydraulic.svg) | solid — **no official sample exists**; project decision: a hydraulic signal is a fluid-filled line like a measuring line |
-| any other value | ![authored](signals/authored.svg) | the file's authored stroke is kept unchanged (LongDash shown) |
+| — (`MeasuringLineFunction`) | ![measuring](signals/measuring.svg) | solid, no marks |
+| `SignalConveying` (plain, no sub-type) | ![signal](signals/signal.svg) | dashed 3/3, no marks |
+| `ElectricalSignalConveying` | ![electrical](signals/electrical.svg) | solid + repeated italic **E** |
+| `HydraulicSignalConveying` | ![hydraulic](signals/hydraulic.svg) | solid + repeated upright **L** |
+| `BusSignalConveying` | ![bus](signals/bus.svg) | solid + repeated small circle |
+| `PneumaticSignalConveying` | ![pneumatic](signals/pneumatic.svg) | solid + repeated **^** chevron |
+| `CapillarySignalConveying` | ![capillary](signals/capillary.svg) | solid + repeated small **x** |
+| `UndefinedSignalConveying` | ![undefined](signals/undefined.svg) | solid + repeated **/** slash |
+| `ElectromagneticGuidedSignalConveying` | ![em-guided](signals/em-guided.svg) | solid + repeated **~** squiggle |
+| `ElectromagneticUnguidedSignalConveying` | ![em-unguided](signals/em-unguided.svg) | line hidden entirely — only the repeated **~** squiggle draws (no physical conductor to depict) |
+| attribute absent / unknown value | ![authored](signals/authored.svg) | the file's authored stroke is kept unchanged (LongDash shown) |
 
-Known uncertainty: the bus-circle cadence rests on a single 9 mm sample (one circle, 5 mm in — modelled as a 10 mm cadence).
+Marks repeat every 6.5 mm starting 2.5 mm in (cadence measured from the official electrical samples), rotated to the local line direction; circles keep the observed 10 mm cadence starting 5 mm in. Glyphs are hand-drawn vectors (~2.5 mm tall) so SVG/PDF exports need no font.
+
+**Profile precedence:** if a loaded DISC profile publishes `Profile/LineStroke` styling for signal types (0.6.3 publishes none), the profile's styling wins by default. Settings → Rendering → *Built-in signal-line styling* forces the table above instead — useful while profile styling is early-stage.
 
 ## Profile label placement
 

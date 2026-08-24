@@ -75,6 +75,7 @@ export function ViewSection(): JSX.Element {
         selected={monochrome}
         disabled={!hasDocument}
         tooltip="Render the drawing in ink only — highlight tints never mix with the file's own colors"
+        shortcut="view.monochrome"
         onClick={() => setHighlightMonochrome(!monochrome)}
       />
     </RibbonSection>

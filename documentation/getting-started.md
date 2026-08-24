@@ -28,6 +28,10 @@ The panel shell is the [tredespace UI](https://tredespace.com/docs/widgets) work
 
 The layout persists across sessions; if you get lost, ribbon → **Reset** restores the default layout.
 
+## Shortcuts
+
+Every ribbon action has a keyboard shortcut, rebindable in Settings → Shortcuts (click *Record*, press the new keys). Plain keys drive the app so nothing collides with the browser: **F** fit, **0** zoom 100%, **Z** then **I**/**O** zoom in/out, **D** theme, **B** black & white, digits **1–9** toggle the panels, **E** then **P**/**S**/**C** export PDF/SVG/report, **Ctrl+O** open a file, **F1** this manual. *Export keymap* saves your overrides as a portable JSON file; *Import keymap* applies one — unknown ids and conflicting keys are skipped, with a report of what happened.
+
 ## Status bar
 
 File name and size, object count, loaded profile, zoom, and the cursor position in drawing millimetres.

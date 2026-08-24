@@ -11,6 +11,9 @@ export type RenderingState = Readonly<{
   unitDisplay: UnitDisplayMode;
   /** Selected text gets a yellow backdrop rect (the halo can't embolden glyphs legibly). */
   selectionTextRect: boolean;
+  /** Force the built-in signal-line convention even when the loaded profile
+   *  publishes LineStrokes for signal types (early-stage profiles). */
+  preferBuiltinSignalStyle: boolean;
 }>;
 
 export const DEFAULT_RENDERING_STATE: RenderingState = {
@@ -19,6 +22,7 @@ export const DEFAULT_RENDERING_STATE: RenderingState = {
   showGrid: true,
   unitDisplay: "symbol",
   selectionTextRect: true,
+  preferBuiltinSignalStyle: false,
 };
 
 export const renderingState = createStore<RenderingState>(DEFAULT_RENDERING_STATE);

@@ -31,4 +31,4 @@ When the underlay sits *under* the drawing, the sheet's white paper is suppresse
 
 ## Rendering settings
 
-Settings → Rendering: minimum stroke width (px), stroke width scale, grid, and unit display (conventional symbols vs spec unit names in the Properties panel).
+Settings → Rendering: minimum stroke width (px), stroke width scale, grid, unit display (conventional symbols vs spec unit names in the Properties panel), and *Built-in signal-line styling* — forces the viewer's [signal-line convention](conventions.md) even when the loaded profile publishes its own LineStroke styling (useful while profile styling is early-stage).
