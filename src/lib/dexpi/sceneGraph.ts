@@ -519,7 +519,14 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
   nodes = [
     ...nodes,
     ...buildHeatTraceOverlays(nodes, tracedIds, traceStyle),
-    ...buildHeatTraceSymbolOverlays(nodes, tracedIds, traceStyle, (n) => computeSceneBounds([n], shapes)),
+    ...buildHeatTraceSymbolOverlays(
+      nodes,
+      tracedIds,
+      traceStyle,
+      (n) => computeSceneBounds([n], shapes),
+      shapes,
+      (objectId) => objectsById.get(objectId)?.getAttribute("type") ?? null,
+    ),
   ];
   return {
     nodes,

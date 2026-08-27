@@ -1,5 +1,14 @@
 import type { ProfileLineStroke } from "./discProfile.ts";
-import type { Bounds, Point, RgbColor, SceneNode, Stroke, StrokeRounding } from "./types.ts";
+import type {
+  Bounds,
+  Point,
+  RgbColor,
+  SceneNode,
+  ScenePrimitive,
+  ShapeDef,
+  Stroke,
+  StrokeRounding,
+} from "./types.ts";
 import { componentObjects, dataValue, getData, refLocalName } from "./xml.ts";
 
 // -----------------------------------------------------------------------------
@@ -298,16 +307,123 @@ function isVerticalRotation(rotationDeg: number): boolean {
 }
 
 /**
- * Dashed side-lines for heat-traced INLINE components (valves, fittings,
- * nozzles drawn as symbol placements): a horizontal placement gets the
- * trace just below its world bounds, a vertical one just to the right —
- * the prior-art convention. Label placements never get overlays.
+ * Extends a bounds accumulator by one shape primitive in its own local
+ * coordinates (no instance transform) — deliberately approximate (rotation
+ * ignored, text skipped) since this only feeds the round-silhouette check
+ * below, never final drawing geometry.
+ */
+function extendLocalBounds(
+  b: { minX: number; minY: number; maxX: number; maxY: number },
+  prim: ScenePrimitive,
+): void {
+  const extend = (x: number, y: number): void => {
+    b.minX = Math.min(b.minX, x);
+    b.minY = Math.min(b.minY, y);
+    b.maxX = Math.max(b.maxX, x);
+    b.maxY = Math.max(b.maxY, y);
+  };
+
+  switch (prim.kind) {
+    case "polyline":
+    case "polygon":
+      for (const p of prim.points) {
+        extend(p.x, p.y);
+      }
+      break;
+    case "circle":
+      extend(prim.center.x - prim.radius, prim.center.y - prim.radius);
+      extend(prim.center.x + prim.radius, prim.center.y + prim.radius);
+      break;
+    case "ellipse":
+    case "ellipseArc":
+      extend(prim.center.x - prim.rx, prim.center.y - prim.ry);
+      extend(prim.center.x + prim.rx, prim.center.y + prim.ry);
+      break;
+    case "rect":
+      extend(prim.center.x - prim.width / 2, prim.center.y - prim.height / 2);
+      extend(prim.center.x + prim.width / 2, prim.center.y + prim.height / 2);
+      break;
+    case "text":
+      break;
+  }
+}
+
+/** How much of the shape's own bounding box a circle/ellipse primitive must cover to read as "round". */
+const ROUND_SHAPE_COVERAGE_RATIO = 0.6;
+
+/**
+ * Whether a catalogue shape's silhouette reads as a round "instrument
+ * bubble" — a Circle/Ellipse primitive whose own bounding box covers most
+ * of the shape's overall bounds. This is a drawing-convention judgment, not
+ * a DEXPI class check: a PSV (`Plant/Piping.SafetyValveOrFitting`) drawn
+ * with a plain circle symbol (e.g. DiscProfile ND0248B) reads as an
+ * instrument bubble just like a `Plant/Instrumentation.
+ * ProcessInstrumentationFunction` balloon does, while a valve body drawn as
+ * a bowtie polygon does not — class alone can't distinguish these.
+ */
+function isRoundShape(shape: ShapeDef): boolean {
+  const overall = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+  for (const prim of shape.primitives) {
+    extendLocalBounds(overall, prim);
+  }
+  if (!Number.isFinite(overall.minX)) {
+    return false;
+  }
+  const overallW = overall.maxX - overall.minX;
+  const overallH = overall.maxY - overall.minY;
+  if (overallW <= 0 || overallH <= 0) {
+    return false;
+  }
+
+  for (const prim of shape.primitives) {
+    if (prim.kind !== "circle" && prim.kind !== "ellipse") {
+      continue;
+    }
+    const rx = prim.kind === "circle" ? prim.radius : prim.rx;
+    const ry = prim.kind === "circle" ? prim.radius : prim.ry;
+    if (2 * rx >= overallW * ROUND_SHAPE_COVERAGE_RATIO && 2 * ry >= overallH * ROUND_SHAPE_COVERAGE_RATIO) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * PropertyBreak objects (and any future *PropertyBreak subclass) are
+ * logical annotations for a piping-class/area transition, not physical
+ * heat-traced hardware — they carry no HeatTracingType of their own and
+ * only land in `tracedIds` because they're nested `Items` alongside real
+ * components in a traced segment. Their break-wing symbol still gets drawn
+ * normally; it just never earns its own heat-trace mark (the segment's
+ * pipe-level overlay already runs through the break point uninterrupted).
+ * Same convention `validation.ts`'s `hasPropertyBreak` uses to spot one.
+ */
+function isPropertyBreakType(type: string): boolean {
+  return type.endsWith("PropertyBreak");
+}
+
+/**
+ * Dashed overlay for a heat-traced symbol placement: an encompassing ring
+ * just outside a round "instrument bubble" symbol's bounds (director's
+ * convention — e.g. a PSV balloon), or a side-line for any other inline
+ * component (valves, fittings, nozzles) — a horizontal placement gets the
+ * trace just below its world bounds, a vertical one just to the right, the
+ * prior-art convention. A round instrument-bubble shape gets the ring even
+ * when it lives in a "label" group — an instrument's tag balloon (e.g. a
+ * PSV's circle) is drawn there because it carries the tag text, not because
+ * it is a label backdrop, and the real DISC data places it exactly that way
+ * (see the 2026-08-27 DESIGN.md entry). Non-round label placements still
+ * get no overlay — nothing establishes what a dashed mark under an
+ * arbitrary label shape should mean. PropertyBreak placements never get an
+ * overlay either, regardless of shape — see `isPropertyBreakType`.
  */
 export function buildHeatTraceSymbolOverlays(
   nodes: readonly SceneNode[],
   tracedIds: ReadonlySet<string>,
   style: HeatTraceStyle,
   boundsOf: (node: SceneNode) => Bounds,
+  shapes: ReadonlyMap<string, ShapeDef>,
+  typeOf: (objectId: string) => string | null,
 ): SceneNode[] {
   if (tracedIds.size === 0) {
     return [];
@@ -316,12 +432,49 @@ export function buildHeatTraceSymbolOverlays(
   const offset = Math.abs(style.lateralOffsetMm) || DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM;
   const overlays: SceneNode[] = [];
   for (const node of nodes) {
-    if (node.kind !== "use" || node.role !== "symbol" || !node.objectId || !tracedIds.has(node.objectId)) {
+    if (
+      node.kind !== "use" ||
+      (node.role !== "symbol" && node.role !== "label") ||
+      !node.objectId ||
+      !tracedIds.has(node.objectId)
+    ) {
+      continue;
+    }
+
+    const type = typeOf(node.objectId);
+    if (type && isPropertyBreakType(type)) {
       continue;
     }
 
     const b = boundsOf(node);
     if (b.maxX <= b.minX && b.maxY <= b.minY) {
+      continue;
+    }
+
+    const shape = shapes.get(node.shapeId);
+    if (!shape) {
+      continue;
+    }
+    const isRound = isRoundShape(shape);
+    if (node.role === "label" && !isRound) {
+      continue;
+    }
+
+    const stroke = overlayStroke(style, DEFAULT_SYMBOL_TRACE_WIDTH_MM);
+    if (isRound) {
+      const radius = Math.max(b.maxX - b.minX, b.maxY - b.minY) / 2 + offset;
+      overlays.push({
+        kind: "prim",
+        prim: {
+          kind: "circle",
+          center: { x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 },
+          radius,
+          stroke,
+          fill: { style: "Transparent", color: stroke.color },
+        },
+        objectId: node.objectId,
+        role: "symbol",
+      });
       continue;
     }
 
@@ -336,7 +489,7 @@ export function buildHeatTraceSymbolOverlays(
         ];
     overlays.push({
       kind: "prim",
-      prim: { kind: "polyline", points, stroke: overlayStroke(style, DEFAULT_SYMBOL_TRACE_WIDTH_MM) },
+      prim: { kind: "polyline", points, stroke },
       objectId: node.objectId,
       role: "symbol",
     });

@@ -1238,3 +1238,102 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   it) — caught only by comparing `reference_pid.xml` against the official
   C01 rendering. No axis flip anywhere now; rotations and arc sweeps map
   1:1 onto Skia's y-down conventions.
+- **2026-08-27** Heat tracing graphical convention, director-supplied
+  (dash-dash or dash-dot-dash line style throughout), three placement
+  cases per base-symbol kind:
+  1. **Pipeline**: shown offset to the right-hand side of the line, in
+     the direction of flow.
+  2. **Instrument**: shown outside the base instrument symbol,
+     encompassing it (e.g. a dashed ring around a PSV balloon — see the
+     D-20/PSV-0002 reference image, AP110/AP310/AS200/AD750 tie-in
+     labelled above it).
+  3. **Piping component**: shown below the base piping-component symbol,
+     spanning its width; where the label layout permits, the base symbol
+     should be rotated/mirrored so its heat-trace mark stays contiguous
+     with the connecting pipe's trace.
+  This refines the 2026-08-20 addendum in the M9 section
+  (`buildHeatTraceSymbolOverlays`): the inline-component overlay (dashed
+  line below the symbol when horizontal, to its right when rotated
+  ~90°/270°) already matched case 3. Case 1 matches the existing
+  pipeline lateral-offset overlay (2026-08-21 entry) in intent;
+  reconcile the offset SIDE against this "right-hand side in flow
+  direction" wording when that code is next touched.
+  **Case 2 implemented same day**, then corrected same day against real
+  DISC data: `buildHeatTraceSymbolOverlays` first branched on the
+  represented object's DEXPI class (`Plant/Instrumentation.*`), but the
+  bundled example (`public/examples/DISC_EXAMPLE-14-13.xml`) showed this
+  is wrong — its D-20/PSV-0002 (the exact reference image case) is
+  `SafetyValveOrFitting1`, type `Plant/Piping.SafetyValveOrFitting`
+  (physical piping component, per the 2.0 model), drawn with the plain
+  round DiscProfile symbol `ND0248B` (a single 6mm-radius
+  `Core/Diagram.Ellipse`) — so a class check routed it to the side-line
+  path and it never got a ring. **The decision is shape-based, not
+  class-based:** `isRoundShape` (heatTracing.ts) looks at the resolved
+  catalogue shape's own primitives — if a Circle/Ellipse primitive's
+  bounding box covers ≥60% of the shape's overall local bounds in both
+  axes (`ROUND_SHAPE_COVERAGE_RATIO`), the symbol reads as a round
+  "instrument bubble" and gets the ring; a bowtie/polygon valve body
+  does not, regardless of its DEXPI class. This matches the actual P&ID
+  drafting convention the director's spec describes — instrument-style
+  round symbols get encompassed, everything else gets a side-line — and
+  correctly covers both `Plant/Instrumentation.ProcessInstrumentation-
+  Function` balloons and `Plant/Piping.SafetyValveOrFitting` drawn
+  round. The ring itself is a `CirclePrim` centered on the symbol's
+  world bounds, transparent fill, radius = half the larger bound
+  dimension + the trace lateral offset (reuses the existing
+  style/stroke resolution, so profile `LineStroke` still wins over the
+  viewer defaults). `sceneGraph.ts` passes its `shapes` map into
+  `buildHeatTraceSymbolOverlays` alongside the existing `boundsOf`
+  callback. `CirclePrim`/`EllipsePrim` and their dashed-stroke rendering
+  already existed in all three renderers (canvas, SVG, PDF), so no
+  renderer changes were needed. Unit-tested (`heatTracing.test.ts`,
+  "instrument heat-trace overlays"): a traced round-symbol instrument
+  gets exactly one ring sized/centered on its bounds, an untraced
+  sibling gets none; manually verified against a
+  `Plant/Piping.SafetyValveOrFitting` + `ND0248B`-shaped fixture
+  (vitest itself can't run in this sandbox — Node 20 vs. jsdom 30/undici
+  incompatibility, pre-existing and unrelated to this change).
+  **Second correction, same day (director caught it live: the D-20/
+  PSV-0002 balloon still rendered as a plain solid circle, no ring):**
+  the shape-based check above was right, but `buildHeatTraceSymbolOverlays`
+  still only processed `role === "symbol"` nodes. In the real DISC file
+  the PSV's `ND0248B` `Profile/SymbolUsage` sits INSIDE a
+  `Core/Diagram.Label` group (it carries the tag text "PSV/0002"), so
+  `walkGroup` tags it `role: "label"` — and the overlay builder silently
+  skipped it. Fixed: the node-kind filter now also accepts `role ===
+  "label"`, but only draws the ring when the shape is round (`isRound`
+  computed once up front); a non-round label placement still gets no
+  overlay — there's no established convention for what a dashed mark
+  under an arbitrary label shape (a tag box, say) would mean, so that
+  stays undrawn rather than guessed. Regression-tested: a Label-wrapped
+  round balloon (mirroring the real `SafetyValveOrFitting1` structure)
+  now rings; a non-round Label placement still renders nothing.
+  **Third correction, same day (director spotted a `PropertyBreak` — the
+  wing symbol between AP110/AS200 and AP310/AD750 — drawing its own
+  dashed side-line, and asked whether that was right):** it wasn't.
+  `PropertyBreak2` in the bundled example carries no `HeatTracingType` of
+  its own — only `DiscProfile/BreakValue1`/`BreakValue2` — it's a
+  logical area/piping-class transition marker, and only lands in
+  `tracedIds` because it's nested as an `Items` sibling of
+  `SafetyValveOrFitting1` inside the traced `PipingNetworkSegment31`
+  (the same "a segment classification covers everything nested inside
+  it" inheritance rule that correctly traces real pipes/valves/nozzles).
+  That inheritance is right for the *pipeline's own* lateral-offset
+  overlay (case 1 — it already runs through the break point
+  uninterrupted via the parent pipe geometry) but wrong for the
+  *symbol*-level overlay: `buildHeatTraceSymbolOverlays` gave the
+  break's own wing symbol (`ND0007`) a dashed mark purely because its
+  `objectId` was in `tracedIds`, misrepresenting a logical annotation as
+  traced hardware — the same category of mistake already ruled out for
+  `DiscProfile/InformationModel.HeatTracingBreak` (excluded from the
+  start; see the file-header comment). Fixed: `buildHeatTraceSymbolOverlays`
+  now takes a `typeOf` callback (`sceneGraph.ts` threads it from the
+  `objectsById` map, alongside `boundsOf`/`shapes`) and skips any node
+  whose represented-object type ends with `PropertyBreak`
+  (`isPropertyBreakType`, mirroring `validation.ts`'s `hasPropertyBreak`
+  pattern) before any ring/side-line decision — regardless of shape.
+  They stay in `heatTracedIds` itself (untouched), so the Highlight
+  panel's "Heat traced" tint on a break sitting inside a traced run is
+  unaffected — only the dedicated dashed mark is suppressed.
+  Regression-tested: a traced segment's valve sibling still overlays,
+  its `PropertyBreak` sibling gets nothing.

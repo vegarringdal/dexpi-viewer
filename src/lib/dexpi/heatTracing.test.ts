@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseDiscProfile } from "./discProfile.ts";
 import { DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM, offsetPolyline } from "./heatTracing.ts";
 import { parseDexpiDocument } from "./parseDocument.ts";
-import type { PolyLinePrim, PrimNode } from "./types.ts";
+import type { CirclePrim, PolyLinePrim, PrimNode } from "./types.ts";
 
 // -----------------------------------------------------------------------------
 // Fixtures — heat tracing is main-file data: HeatTracingType on the piping
@@ -498,6 +498,265 @@ describe("inline symbol heat-trace overlays", () => {
     expect((v1?.x ?? 0) > 30).toBe(true);
     const dashed = horizontal?.prim.kind === "polyline" ? horizontal.prim.stroke.dash : [];
     expect(dashed.length).toBeGreaterThan(0);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// PropertyBreak exclusion (2026-08-27 director's call — see DESIGN.md)
+// -----------------------------------------------------------------------------
+
+const PROPERTY_BREAK_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Seg1" type="Plant/Piping.PipingNetworkSegment">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+    <Components property="Items">
+      <Object id="Valve1" type="Plant/Piping.GlobeValve"/>
+      <Object id="Break1" type="Plant/Piping.PropertyBreak">
+        <Data property="DiscProfile/BreakValue1"><String>AP110</String></Data>
+        <Data property="DiscProfile/BreakValue2"><String>AP310</String></Data>
+      </Object>
+    </Components>
+  </Object>
+  <Object id="Cat1" type="Core/Diagram.ShapeCatalogue">
+    <Components property="Shapes">
+      <Object id="ValveShape" type="Core/Diagram.Shape">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.PolyLine">
+            <Data property="Points">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>-2</Double></Data>
+                <Data property="Y"><Double>-1</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>2</Double></Data>
+                <Data property="Y"><Double>1</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+      <Object id="BreakWingShape" type="Core/Diagram.Shape">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.Polygon">
+            <Data property="FillStyle"><DataReference data="Core/Diagram.FillStyle.Solid"/></Data>
+            <Data property="Points">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>1.1</Double></Data>
+                <Data property="Y"><Double>-9.6</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>1.1</Double></Data>
+                <Data property="Y"><Double>-10.4</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>-10</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Valve1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#ValveShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>10</Double></Data>
+                <Data property="Y"><Double>10</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Break1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#BreakWingShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>30</Double></Data>
+                <Data property="Y"><Double>10</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+
+describe("PropertyBreak heat-trace overlay exclusion", () => {
+  const doc = parseDexpiDocument(PROPERTY_BREAK_XML).data;
+  const overlays = (doc?.scene.nodes ?? []).filter((n) => n.kind === "prim" && n.role === "symbol");
+
+  it("still overlays the traced valve sibling", () => {
+    expect(overlays.filter((n) => n.objectId === "Valve1")).toHaveLength(1);
+  });
+
+  it("draws no overlay for the PropertyBreak, even though it inherits the segment's traced classification", () => {
+    // Break1 has no HeatTracingType of its own — it's a logical
+    // area/piping-class transition marker nested as a sibling Item, not
+    // heat-traced hardware. The segment's own pipe-level lateral overlay
+    // already runs through it uninterrupted; the break-wing symbol must
+    // not get its own dashed mark on top.
+    expect(overlays.filter((n) => n.objectId === "Break1")).toHaveLength(0);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Instrument overlays (encompassing ring, director's 2026-08-27 convention)
+// -----------------------------------------------------------------------------
+
+const INSTRUMENT_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Psv1" type="Plant/Instrumentation.ProcessInstrumentationFunction">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+  </Object>
+  <Object id="Psv2" type="Plant/Instrumentation.ProcessInstrumentationFunction"/>
+  <Object id="Psv3" type="Plant/Piping.SafetyValveOrFitting">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+  </Object>
+  <Object id="Psv4" type="Plant/Piping.SafetyValveOrFitting">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+  </Object>
+  <Object id="Cat1" type="Core/Diagram.ShapeCatalogue">
+    <Components property="Shapes">
+      <Object id="BalloonShape" type="Core/Diagram.Shape">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.Circle">
+            <Data property="Center">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>0</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+            <Data property="Radius"><Double>5</Double></Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Psv1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#BalloonShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>20</Double></Data>
+                <Data property="Y"><Double>20</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Psv2" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#BalloonShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>40</Double></Data>
+                <Data property="Y"><Double>20</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Psv3" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#BalloonShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>30</Double></Data>
+                <Data property="Y"><Double>40</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Psv4" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.Label">
+            <Components property="Elements">
+              <Object type="Core/Diagram.ShapeUsage">
+                <References objects="#BalloonShape" property="Shape"/>
+                <Data property="Position">
+                  <AggregatedDataValue type="Core/Diagram.Point">
+                    <Data property="X"><Double>10</Double></Data>
+                    <Data property="Y"><Double>40</Double></Data>
+                  </AggregatedDataValue>
+                </Data>
+              </Object>
+            </Components>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+
+function isCircleSymbolOverlay(n: PrimNode): n is PrimNode & { prim: CirclePrim } {
+  return n.role === "symbol" && n.prim.kind === "circle";
+}
+
+describe("instrument heat-trace overlays", () => {
+  const doc = parseDexpiDocument(INSTRUMENT_XML).data;
+  const circleOverlays = (doc?.scene.nodes ?? [])
+    .filter((n): n is PrimNode => n.kind === "prim")
+    .filter(isCircleSymbolOverlay);
+
+  it("draws an encompassing ring for a traced instrument only", () => {
+    expect(circleOverlays.filter((n) => n.objectId === "Psv1")).toHaveLength(1);
+    expect(circleOverlays.filter((n) => n.objectId === "Psv2")).toHaveLength(0);
+  });
+
+  it("rings a traced Plant/Piping.SafetyValveOrFitting drawn with a round symbol (real DISC PSV shape)", () => {
+    // The classification is shape-based, not class-based: a PSV modelled as
+    // a physical piping component (not Plant/Instrumentation.*) still reads
+    // as an instrument bubble when its catalogue symbol is round — matches
+    // DISC_EXAMPLE-14-13's D-20/PSV-0002 (SafetyValveOrFitting1 + ND0248B).
+    expect(circleOverlays.filter((n) => n.objectId === "Psv3")).toHaveLength(1);
+  });
+
+  it("rings a round tag balloon placed inside a Label group (real DISC PSV structure)", () => {
+    // DISC_EXAMPLE-14-13's actual D-20/PSV-0002 balloon (ND0248B) sits
+    // inside a Core/Diagram.Label group — it carries the tag text, so the
+    // scene graph tags it role "label", not "symbol". The ring must still
+    // apply: a round instrument bubble reads as one regardless of which
+    // group wraps it. This was the actual reported bug (no ring rendered).
+    expect(circleOverlays.filter((n) => n.objectId === "Psv4")).toHaveLength(1);
+  });
+
+  it("centers the ring on the symbol and sizes it just outside the bounds", () => {
+    const ring = circleOverlays.find((n) => n.objectId === "Psv1");
+    expect(ring?.prim.center.x).toBeCloseTo(20);
+    expect(ring?.prim.center.y).toBeCloseTo(20);
+    // Balloon radius 5 (bounds half-extent) + default lateral offset 1.5.
+    expect(ring?.prim.radius).toBeCloseTo(6.5);
+    expect(ring?.prim.fill.style).toBe("Transparent");
+    expect(ring?.prim.stroke.dash.length).toBeGreaterThan(0);
   });
 });
 
