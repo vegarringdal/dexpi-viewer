@@ -1587,3 +1587,36 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   `tsc --noEmit` and `biome check` both pass; vitest still can't run in this
   sandbox (same pre-existing Node/jsdom mismatch) — every number above was
   hand-traced through the actual formulas rather than executed.
+- **2026-08-31** Validation CSV export gains two columns: source XML line
+  number and an XPath locator, per director request ("helps a lot" when
+  cross-referencing a finding against the raw file). `ValidationIssue`
+  carries only a string `objectId` (often `null` for unaddressable/aggregate
+  findings) — never an `Element` — so both new columns are resolved at
+  export time in `exportService.ts`, not stored on the issue itself.
+  **Line number:** a parsed DOM `Element` carries no source position
+  (confirmed: both `parseDocument.ts` and `discProfile.ts` use the plain
+  `DOMParser`, no SAX/line-tracking parser anywhere in the repo), so
+  `buildLineNumberIndex` does a separate one-time regex scan over the
+  ORIGINAL raw XML text (`viewerState.get().file?.text`, already retained
+  end-to-end since `readDocumentFile`/`fetchExampleDocument` — not a DOM
+  re-serialization, which could reformat and silently break the
+  correspondence) — matches every `<Object … id="…">` tag regardless of
+  attribute order or attributes spanning multiple lines, keyed by id,
+  first occurrence wins. **XPath:** `plantModel.ts` already had a private
+  `elementXPath(el)` (positional path like `/Model/Object[2]/Components[1]/
+  Object[4]`, 1-based, index omitted for an only child of its tag) used
+  internally for synthetic diagram-object ids — just exported it rather
+  than writing a second implementation. Resolves `objectId` → `Element` via
+  a `root.querySelectorAll("Object[id]")` map built once per export.
+  Refactored `exportIssuesCsv` to extract a pure, exported
+  `buildIssuesCsv(issues, root, xmlText): string` (header + rows) from the
+  `downloadBlob` side effect, so the new logic is directly unit-testable
+  without mocking viewer state/browser download APIs — new
+  `exportService.test.ts` hand-verifies both the line-number arithmetic and
+  the exact `elementXPath` output against a small XML string with known
+  line breaks (vitest itself still can't execute in this sandbox; every
+  number was traced by hand through the actual regex/algorithm). New
+  columns land between `objectId` and `message`:
+  `rule,category,severity,objectId,line,xpath,message`. Both are blank for
+  an issue with `objectId: null` or one whose id doesn't resolve to any
+  element.

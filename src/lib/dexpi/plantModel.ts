@@ -56,7 +56,7 @@ function isValueObject(type: string): boolean {
  * ids are duplicated. Indices are 1-based per tag name, XPath-style, and
  * omitted for an only child of its tag.
  */
-function elementXPath(el: Element): string {
+export function elementXPath(el: Element): string {
   const segments: string[] = [];
   let current: Element | null = el;
   while (current) {
