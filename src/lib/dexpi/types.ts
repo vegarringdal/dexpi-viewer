@@ -180,6 +180,8 @@ export type SceneGraph = Readonly<{
   /** Heat-traced object ids (incl. inherited descendants), computed alongside
    *  the overlay nodes — the eligibility rules live only in heatTracing.ts. */
   heatTracedIds: ReadonlySet<string>;
+  /** Subset of `heatTracedIds` explicitly flagged IsHeatTracingSafetyCritical. */
+  heatTracingSafetyCriticalIds: ReadonlySet<string>;
 }>;
 
 // -----------------------------------------------------------------------------

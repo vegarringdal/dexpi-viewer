@@ -1337,3 +1337,253 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   unaffected — only the dedicated dashed mark is suppressed.
   Regression-tested: a traced segment's valve sibling still overlays,
   its `PropertyBreak` sibling gets nothing.
+- **2026-08-31** Multi-level heat-trace inheritance + `NoHeatTracingSystem`
+  override (director's clarification of an upcoming DISC Profile addendum —
+  not yet published, so this is the viewer getting ahead of the profile
+  based on the director's description, not a profile-file change). Previous
+  behavior: `collectHeatTracedIds` did a flat `querySelectorAll` over every
+  `Object` in the document, and any object with an explicit non-none
+  `HeatTracingType` unconditionally added itself + ALL nested descendants,
+  regardless of a descendant's own classification — so a lower-level
+  `NoHeatTracingSystem` override was silently ignored, and a `NULL` value
+  more than one level below the nearest classified ancestor never inherited
+  (there was no true ancestor walk, just one level of "parent classified →
+  child added"). New rule, confirmed by the director: `HeatTracingType` set
+  to any of the four active enum literals (`ElectricalHeatTracingSystem`/
+  `HeatTracingSystem`/`SteamHeatTracingSystem`/`TubularHeatTracingSystem`)
+  covers that object and everything nested below it; `NULL`/absent inherits
+  the nearest ancestor's EFFECTIVE value, climbing as many levels as
+  needed, defaulting to untraced when no ancestor has one set; and
+  `NoHeatTracingSystem` at any level blocks inheritance for that object and
+  its descendants until something below re-classifies with an active type.
+  `collectHeatTracedIds` (`heatTracing.ts`) is now a single top-down
+  recursive walk from the Model's top-level `Object` children (via
+  `directChildrenByTag`/`componentObjects`) threading an `inherited: boolean`
+  down through the tree — the walk naturally implements "climb to the
+  nearest ancestor with a value" without an explicit upward search, since
+  ineligible classes (signals, etc.) just pass the inherited state through
+  unchanged rather than resetting it. `isHeatTraceEligible`'s existing class
+  list already covered the DISC Profile's promised additions (`Nozzle`,
+  `ProcessInstrumentationFunction` were already accepted local names, `Pipe`
+  via the `Plant/Piping.` prefix) — no change needed there. Also added:
+  `IsHeatTracingSafetyCritical`, a new boolean DISC Profile attribute
+  alongside `HeatTracingType`. No inheritance rule was specified for it, so
+  `collectHeatTracingSafetyCriticalIds` only picks up an object's own
+  explicit `true` value, filtered to ids already in `tracedIds`. Both sets
+  are threaded onto `SceneGraph` (`heatTracedIds` /
+  `heatTracingSafetyCriticalIds` in `types.ts`, computed in
+  `sceneGraph.ts`) — the safety-critical set has no consumer yet (no
+  highlight mode, no validation rule); wiring that up is a follow-up once
+  there's a concrete UI ask. Unit-tested (`heatTracing.test.ts`): inheritance
+  through two NULL levels from a top ancestor, override-then-nothing,
+  override-then-re-classify-below, and no-ancestor-defaults-to-untraced;
+  plus safety-critical collection ignoring untraced and non-flagged ids.
+  All existing heat-trace fixtures re-verified by hand against the new
+  algorithm (vitest itself can't run in this sandbox — Node 20.20.2 vs.
+  jsdom 30's `^22.22.2` engine requirement, pre-existing and unrelated to
+  this change). `tsc --noEmit` and `biome check` both pass.
+- **2026-08-31** Five heat-trace placement/shape corrections, director's
+  direct instruction (not yet visually verified in this sandbox — see the
+  Node/jsdom note above; hand-traced against the geometry instead):
+  1. **Always bottom/right, never derived from travel direction.** The
+     connector-line overlay (`buildHeatTraceOverlays`) used to offset by the
+     LineStroke's own signed `LateralOffset` relative to each pipe's point
+     order — a right-to-left or bottom-to-top connector could land the trace
+     on the top/left instead. New `resolveAbsoluteLateralOffset` picks the
+     sign (once per polyline, from its longest/dominant segment, so a
+     multi-bend run still offsets as one continuous parallel curve rather
+     than flipping side-to-side) so the result is always toward bottom for a
+     horizontal-dominant run and right for a vertical-dominant one; only the
+     magnitude comes from the profile/default now, never the sign. This is a
+     deliberate override of the 2026-08-21 entry's "profile LineStroke sign
+     wins" behavior — flagged here in case that's not what was meant.
+     `buildHeatTraceSymbolOverlays`'s side-line was already bottom/right-only
+     (always adds to `maxX`/`maxY`), so it needed no change for this part.
+  2. **Round vs. straight line is now a named-symbol allowlist, not shape
+     geometry.** `isRoundShape` (silhouette-coverage heuristic) is replaced
+     by `isRoundTraceSymbol`: exactly `ND0023`/`ND0248A`/`ND0248B`
+     (`ShapeDef.name`, which already carries the DISC symbol name for
+     profile-resolved shapes) get the encompassing ring; everything else —
+     including a BallValve whose body happens to be drawn round — gets the
+     straight side-line. `isBallValveType` is a belt-and-suspenders guard on
+     top (never round even if a shape name coincidentally matched).
+  3. **OffPageConnector never gets a mark.** New `isOffPageConnectorType`
+     (local name ending `OffPageConnector`) is skipped in
+     `buildHeatTraceSymbolOverlays` exactly like `PropertyBreak` — it can
+     still sit in `heatTracedIds` (so Highlight-panel tinting is unaffected),
+     it just never draws its own dashed ring/line.
+  4. **DoubleBlockAndBleedValve / …AndCheckValve trace their flat side.**
+     These bodies (DiscProfile `ND0004`/`ND0005`, DISC RDL names starting
+     "Modular Valve …") have a bleed-port stub that pushes one bounding-box
+     side far out (verified against the real profile geometry: both symbols
+     have `MinY=-9` at the stub, `MaxY=2` at the flat body edge). Tracing the
+     default max side would land the line on the stub. New `isMaxSideFlat`
+     compares the shape's own LOCAL bounds (pre-transform, via the existing
+     `extendLocalBounds`) to decide whether MIN or MAX is the flat side, and
+     `buildHeatTraceSymbolOverlays` uses that side instead of always-max for
+     `isDoubleBlockAndBleedType` objects only. Local axes are treated as
+     mapping straight onto world axes (no rotation applied) — consistent
+     with how `computeSceneBounds` already treats polyline/polygon shape
+     bounds (ignores rotation entirely, per its own "conservative"
+     doc-comment), but means a rotated instance's flat side isn't
+     re-derived precisely; flagged as a known limitation pending a real
+     rotated example to verify against.
+  5. **Flange/plug-on-valve placement is unchanged by design.** No
+     class-specific code was added for flanges or plugs — they were never
+     round-eligible (allowlist-only now) and always got the standard
+     `DEFAULT_SYMBOL_TRACE_WIDTH_MM`/offset side-line; the new
+     DoubleBlockAndBleed special case is gated strictly on
+     `isDoubleBlockAndBleedType` so it can't leak onto a neighboring
+     flange/plug symbol.
+  Tests added in `heatTracing.test.ts`: a reversed-order horizontal
+  connector still traces on the bottom; the profile-stroke test now expects
+  magnitude-only (sign always bottom/right); a BallValve reusing an
+  `ND0248B`-named shape still gets a straight line; a traced OffPageConnector
+  gets no overlay at all; a synthetic DoubleBlockAndBleedValve shape with the
+  bleed stub mirrored onto the MAX side traces its MIN side instead of the
+  plain default. `tsc --noEmit` and `biome check` both pass.
+- **2026-08-31 (same day, director caught it from a real document screenshot):**
+  the "always bottom/right" fix above was wrong for a bent (L-shaped) pipe —
+  the vertical leg traced on the LEFT instead of the right. Root cause: my
+  first implementation (`resolveAbsoluteLateralOffset`) picked ONE sign for
+  the entire polyline from its longest segment, then applied that single
+  sign uniformly via `offsetPolyline`'s existing shared-`offsetMm` design.
+  For an L-bend where the horizontal leg is longer, the sign was chosen to
+  put THAT leg on the bottom — correct for the horizontal leg, but the same
+  sign, applied to the vertical leg's own (different) normal direction,
+  landed it on the left instead of the right. Fixed by moving the bias
+  choice INSIDE `offsetPolyline` and making it per-segment: each segment now
+  independently keeps or flips its own unit normal to whichever of the two
+  perpendicular directions has a non-negative x+y component, rather than
+  sharing one sign across the whole run. `resolveAbsoluteLateralOffset` is
+  deleted — no longer needed since the bias lives in the core geometry
+  function now. Verified this doesn't reintroduce a miter spike on ordinary
+  bends: two perpendicular segments both biased into the bottom-right
+  quadrant produce compatible (non-opposing) normals, so the existing miter
+  math still joins them cleanly (hand-traced: a (0,0)→(10,0)→(10,10) bend
+  now offsets to (0,1)→(11,1)→(11,10), a clean corner, not a spike). The one
+  existing near-180°-reversal test (`clamps near-reversal bends instead of
+  spiking`) still passes — hand-traced the exact numbers; the bias happens
+  to resolve that particular case into a small clean miter rather than
+  needing the explicit clamp path, but the assertion only checks the result
+  stays bounded, which it does. Updated the direct `offsetPolyline` unit
+  tests for the new "magnitude only, always bottom/right" contract (the old
+  sign-relative-to-travel-direction premise no longer holds) and added two
+  regression tests: an L-bend traces bottom AND right on its two legs, and a
+  long vertical leg with a short horizontal leg (mirroring the reported bug
+  more closely) keeps the vertical leg on the right despite being the
+  dominant segment.
+- **2026-08-31 (same session):** two more director corrections:
+  1. `MeasuringLineFunction` (a physical impulse/sensing line) now inherits
+     heat tracing from a traced parent — added to `isHeatTraceEligible`
+     alongside the existing classes. It's distinct from a logical
+     `SignalConveyingFunction`, which still never carries or inherits a
+     classification. Fixture/tests in `heatTracing.test.ts` updated: `Sig1`
+     (a `MeasuringLineFunction` nested in the traced `Seg1`) now expects a
+     traced overlay instead of asserting it stays untraced.
+  2. The default heat-trace dash pattern is shortened from `[2.4, 1.6]` to
+     `[1.6, 1.0]` mm per director feedback. Confirmed first: DISC/DEXPI has
+     no published DashArray example for the heat-trace LineStroke (same gap
+     noted in the 2026-08-21 entry), so this was always a viewer-only
+     aesthetic default, free to adjust without touching spec compliance.
+     Adjusted again same day to `[1.0, 1.0]` per further director feedback.
+- **2026-08-31 (same session, director flagged from a real-document
+  screenshot — a ball valve + integrated bleed-branch symbol with an
+  instrument ring above it):** two more corrections:
+  1. **Instrument ring width.** The screenshot showed the ring around a
+     traced instrument bubble noticeably heavier than the pipe's own trace
+     line beside it. Researched before changing anything: real
+     `ConnectorLine` strokes (`primitives.ts` `parseStrokeAggregate`, an
+     explicit per-element `Data property="Width"`, default
+     `DEFAULT_STROKE_WIDTH_MM = 0.25`) are uniformly **0.25mm** across every
+     bundled real DISC example drawing (piping and instrument/signal lines
+     alike) — there's no per-pipe variation to match in practice, and no
+     existing mechanism maps a symbol back to "the pipe it's mounted on"
+     (would need a real object-graph walk: symbol → enclosing
+     PipingNetworkSegment/System → that segment's own connector scene nodes
+     → their stroke width; doesn't exist anywhere yet). Building that
+     lookup for a value that's constant in every real file would be
+     over-engineering, so `DEFAULT_SYMBOL_TRACE_WIDTH_MM` (used for every
+     symbol ring/side-line, `heatTracing.ts`) is simply changed from `0.35`
+     to `0.25` to match.
+  2. **Flat-side placement generalized beyond DoubleBlockAndBleedValve.**
+     The screenshot's ball valve has an integrated bleed/drain branch drawn
+     as part of its OWN catalogue shape (not a separate object) pointing
+     down; the bottom-default trace ran straight through it, and the actual
+     flat side was above. The flat-side check (`isMaxSideFlat` against
+     `localShapeBounds`) was gated to `isDoubleBlockAndBleedType` only —
+     removed that gate entirely. It's now applied to every non-round
+     straight-line symbol overlay unconditionally: a plain symmetric valve
+     shape has `|localMin| ≈ |localMax|` on both axes, so `isMaxSideFlat`
+     still resolves to the same bottom/right default as before (verified:
+     no change to the existing GlobeValve/PropertyBreak fixtures' expected
+     output) — only a shape with genuine asymmetry (a stub, branch, or
+     off-center body) picks the other side. `isDoubleBlockAndBleedType` is
+     now dead code and deleted. Added a regression test: a synthetic
+     `Plant/Piping.BallValve` whose catalogue shape has a downward stub
+     traces above it, not through it.
+  `tsc --noEmit` and `biome check` both pass; vitest still can't run in this
+  sandbox (same pre-existing Node/jsdom mismatch) — hand-traced the new
+  test's numbers instead.
+- **2026-08-31 (same session, three more director corrections from a
+  DoubleBlockAndBleedValve screenshot — a T-shaped valve with an integrated
+  bleed valve pointing down):**
+  1. **Trace width is now one fixed constant everywhere, never derived from
+     the traced pipe/symbol's own line width.** Director's explicit call —
+     every heat-trace mark should read as one consistent style, not vary
+     per component. `overlayStroke` no longer takes a per-call fallback
+     width parameter; `buildHeatTraceOverlays` no longer passes the pipe's
+     own `node.prim.stroke.width`. Both call sites (connector-line and
+     symbol) now fall back to one shared `DEFAULT_HEAT_TRACE_WIDTH_MM`
+     (renamed from the symbol-only `DEFAULT_SYMBOL_TRACE_WIDTH_MM` added
+     earlier the same day) whenever the profile doesn't specify its own
+     `LineStroke.Width`.
+  2. **The flat-side fix from earlier today was still wrong for a rotated
+     instance — found and root-caused from the screenshot.** The
+     DoubleBlockAndBleedValve there has its bleed branch pointing DOWN, but
+     `isMaxSideFlat` was reading the shape's LOCAL bounds and mapping them
+     straight onto WORLD axes — an assumption already flagged as a "known
+     limitation" in the first flat-side entry. Researched properly this
+     time: the real ND0004/ND0005 catalogue geometry stubs out on local
+     MinY (native "up"), so an instance rotated 180° to point the stub down
+     (matching the screenshot) needs its ACTUAL rotation applied to know
+     the flat side landed on world MIN Y (top) instead. Found the exact
+     rotation formula already used by all three renderers (canvas
+     `ctx.rotate`, SVG `rotate()`, and `flattenScene.ts`'s manual
+     `transformPoint` for PDF export/hit-testing) — translate → rotate →
+     scale/mirror, degrees unnegated, y-down space so positive rotation is
+     visually clockwise — and reused it rather than re-deriving: exported
+     `transformPoint` from `flattenScene.ts` (was module-private) and
+     imported it into `heatTracing.ts`. New `resolveFlatSideIsWorldMax`
+     identifies the shape's more-asymmetric LOCAL axis, then actually
+     rotates that axis's flat-side point through the instance's real
+     `UseTransform` and compares it against the transformed origin to see
+     which WORLD side it lands on — correct for the 0/90/180/270°
+     placements DEXPI symbols actually use. Also added `rotatedWorldBounds`
+     (transforms the shape's local bounding corners the same way) and
+     switched both the ring and the side-line to use it INSTEAD of the
+     injected `boundsOf` callback, since `boundsOf` ultimately calls
+     `computeSceneBounds`, which deliberately ignores rotation for
+     polyline/polygon primitives (fine as a general scene-bounds
+     approximation, provably wrong for this specific decision — verified
+     by hand that a 90°-rotated symmetric valve's TRUE bounds are narrower/
+     taller than the rotation-ignorant approximation, e.g. a 4×2 shape
+     becomes 2×4, not 4×2 again). Caught and fixed a real bug while
+     verifying by hand: the first version of `resolveFlatSideIsWorldMax`
+     had no tie-break for a shape with equal (typically zero) asymmetry on
+     both local axes — it arbitrarily fell through to the Y-axis check
+     regardless of placement axis, which for a ROTATED symmetric shape
+     (e.g. the existing 90°-rotated `GlobeValve` test fixture) produced the
+     wrong side. Fixed with an explicit epsilon guard
+     (`COINCIDENT_EPSILON_MM`, already defined for point-dedup): no real
+     asymmetry on either axis just returns the plain bottom/right default
+     immediately, skipping the rotate-and-compare entirely. Re-verified by
+     hand against the existing rotated `GlobeValve` fixture (still resolves
+     to the right side, confirming no regression) and added a new
+     regression test mirroring the actual screenshot: a DoubleBlockAndBleed
+     shape with ND0004-shaped local bounds (stub at local MinY), placed
+     with `Rotation=180`, traces above it (world MinY side) rather than
+     through the now-downward stub.
+  `tsc --noEmit` and `biome check` both pass; vitest still can't run in this
+  sandbox (same pre-existing Node/jsdom mismatch) — every number above was
+  hand-traced through the actual formulas rather than executed.

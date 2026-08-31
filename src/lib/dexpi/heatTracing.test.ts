@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { parseDiscProfile } from "./discProfile.ts";
-import { DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM, offsetPolyline } from "./heatTracing.ts";
+import {
+  collectHeatTracedIds,
+  collectHeatTracingSafetyCriticalIds,
+  DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM,
+  offsetPolyline,
+} from "./heatTracing.ts";
 import { parseDexpiDocument } from "./parseDocument.ts";
 import type { CirclePrim, PolyLinePrim, PrimNode } from "./types.ts";
 
@@ -9,10 +14,12 @@ import type { CirclePrim, PolyLinePrim, PrimNode } from "./types.ts";
 // segment; the pipe inside inherits the classification. The HeatTracingBreak
 // is a logical property break, never drawn. Pipe1 runs left→right at y=10,
 // Pipe2 (untraced) at y=20, Pipe3 (traced) runs bottom→top at x=45.
-// Sig1 (logical signal nested in the traced Seg1) and Sig2 (a signal
-// carrying HeatTracingType directly — a modelling error) draw connectors at
-// y=30/y=35 and must never get an overlay: eligibility filters both direct
-// classifications and inherited descendants.
+// Sig1 (a MeasuringLineFunction — physical impulse line, not a logical
+// signal — nested in the traced Seg1) inherits the classification and DOES
+// get an overlay. Sig2 (a true logical SignalConveyingFunction carrying
+// HeatTracingType directly — a modelling error) draws a connector at y=35
+// and must never get an overlay: eligibility filters both direct
+// classifications and inherited descendants for genuinely logical classes.
 // -----------------------------------------------------------------------------
 
 const MAIN_XML = `<?xml version="1.0" encoding="UTF-8"?>
@@ -204,8 +211,7 @@ function connectorPolylines(xml: string, profileXml: string | null = null): Poly
 // -----------------------------------------------------------------------------
 
 describe("offsetPolyline", () => {
-  it("displaces a horizontal run vertically, to the right of the drawing direction", () => {
-    // Heading +x in the y-down drawing space, so visual right is +y.
+  it("displaces a horizontal run downward (bottom), regardless of point order", () => {
     const result = offsetPolyline(
       [
         { x: 0, y: 10 },
@@ -219,8 +225,7 @@ describe("offsetPolyline", () => {
     ]);
   });
 
-  it("displaces a vertical run horizontally", () => {
-    // Heading +y (down on screen), so visual right is -x.
+  it("displaces a vertical run rightward, regardless of point order", () => {
     const result = offsetPolyline(
       [
         { x: 45, y: 0 },
@@ -229,12 +234,12 @@ describe("offsetPolyline", () => {
       1.5,
     );
     expect(result).toEqual([
-      { x: 43.5, y: 0 },
-      { x: 43.5, y: 40 },
+      { x: 46.5, y: 0 },
+      { x: 46.5, y: 40 },
     ]);
   });
 
-  it("puts a negative offset on the left side", () => {
+  it("ignores the sign of the input — magnitude only, side is always bottom/right", () => {
     const result = offsetPolyline(
       [
         { x: 0, y: 10 },
@@ -242,12 +247,14 @@ describe("offsetPolyline", () => {
       ],
       -2,
     );
-    expect(result[0]?.y).toBeCloseTo(8);
-    expect(result[1]?.y).toBeCloseTo(8);
+    expect(result[0]?.y).toBeCloseTo(12);
+    expect(result[1]?.y).toBeCloseTo(12);
   });
 
-  it("joins a right-angle bend with a single continuous miter vertex", () => {
-    // Right then down-screen: both offset segments must meet exactly at (9, 1).
+  it("traces bottom on the horizontal leg AND right on the vertical leg of an L-bend", () => {
+    // Right then down-screen. A single shared sign for the whole polyline
+    // can't put both legs on their own correct side when they differ in
+    // length — each segment must resolve its side independently.
     const result = offsetPolyline(
       [
         { x: 0, y: 0 },
@@ -259,10 +266,27 @@ describe("offsetPolyline", () => {
     expect(result).toHaveLength(3);
     expect(result[0]?.x).toBeCloseTo(0);
     expect(result[0]?.y).toBeCloseTo(1);
-    expect(result[1]?.x).toBeCloseTo(9);
+    expect(result[1]?.x).toBeCloseTo(11);
     expect(result[1]?.y).toBeCloseTo(1);
-    expect(result[2]?.x).toBeCloseTo(9);
+    expect(result[2]?.x).toBeCloseTo(11);
     expect(result[2]?.y).toBeCloseTo(10);
+  });
+
+  it("keeps the vertical leg on its own right side even when it is much longer than the horizontal leg", () => {
+    // Regression for the real-file bug: a long horizontal run used to make
+    // the short vertical leg inherit the horizontal leg's side (left, wrong)
+    // because the sign was picked once from the longest segment.
+    const result = offsetPolyline(
+      [
+        { x: 0, y: 0 },
+        { x: 0, y: 100 },
+        { x: 5, y: 100 },
+      ],
+      1,
+    );
+    expect(result[0]?.x).toBeCloseTo(1);
+    expect(result[2]?.x).toBeCloseTo(5);
+    expect(result[2]?.y).toBeCloseTo(101);
   });
 
   it("clamps near-reversal bends instead of spiking", () => {
@@ -320,10 +344,38 @@ describe("heat tracing overlays", () => {
     }
   });
 
-  it("offsets the vertical overlay horizontally by the default lateral offset", () => {
+  it("offsets the vertical overlay to the right, regardless of the pipe's own point order", () => {
     const [, overlay] = connectors.filter((n) => n.objectId === "Pipe3");
     for (const p of overlay?.prim.points ?? []) {
-      expect(p.x).toBeCloseTo(45 - DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM);
+      expect(p.x).toBeCloseTo(45 + DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM);
+    }
+  });
+
+  it("keeps a reversed (right-to-left) horizontal pipe's overlay on the bottom, not the top", () => {
+    // Same Pipe1 run as above, but the connector's points are stored
+    // right-to-left instead of left-to-right — a real file could order
+    // either way. The overlay must still land below the pipe.
+    const reversedXml = MAIN_XML.replace(
+      `<AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>10</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>40</Double></Data>
+                <Data property="Y"><Double>10</Double></Data>
+              </AggregatedDataValue>`,
+      `<AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>40</Double></Data>
+                <Data property="Y"><Double>10</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>10</Double></Data>
+              </AggregatedDataValue>`,
+    );
+    const [, overlay] = connectorPolylines(reversedXml).filter((n) => n.objectId === "Pipe1");
+    for (const p of overlay?.prim.points ?? []) {
+      expect(p.y).toBeCloseTo(10 + DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM);
     }
   });
 
@@ -332,12 +384,16 @@ describe("heat tracing overlays", () => {
     expect((doc?.scene.nodes ?? []).some((n) => n.objectId === "Break1")).toBe(false);
   });
 
-  it("gives no overlay to a logical signal nested below the heat-traced segment", () => {
-    // Sig1 sits inside Seg1's Items, but eligibility filters inherited
-    // descendants too — only its single base connector renders.
+  it("inherits heat tracing for a MeasuringLineFunction nested below a traced segment", () => {
+    // Sig1 is a physical impulse/sensing line (MeasuringLineFunction), not a
+    // logical signal — it sits inside Seg1's Items and inherits the traced
+    // classification like any other eligible descendant (2026-08-31
+    // director's clarification).
     const sig1 = connectors.filter((n) => n.objectId === "Sig1");
-    expect(sig1).toHaveLength(1);
-    expect(sig1[0]?.prim.stroke.dash).toHaveLength(0);
+    expect(sig1).toHaveLength(2);
+    const [base, overlay] = sig1;
+    expect(base?.prim.stroke.dash).toHaveLength(0);
+    expect(overlay?.prim.stroke.dash.length).toBeGreaterThan(0);
   });
 
   it("ignores HeatTracingType data placed directly on a logical signal", () => {
@@ -364,12 +420,14 @@ describe("profile heat-trace stroke", () => {
     });
   });
 
-  it("draws the overlay with the profile's offset, side and style", () => {
+  it("draws the overlay with the profile's magnitude and style, but always toward the bottom/right", () => {
     const connectors = connectorPolylines(MAIN_XML, PROFILE_XML);
     const [, overlay] = connectors.filter((n) => n.objectId === "Pipe1");
-    // Negative offset = visual left of the drawing direction = -y for a +x run.
+    // Profile LateralOffset is -2 (its own "visual left" semantics), but
+    // placement always wins toward the bottom for a horizontal run —
+    // only the magnitude (2mm) comes from the profile.
     for (const p of overlay?.prim.points ?? []) {
-      expect(p.y).toBeCloseTo(8);
+      expect(p.y).toBeCloseTo(12);
     }
     expect(overlay?.prim.stroke).toEqual({
       color: { r: 0, g: 0, b: 255 },
@@ -633,6 +691,7 @@ const INSTRUMENT_XML = `<?xml version="1.0" encoding="UTF-8"?>
   <Object id="Cat1" type="Core/Diagram.ShapeCatalogue">
     <Components property="Shapes">
       <Object id="BalloonShape" type="Core/Diagram.Shape">
+        <Data property="Name"><String>ND0248B</String></Data>
         <Components property="Primitives">
           <Object type="Core/Diagram.Circle">
             <Data property="Center">
@@ -757,6 +816,455 @@ describe("instrument heat-trace overlays", () => {
     expect(ring?.prim.radius).toBeCloseTo(6.5);
     expect(ring?.prim.fill.style).toBe("Transparent");
     expect(ring?.prim.stroke.dash.length).toBeGreaterThan(0);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Symbol-family overrides: BallValve always straight, OffPageConnector never
+// traced, DoubleBlockAndBleed(AndCheck)Valve traces its flat side
+// (director's 2026-08-31 clarification)
+// -----------------------------------------------------------------------------
+
+describe("BallValve straight-line override", () => {
+  it("never rings a BallValve, even when it (incorrectly) reuses a round ND0248B-named symbol", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Ball1" type="Plant/Piping.BallValve">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+  </Object>
+  <Object id="Cat1" type="Core/Diagram.ShapeCatalogue">
+    <Components property="Shapes">
+      <Object id="RoundShape" type="Core/Diagram.Shape">
+        <Data property="Name"><String>ND0248B</String></Data>
+        <Components property="Primitives">
+          <Object type="Core/Diagram.Circle">
+            <Data property="Center">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>0</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+            <Data property="Radius"><Double>5</Double></Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Ball1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#RoundShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>20</Double></Data>
+                <Data property="Y"><Double>20</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+    const doc = parseDexpiDocument(xml).data;
+    const overlays = (doc?.scene.nodes ?? []).filter((n) => n.kind === "prim" && n.objectId === "Ball1");
+    expect(overlays.some((n) => n.kind === "prim" && n.prim.kind === "circle")).toBe(false);
+    expect(overlays.some((n) => n.kind === "prim" && n.prim.kind === "polyline")).toBe(true);
+  });
+});
+
+describe("OffPageConnector exclusion", () => {
+  it("draws no heat-trace overlay for a traced OffPageConnector", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Conn1" type="Plant/Piping.FlowInPipeOffPageConnector">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+  </Object>
+  <Object id="Cat1" type="Core/Diagram.ShapeCatalogue">
+    <Components property="Shapes">
+      <Object id="ConnShape" type="Core/Diagram.Shape">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.PolyLine">
+            <Data property="Points">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>-2</Double></Data>
+                <Data property="Y"><Double>-1</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>2</Double></Data>
+                <Data property="Y"><Double>1</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Conn1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#ConnShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>20</Double></Data>
+                <Data property="Y"><Double>20</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+    const doc = parseDexpiDocument(xml).data;
+    expect(doc?.scene.heatTracedIds.has("Conn1")).toBe(true);
+    const overlays = (doc?.scene.nodes ?? []).filter((n) => n.kind === "prim" && n.objectId === "Conn1");
+    expect(overlays).toHaveLength(0);
+  });
+});
+
+describe("DoubleBlockAndBleedValve flat-side trace", () => {
+  it("traces the flat (non-protruding) side, not the default bottom, when the bleed stub is on the max side", () => {
+    // Local bounds mimic a bleed port on the MAX-Y side (mirrored from the
+    // real ND0004/ND0005 geometry, which stubs out on MIN-Y) so the override
+    // is exercised against a result that differs from the plain default.
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="DBB1" type="DiscProfile/InformationModel.DoubleBlockAndBleedValve">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+  </Object>
+  <Object id="Cat1" type="Core/Diagram.ShapeCatalogue">
+    <Components property="Shapes">
+      <Object id="DbbShape" type="Core/Diagram.Shape">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.PolyLine">
+            <Data property="Points">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>-9</Double></Data>
+                <Data property="Y"><Double>-2</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>9</Double></Data>
+                <Data property="Y"><Double>9</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#DBB1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#DbbShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>20</Double></Data>
+                <Data property="Y"><Double>20</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+    const doc = parseDexpiDocument(xml).data;
+    const overlay = (doc?.scene.nodes ?? []).find(
+      (n): n is PrimNode & { prim: PolyLinePrim } =>
+        n.kind === "prim" && n.objectId === "DBB1" && n.prim.kind === "polyline",
+    );
+    // World bounds: minY = 20-2=18, maxY = 20+9=29. Flat side is MIN (|−2| <
+    // |9|), so the line must sit above the shape (minY - offset), not below.
+    for (const p of overlay?.prim.points ?? []) {
+      expect(p.y).toBeCloseTo(18 - DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM);
+    }
+  });
+
+  it("also traces the flat side for a plain BallValve whose own symbol has an integrated down-pointing branch", () => {
+    // Real report: a ball valve drawn with an integrated bleed/drain branch
+    // stub below it (same catalogue shape, not a separate object) got its
+    // trace on the default bottom, running straight through the branch. The
+    // flat-side check isn't gated to any particular class — it looks at
+    // the shape's own geometry, so a BallValve with this kind of asymmetric
+    // symbol is covered the same way DoubleBlockAndBleedValve is.
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Ball1" type="Plant/Piping.BallValve">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+  </Object>
+  <Object id="Cat1" type="Core/Diagram.ShapeCatalogue">
+    <Components property="Shapes">
+      <Object id="BallWithBleedShape" type="Core/Diagram.Shape">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.PolyLine">
+            <Data property="Points">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>-4</Double></Data>
+                <Data property="Y"><Double>-1</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>4</Double></Data>
+                <Data property="Y"><Double>1</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+          <Object type="Core/Diagram.PolyLine">
+            <Data property="Points">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>0</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>8</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#Ball1" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#BallWithBleedShape" property="Shape"/>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>20</Double></Data>
+                <Data property="Y"><Double>20</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+    const doc = parseDexpiDocument(xml).data;
+    const overlay = (doc?.scene.nodes ?? []).find(
+      (n): n is PrimNode & { prim: PolyLinePrim } =>
+        n.kind === "prim" && n.objectId === "Ball1" && n.prim.kind === "polyline",
+    );
+    // Local Y bounds: -1 (flat) to 8 (bleed branch). World: minY=19, maxY=28.
+    // Flat side is MIN, so the line sits above (minY - offset), not below.
+    expect(overlay?.prim.points.length).toBeGreaterThan(0);
+    for (const p of overlay?.prim.points ?? []) {
+      expect(p.y).toBeCloseTo(19 - DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM);
+    }
+  });
+
+  it("still traces the flat side when the instance is rotated 180° from the catalogue's native orientation", () => {
+    // Real report, matching the actual screenshot: a DoubleBlockAndBleedValve
+    // whose CATALOGUE-native geometry stubs out upward (local MinY, mirroring
+    // the real ND0004/ND0005 data) is placed rotated 180° so the bleed branch
+    // actually points down on screen. Reading local min/max straight onto
+    // world axes (the old approach) would still call the native "flat" side
+    // (local MaxY) the trace side — but after a real 180° rotation that
+    // local point lands ABOVE the object's center in world space, not below.
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="DBB2" type="DiscProfile/InformationModel.DoubleBlockAndBleedValve">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+  </Object>
+  <Object id="Cat1" type="Core/Diagram.ShapeCatalogue">
+    <Components property="Shapes">
+      <Object id="Nd0004LikeShape" type="Core/Diagram.Shape">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.PolyLine">
+            <Data property="Points">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>-9</Double></Data>
+                <Data property="Y"><Double>-9</Double></Data>
+              </AggregatedDataValue>
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>9</Double></Data>
+                <Data property="Y"><Double>2</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+  <Object id="D1" type="Core/Diagram.Diagram">
+    <Data property="MinX"><Double>0</Double></Data>
+    <Data property="MinY"><Double>0</Double></Data>
+    <Data property="MaxX"><Double>50</Double></Data>
+    <Data property="MaxY"><Double>50</Double></Data>
+    <Components property="Groups">
+      <Object type="Core/Diagram.RepresentationGroup">
+        <References objects="#DBB2" property="Represents"/>
+        <Components property="Elements">
+          <Object type="Core/Diagram.ShapeUsage">
+            <References objects="#Nd0004LikeShape" property="Shape"/>
+            <Data property="Rotation"><Double>180</Double></Data>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>20</Double></Data>
+                <Data property="Y"><Double>20</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+    const doc = parseDexpiDocument(xml).data;
+    const overlay = (doc?.scene.nodes ?? []).find(
+      (n): n is PrimNode & { prim: PolyLinePrim } =>
+        n.kind === "prim" && n.objectId === "DBB2" && n.prim.kind === "polyline",
+    );
+    // World bounds after the 180° rotation: minY=18, maxY=29 (native MaxY=2,
+    // the flat side, rotates to sit just above center — world y=18 — while
+    // native MinY=-9, the stub, rotates to below — world y=29). The line
+    // must sit above the shape (minY - offset), not through/below the stub.
+    expect(overlay?.prim.points.length).toBeGreaterThan(0);
+    for (const p of overlay?.prim.points ?? []) {
+      expect(p.y).toBeCloseTo(18 - DEFAULT_HEAT_TRACE_LATERAL_OFFSET_MM);
+    }
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Multi-level inheritance and the NoHeatTracingSystem override
+// (DISC Profile addendum, 2026-08-31 director's clarification)
+// -----------------------------------------------------------------------------
+
+function parseRoot(xml: string): Element {
+  const dom = new DOMParser().parseFromString(xml, "text/xml");
+  return dom.documentElement;
+}
+
+describe("collectHeatTracedIds inheritance", () => {
+  it("inherits through a NULL grandchild past a NULL child, from the top-level ancestor", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Sys1" type="Plant/Piping.PipingNetworkSystem">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+    <Components property="Items">
+      <Object id="Seg1" type="Plant/Piping.PipingNetworkSegment">
+        <Components property="Items">
+          <Object id="Pipe1" type="Plant/Piping.Pipe"/>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+    const traced = collectHeatTracedIds(parseRoot(xml));
+    expect(traced.has("Sys1")).toBe(true);
+    expect(traced.has("Seg1")).toBe(true);
+    expect(traced.has("Pipe1")).toBe(true);
+  });
+
+  it("NoHeatTracingSystem at a lower level overrides inheritance for it and its descendants", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Sys1" type="Plant/Piping.PipingNetworkSystem">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+    <Components property="Items">
+      <Object id="Seg1" type="Plant/Piping.PipingNetworkSegment">
+        <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.NoHeatTracingSystem"/></Data>
+        <Components property="Items">
+          <Object id="Pipe1" type="Plant/Piping.Pipe"/>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+    const traced = collectHeatTracedIds(parseRoot(xml));
+    expect(traced.has("Sys1")).toBe(true);
+    expect(traced.has("Seg1")).toBe(false);
+    expect(traced.has("Pipe1")).toBe(false);
+  });
+
+  it("a re-classification below an overridden level starts tracing again", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Sys1" type="Plant/Piping.PipingNetworkSystem">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+    <Components property="Items">
+      <Object id="Seg1" type="Plant/Piping.PipingNetworkSegment">
+        <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.NoHeatTracingSystem"/></Data>
+        <Components property="Items">
+          <Object id="Pipe1" type="Plant/Piping.Pipe">
+            <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.ElectricalHeatTracingSystem"/></Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+    const traced = collectHeatTracedIds(parseRoot(xml));
+    expect(traced.has("Seg1")).toBe(false);
+    expect(traced.has("Pipe1")).toBe(true);
+  });
+
+  it("with no ancestor classification, a NULL HeatTracingType defaults to untraced", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Seg1" type="Plant/Piping.PipingNetworkSegment">
+    <Components property="Items">
+      <Object id="Pipe1" type="Plant/Piping.Pipe"/>
+    </Components>
+  </Object>
+</Model>`;
+    const traced = collectHeatTracedIds(parseRoot(xml));
+    expect(traced.size).toBe(0);
+  });
+});
+
+describe("collectHeatTracingSafetyCriticalIds", () => {
+  it("collects only traced ids explicitly flagged IsHeatTracingSafetyCritical", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Main">
+  <Object id="Seg1" type="Plant/Piping.PipingNetworkSegment">
+    <Data property="HeatTracingType"><DataReference data="Plant/Enumerations.HeatTracingTypeClassification.HeatTracingSystem"/></Data>
+    <Data property="IsHeatTracingSafetyCritical"><Boolean>true</Boolean></Data>
+    <Components property="Items">
+      <Object id="Pipe1" type="Plant/Piping.Pipe">
+        <Data property="IsHeatTracingSafetyCritical"><Boolean>true</Boolean></Data>
+      </Object>
+      <Object id="Pipe2" type="Plant/Piping.Pipe"/>
+    </Components>
+  </Object>
+  <Object id="Seg2" type="Plant/Piping.PipingNetworkSegment">
+    <Data property="IsHeatTracingSafetyCritical"><Boolean>true</Boolean></Data>
+  </Object>
+</Model>`;
+    const root = parseRoot(xml);
+    const traced = collectHeatTracedIds(root);
+    const critical = collectHeatTracingSafetyCriticalIds(root, traced);
+    expect(critical).toEqual(new Set(["Seg1", "Pipe1"]));
   });
 });
 

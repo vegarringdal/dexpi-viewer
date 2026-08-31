@@ -9,7 +9,7 @@ import type { Point, SceneGraph, ScenePrimitive, UseTransform } from "./types.ts
 // their scaled semi-axes.
 // -----------------------------------------------------------------------------
 
-function transformPoint(t: UseTransform, p: Point): Point {
+export function transformPoint(t: UseTransform, p: Point): Point {
   const sx = (t.isMirrored ? -1 : 1) * t.scaleX;
   const x = p.x * sx;
   const y = p.y * t.scaleY;

@@ -3,6 +3,7 @@ import {
   buildHeatTraceOverlays,
   buildHeatTraceSymbolOverlays,
   collectHeatTracedIds,
+  collectHeatTracingSafetyCriticalIds,
   resolveHeatTraceStyle,
 } from "./heatTracing.ts";
 import { parseConnectorPolyline, parsePrimitive } from "./primitives.ts";
@@ -515,6 +516,7 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
     ];
   }
   const tracedIds = collectHeatTracedIds(root);
+  const safetyCriticalIds = collectHeatTracingSafetyCriticalIds(root, tracedIds);
   const traceStyle = resolveHeatTraceStyle(profile?.heatTraceStroke ?? null);
   nodes = [
     ...nodes,
@@ -533,5 +535,6 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
     shapes,
     bounds: bounds ?? computeSceneBounds(nodes, shapes),
     heatTracedIds: tracedIds,
+    heatTracingSafetyCriticalIds: safetyCriticalIds,
   };
 }
