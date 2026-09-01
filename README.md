@@ -126,7 +126,7 @@ lines, or piping service (fluid code / piping class, with ancestor
 inheritance) — each value in its own color with a legend of counts
 and per-value visibility toggles.
 
-All milestones M0–M9 are complete; the open items are niche
+All milestones M0–M11 are complete; the open items are niche
 (Proteus-era edge tolerances, profile LabelTemplate overlays, culling
 for truly huge files) and tracked in DESIGN.md.
 
@@ -135,9 +135,16 @@ Conceptual Model / Diagram Tree): the **Conceptual Model Tree** and
 **Diagram Tree** panels mirror the file's `ConceptualModel`/`Diagram`
 XML containment exactly — one expandable group row per `<Components
 property=…>` bucket, one row per object underneath — instead of the
-Explorer's flattened hierarchy. Both start collapsed and expand to
-reveal the current selection; the selected row's raw Data table and
-Inverse References (grouped by `ReferencingType.property`, e.g.
+Explorer's flattened hierarchy. Each row shows the bare type in the
+main column and the resolved value/tag (TagName, ItemTag, SegmentNumber,
+…) in a drag-resizable side column; the tree/Data split below it is
+drag-resizable too, and the tree itself is virtualized (only rows near
+the viewport mount) so a large, mostly-expanded subtree stays smooth to
+scroll — Explorer shares the same virtualized tree component. Both
+panels start collapsed and expand to reveal the current selection; the
+selected row's raw Data table (aggregate values like Stroke/Color
+render as an indented block, not one flattened line) and Inverse
+References (grouped by `ReferencingType.property`, e.g.
 `AttributeRepresentation.Object [2]`) render below the tree. A Diagram
 Tree row cross-links to its real conceptual object via its own
 `Represents`/`Object` reference, so selecting either tree, the drawing,

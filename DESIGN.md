@@ -1176,7 +1176,7 @@ the same walker, closing the long-open profile-validation item).
 Scope note: covers per-object SHAPE only — cross-object semantics
 (CON-*) stay hand-written.
 
-### M10 — Conceptual Model Tree & Diagram Tree panels ✅
+### M11 — Conceptual Model Tree & Diagram Tree panels ✅
 
 - [x] Two new dockable panels (ids `conceptualModelTree`/`diagramTree`,
       ribbon Panels toggle, T+C / T+D; not in the default layout;
@@ -1229,19 +1229,73 @@ Scope note: covers per-object SHAPE only — cross-object semantics
       `Represents` referrer over `Object`, and skips re-picking when the
       row already shown already represents the same target (so it
       doesn't fight a user's choice among multiple representations).
-- [x] `npm run lint`/`npm run typecheck` both clean. Could not verify
-      interactively in this sandbox: `vitest` still can't execute here
-      (pre-existing Node-version/jsdom mismatch — confirmed this round
-      too, Node 20 vs jsdom 30's required ^22/^24/≥26), and Playwright's
-      Chromium download is blocked by the sandbox's network allowlist
-      (403) with no system Chromium/sudo available for `--with-deps`
-      either. Verified instead that the dev server serves every new
-      module with 200 (no esbuild/Vite import errors) and hand-traced
-      `groupByProperty`/the branch-selection logic against
-      `refrences/reference_pid.xml`. A real click-through (both panels
-      open, trees mirror the property nesting, drawing/tree/tree
-      selection sync each way, Data/Inverse References populate) is
-      still owed in an actual browser.
+- [x] Row content, resizable-column follow-up (director's first real-app
+      pass, several rounds): the main column shows the bare **type**
+      (matching the raw XML property-grid look) and the resizable side
+      column shows the resolved **value/tag** — the reverse of the
+      Explorer's name-first layout — blank on synthetic property-group
+      rows where they'd be identical. `SegmentNumber` added to
+      `plantModel.ts`'s `LABEL_PRIORITY` (confirmed as the real DEXPI
+      attribute on `PipingNetworkSegment` against `reference_pid.xml`)
+      so segment rows get a value there too, benefiting Explorer's own
+      labels the same way the other `…Number` fields already do.
+- [x] Resizable UI, two new pieces: `useDragResize` (pointer-drag width/
+      height with min/max clamping, no persistence) and `TreeDataSplit`
+      (the tree/Data-Inverse-References vertical split, plus the tree's
+      type-column width feeding `--pt-type-col-width` to `PlantTree`'s
+      `resizableTypeColumn` rows). `PropertiesSections.tsx`'s `DataTable`
+      gained the same treatment for its attribute-name/value columns
+      (shared with the plain Properties panel too — the attribute name
+      now wraps instead of truncating, so a long one is never fully
+      hidden regardless of width). All three drag handles ended up as a
+      persistent thin line (not just a hover-only strip) after the first
+      version proved too thin/invisible to find — thickens and turns
+      blue on hover, wide invisible grab zone either side.
+- [x] Aggregate Data values (`values.ts`'s generic `"Type { a: 1, b: 2 }"`
+      fallback for Stroke/Color/etc. — anything without a dedicated
+      formatter) render as an indented multi-line block in `DataTable`
+      (`prettyPrintValue`, brace/comma-driven — safe because
+      `formatAggregate` never puts a literal brace or comma inside a leaf
+      value) instead of one flattened line. Plain values (numbers,
+      strings, PhysicalQuantity, …) pass through unchanged. Presentation
+      only — `formatDataValue`'s string contract (drawing labels, CSV
+      export, tooltips) is untouched.
+- [x] Virtualized `PlantTree` (director noticed real scroll jank on a
+      large, mostly-expanded PipingNetworkSystems subtree — no
+      virtualization existed anywhere in this codebase, confirmed no
+      `react-window`-type dependency either): the tree now owns its own
+      scrolling and windows the row list to `OVERSCAN_ROWS` beyond the
+      viewport, each row forced to a fixed `ROW_HEIGHT_PX` so the offset
+      math stays exact — hand-rolled rather than a new dependency, since
+      row height is uniform (indentation is padding, not height) and the
+      math is simple. New shared `flattenVisibleNodes` (`plantTreeFilter.ts`)
+      is the single source of truth for "visible row order," reused by
+      both the windowing and `useTreeSelection`'s shift-range math (previously
+      two separate traversals that could drift). The old scroll-into-view
+      mechanism (`querySelector` a `data-object-id`, `setTimeout` to let
+      newly-expanded rows render first) couldn't survive virtualization —
+      an off-screen row simply isn't in the DOM. Replaced with a
+      `revealRequest: {id, nonce} | null` prop `PlantTree` reacts to
+      internally: computes the target's pixel offset directly from its
+      flattened index (no DOM query, no timing hack), keyed on the nonce
+      (not on the flattened list itself) so an unrelated expand/collapse
+      elsewhere never re-triggers a scroll the user didn't ask for. This
+      benefits **Explorer too** (shared component) — `TopologyPanel.tsx`
+      moved to the same `revealRequest` pattern, dropping its own
+      duplicate `containerRef`/`querySelector` version.
+- [x] `npm run lint`/`npm run typecheck` clean throughout (checked after
+      every round). `vitest` still can't execute in this sandbox
+      (pre-existing Node-version/jsdom mismatch, Node 20 vs jsdom 30's
+      required ^22/^24/≥26) and Playwright's Chromium download is
+      blocked by the sandbox's network allowlist (403), with no system
+      Chromium/sudo available for `--with-deps` either — verified
+      instead via the dev server (every changed module serves 200, no
+      esbuild/Vite import errors) plus hand-tracing the tree/grouping/
+      virtualization logic. The director then actually ran the app and
+      iterated several rounds from real screenshots (column swap,
+      SegmentNumber, resize-handle visibility, scroll perf, indented
+      values) — real usage this time, not just the sandbox's static
+      checks.
 
 ## Decisions log
 
@@ -1686,3 +1740,11 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   `rule,category,severity,objectId,line,xpath,message`. Both are blank for
   an issue with `objectId: null` or one whose id doesn't resolve to any
   element.
+- **2026-09-01** `@tredespace/ui` bumped 0.0.56 → 0.0.80 (director);
+  `external/tredespace-ui-0.0.56.tgz` replaced with
+  `external/tredespace-ui-0.0.80.tgz`, `package.json`'s `file:` dependency
+  path updated to match, `package-lock.json` regenerated. Also removed
+  `external/tredespace-client.ts` — an unused SDK file the app never
+  imported (confirmed: no reference anywhere in `src/`). `npm run
+  typecheck` and `npm run lint` both still pass against the bumped
+  version, no code changes needed on this side.

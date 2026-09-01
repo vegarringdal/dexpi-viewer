@@ -12,7 +12,7 @@
 
 ![Selection: yellow halo along the geometry, yellow rect behind text](images/selection-halo.png)
 
-Click anything in the drawing to select it — the Explorer tree, Properties, Connections and Inspect all follow. Ctrl/Cmd-click toggles multi-selection (also on the canvas); Shift-click range-selects in the tree. Hovering rows in panels highlights the object on the canvas.
+Click anything in the drawing to select it — the Explorer tree, Properties, Connections, Inspect and the [Conceptual Model Tree & Diagram Tree](xml-trees.md) all follow. Ctrl/Cmd-click toggles multi-selection (also on the canvas); Shift-click range-selects in the tree. Hovering rows in panels highlights the object on the canvas.
 
 Selection renders as a **marker-pen yellow halo** tracing the object's own geometry underneath the blue re-stroke — not a bounding box, so a large exchanger doesn't flood its whole footprint. Selected **text** gets a filled yellow rect instead (embolden-by-doubling reads blurry); Settings → Rendering → *Backdrop behind selected text* turns that off. Dashed lines **stay dashed** when selected or highlighted — a selected heat-traced pipe keeps its trace distinguishable from the pipe itself.
 

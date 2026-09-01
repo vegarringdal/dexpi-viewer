@@ -14,7 +14,7 @@ Only the DEXPI 2.0 XML serialization is supported (Proteus 4.x files from the DE
 
 ![The highlighted Panels section toggles panels; Reset restores the default layout](images/panels-ribbon.png)
 
-Dockable panels around a central drawing: Explorer and Validation on the left, Properties / Connections / Highlight / Settings on the right with the Minimap below, and Topology graph + Inspect as collapsed rails next to the drawing (click their chevron to expand).
+Dockable panels around a central drawing: Explorer and Validation on the left, Properties / Connections / Highlight / Settings on the right with the Minimap below, and Topology graph + Inspect as collapsed rails next to the drawing (click their chevron to expand). Two more object browsers — [Conceptual Model Tree & Diagram Tree](xml-trees.md), raw-XML views alongside the Explorer — are off by default; toggle them on from ribbon → Panels.
 
 The panel shell is the [tredespace UI](https://tredespace.com/docs/widgets) workbench, so every panel is fully rearrangeable:
 
@@ -30,7 +30,7 @@ The layout persists across sessions; if you get lost, ribbon → **Reset** resto
 
 ## Shortcuts
 
-Every ribbon action has a keyboard shortcut, rebindable in Settings → Shortcuts (click *Record*, press the new keys). Plain keys drive the app so nothing collides with the browser: **F** fit, **0** zoom 100%, **Z** then **I**/**O** zoom in/out, **D** theme, **B** black & white, digits **1–9** toggle the panels, **E** then **P**/**S**/**C** export PDF/SVG/report, **Ctrl+O** open a file, **F1** this manual. *Export keymap* saves your overrides as a portable JSON file; *Import keymap* applies one — unknown ids and conflicting keys are skipped, with a report of what happened.
+Every ribbon action has a keyboard shortcut, rebindable in Settings → Shortcuts (click *Record*, press the new keys). Plain keys drive the app so nothing collides with the browser: **F** fit, **0** zoom 100%, **Z** then **I**/**O** zoom in/out, **D** theme, **B** black & white, digits **1–9** toggle the original panels, **T** then **C**/**D** toggles Conceptual Model Tree / Diagram Tree, **E** then **P**/**S**/**C** export PDF/SVG/report, **Ctrl+O** open a file, **F1** this manual. *Export keymap* saves your overrides as a portable JSON file; *Import keymap* applies one — unknown ids and conflicting keys are skipped, with a report of what happened.
 
 ## Status bar
 

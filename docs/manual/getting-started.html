@@ -47,6 +47,7 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <a href="rules.html">Validation rule reference</a>
 <a href="metamodel.html">DEXPI 2.0 information model</a>
 <a href="symbols.html">DiscProfile 0.6.3 symbol catalogue</a>
+<a href="xml-trees.html">Conceptual Model Tree & Diagram Tree</a>
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
 <main><h1>Getting started</h1>
 <p><img src="images/overview.png" alt="The workbench with a DISC example sheet loaded; the highlighted File section opens files and profiles"></p>
@@ -59,7 +60,7 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <p>Only the DEXPI 2.0 XML serialization is supported (Proteus 4.x files from the DEXPI 1.x era are out of scope).</p>
 <h2>The workbench</h2>
 <p><img src="images/panels-ribbon.png" alt="The highlighted Panels section toggles panels; Reset restores the default layout"></p>
-<p>Dockable panels around a central drawing: Explorer and Validation on the left, Properties / Connections / Highlight / Settings on the right with the Minimap below, and Topology graph + Inspect as collapsed rails next to the drawing (click their chevron to expand).</p>
+<p>Dockable panels around a central drawing: Explorer and Validation on the left, Properties / Connections / Highlight / Settings on the right with the Minimap below, and Topology graph + Inspect as collapsed rails next to the drawing (click their chevron to expand). Two more object browsers — <a href="xml-trees.html">Conceptual Model Tree &amp; Diagram Tree</a>, raw-XML views alongside the Explorer — are off by default; toggle them on from ribbon → Panels.</p>
 <p>The panel shell is the <a href="https://tredespace.com/docs/widgets">tredespace UI</a> workbench, so every panel is fully rearrangeable:</p>
 <p><img src="images/panel-drag.png" alt="Dragging the Validation tab over the drawing: the compass picks the dock side and the blue region previews where the panel will land"></p>
 <ul>
@@ -71,7 +72,7 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 </ul>
 <p>The layout persists across sessions; if you get lost, ribbon → <strong>Reset</strong> restores the default layout.</p>
 <h2>Shortcuts</h2>
-<p>Every ribbon action has a keyboard shortcut, rebindable in Settings → Shortcuts (click <em>Record</em>, press the new keys). Plain keys drive the app so nothing collides with the browser: <strong>F</strong> fit, <strong>0</strong> zoom 100%, <strong>Z</strong> then <strong>I</strong>/<strong>O</strong> zoom in/out, <strong>D</strong> theme, <strong>B</strong> black &amp; white, digits <strong>1–9</strong> toggle the panels, <strong>E</strong> then <strong>P</strong>/<strong>S</strong>/<strong>C</strong> export PDF/SVG/report, <strong>Ctrl+O</strong> open a file, <strong>F1</strong> this manual. <em>Export keymap</em> saves your overrides as a portable JSON file; <em>Import keymap</em> applies one — unknown ids and conflicting keys are skipped, with a report of what happened.</p>
+<p>Every ribbon action has a keyboard shortcut, rebindable in Settings → Shortcuts (click <em>Record</em>, press the new keys). Plain keys drive the app so nothing collides with the browser: <strong>F</strong> fit, <strong>0</strong> zoom 100%, <strong>Z</strong> then <strong>I</strong>/<strong>O</strong> zoom in/out, <strong>D</strong> theme, <strong>B</strong> black &amp; white, digits <strong>1–9</strong> toggle the original panels, <strong>T</strong> then <strong>C</strong>/<strong>D</strong> toggles Conceptual Model Tree / Diagram Tree, <strong>E</strong> then <strong>P</strong>/<strong>S</strong>/<strong>C</strong> export PDF/SVG/report, <strong>Ctrl+O</strong> open a file, <strong>F1</strong> this manual. <em>Export keymap</em> saves your overrides as a portable JSON file; <em>Import keymap</em> applies one — unknown ids and conflicting keys are skipped, with a report of what happened.</p>
 <h2>Status bar</h2>
 <p>File name and size, object count, loaded profile, zoom, and the cursor position in drawing millimetres.</p>
 <div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main></body></html>
