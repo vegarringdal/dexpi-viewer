@@ -2,6 +2,7 @@ import {
   IconAlertTriangle,
   IconChartDots3,
   IconColorFilter,
+  IconFileVector,
   IconListDetails,
   IconListTree,
   IconMap,
@@ -9,6 +10,7 @@ import {
   IconRestore,
   IconSchema,
   IconSettings,
+  IconSitemap,
 } from "@tabler/icons-react";
 import { useDockLayout, usePanelContext } from "@tredespace/ui/dockable";
 import { RibbonButton, RibbonSection } from "@tredespace/ui/widgets";
@@ -35,6 +37,24 @@ export function PanelsSection(): JSX.Element {
         tooltip="Show/hide the object explorer tree"
         shortcut="panel.explorer"
         onClick={panelToggle(PANEL_IDS.topology)}
+      />
+      <RibbonButton
+        icon={<IconSitemap />}
+        label="Conceptual Model"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.conceptualModelTree)}
+        tooltip="Raw ConceptualModel XML tree, grouped by property, with Data and Inverse References"
+        shortcut="panel.conceptualModelTree"
+        onClick={panelToggle(PANEL_IDS.conceptualModelTree)}
+      />
+      <RibbonButton
+        icon={<IconFileVector />}
+        label="Diagram Tree"
+        size="mini"
+        selected={manager.isOpen(PANEL_IDS.diagramTree)}
+        tooltip="Raw Diagram XML tree, grouped by property, cross-linked to the conceptual model"
+        shortcut="panel.diagramTree"
+        onClick={panelToggle(PANEL_IDS.diagramTree)}
       />
       <RibbonButton
         icon={<IconChartDots3 />}

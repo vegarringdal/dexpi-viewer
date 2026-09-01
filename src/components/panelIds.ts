@@ -10,4 +10,6 @@ export const PANEL_IDS = {
   connections: "connections",
   highlight: "highlight",
   inspect: "inspect",
+  conceptualModelTree: "conceptualModelTree",
+  diagramTree: "diagramTree",
 } as const;

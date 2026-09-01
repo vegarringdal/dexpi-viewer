@@ -7,6 +7,7 @@ import {
 import { selectionState } from "../../state/selection/selection.state.ts";
 import { getLoadedDocument, setViewerError } from "../../state/viewer/viewer.actions.ts";
 import type { FilteredNode, SelectModifiers } from "./PlantTree.tsx";
+import { flattenVisibleNodes } from "./plantTreeFilter.ts";
 import type { MenuItem } from "./TreeContextMenu.tsx";
 
 // -----------------------------------------------------------------------------
@@ -55,15 +56,8 @@ function visibleRowIds(
   items: readonly FilteredNode[],
   expanded: ReadonlySet<string>,
   forceExpand: boolean,
-  out: string[] = [],
 ): string[] {
-  for (const item of items) {
-    out.push(item.node.id);
-    if (item.children.length > 0 && (forceExpand || expanded.has(item.node.id))) {
-      visibleRowIds(item.children, expanded, forceExpand, out);
-    }
-  }
-  return out;
+  return flattenVisibleNodes(items, expanded, forceExpand).map((row) => row.item.node.id);
 }
 
 function copyLine(id: string, kind: "label" | "type" | "full"): string {

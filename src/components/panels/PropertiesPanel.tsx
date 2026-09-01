@@ -6,7 +6,7 @@ import { validationConfigState } from "../../state/validation/validation.state.t
 import { getLoadedDocument } from "../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../state/viewer/viewer.state.ts";
 import { IssueRow } from "./IssuesParts.tsx";
-import { ChipList, EmptyNote, ObjectChip, Section } from "./PropertiesSections.tsx";
+import { ChipList, DataTable, EmptyNote, ObjectChip, Section } from "./PropertiesSections.tsx";
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -90,27 +90,7 @@ export function PropertiesPanel(): JSX.Element {
       </Section>
 
       <Section title="Data">
-        {node.attributes.length === 0 && node.undefinedAttributes.length === 0 && (
-          <EmptyNote text="No attributes." />
-        )}
-        <dl className="grid grid-cols-[minmax(90px,45%)_1fr] gap-x-3 gap-y-1 text-xs">
-          {node.attributes.map((attr) => (
-            <div key={attr.name} className="contents">
-              <dt className="truncate text-slate-400" title={attr.name}>
-                {attr.name}
-              </dt>
-              <dd className="break-words font-mono text-slate-200">{attr.value}</dd>
-            </div>
-          ))}
-          {node.undefinedAttributes.map((name) => (
-            <div key={name} className="contents">
-              <dt className="truncate text-slate-500" title={name}>
-                {name}
-              </dt>
-              <dd className="font-mono text-slate-500 italic">(undefined)</dd>
-            </div>
-          ))}
-        </dl>
+        <DataTable attributes={node.attributes} undefinedAttributes={node.undefinedAttributes} />
       </Section>
 
       <Section title="References">

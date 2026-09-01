@@ -1176,6 +1176,72 @@ the same walker, closing the long-open profile-validation item).
 Scope note: covers per-object SHAPE only — cross-object semantics
 (CON-*) stay hand-written.
 
+### M10 — Conceptual Model Tree & Diagram Tree panels ✅
+
+- [x] Two new dockable panels (ids `conceptualModelTree`/`diagramTree`,
+      ribbon Panels toggle, T+C / T+D; not in the default layout;
+      alongside the existing Explorer/Properties, not replacing them —
+      director's explicit call after an earlier attempt at reshaping
+      the Explorer itself was reverted) mirror the file's raw
+      `ConceptualModel`/`Diagram` XML containment exactly: one
+      expandable group row per `<Components property=…>` bucket (e.g.
+      `ActuatingSystems`, `PipingNetworkSystems`), one row per object
+      underneath, nesting arbitrarily deep — instead of the Explorer's
+      flattened containment. Both start fully collapsed and expand to
+      reveal whatever the app's global selection currently is.
+- [x] `plantModel.ts`: `PlantNode` gained `ownerProperty` (the owning
+      `<Components property=…>` name, captured via a new
+      `componentObjectsWithProperty` walk helper) and `buildPlantModel`'s
+      second parameter became `PlantModelBranch | boolean`
+      (`"conceptual" | "diagram" | "full"`, booleans still accepted for
+      the existing call sites) so a Diagram-only walk
+      (`buildPlantModel(root, "diagram")`, memoized as
+      `diagramPlantModel`) is possible without touching the existing
+      conceptual/full paths. New pure `groupByProperty(plant)` inserts a
+      synthetic group `PlantNode` per distinct `ownerProperty` between a
+      node and its children — same shape as an earlier, since-reverted
+      `restructureByPlantStructure` transform, but keyed on XML property
+      instead of the plant-breakdown overlay. Not wired into the
+      existing Explorer/`TopologyPanel`.
+- [x] Each panel embeds a bottom section (`ObjectDataView`, new,
+      `src/components/panels/objectDataView/`) showing the selected
+      row's Data table (extracted from `PropertiesPanel.tsx` into a
+      shared `DataTable` in `PropertiesSections.tsx` — no behavior
+      change there) and an **Inverse References** list: `referencedBy`
+      entries grouped by `` `${ReferencingTypeName}.${property}` ``
+      (e.g. `AttributeRepresentation.Object [2]`), single-target groups
+      inline, multi-target groups collapsible (native `<details>`). A
+      new `PlantNodeChip` (`PropertiesSections.tsx`) resolves against an
+      explicit `PlantModel` instead of the global document's conceptual
+      model, since Diagram Tree ids aren't in it.
+- [x] Cross-linking: `ConceptualModelTreePanel` reuses `PlantTree`/
+      `plantTreeFilter`/`useTreeSelection` exactly like `TopologyPanel`
+      (conceptual ids are already valid global selection targets).
+      `DiagramTreePanel` cannot reuse `useTreeSelection` — Diagram rows
+      carry synthetic positional-xpath ids (real Diagram objects have no
+      `id` in DEXPI files) that would corrupt global selection — so it
+      keeps its own local `selectedDiagramId` and a small
+      `crossLinkTarget` helper reading a row's own `Represents`/`Object`
+      reference; clicking a row also calls the global `setSelectedObject`
+      when that reference resolves. Reverse sync (an external selection
+      revealing itself in the Diagram Tree) looks up
+      `diagramModel.referencedBy.get(selectedId)`, preferring a
+      `Represents` referrer over `Object`, and skips re-picking when the
+      row already shown already represents the same target (so it
+      doesn't fight a user's choice among multiple representations).
+- [x] `npm run lint`/`npm run typecheck` both clean. Could not verify
+      interactively in this sandbox: `vitest` still can't execute here
+      (pre-existing Node-version/jsdom mismatch — confirmed this round
+      too, Node 20 vs jsdom 30's required ^22/^24/≥26), and Playwright's
+      Chromium download is blocked by the sandbox's network allowlist
+      (403) with no system Chromium/sudo available for `--with-deps`
+      either. Verified instead that the dev server serves every new
+      module with 200 (no esbuild/Vite import errors) and hand-traced
+      `groupByProperty`/the branch-selection logic against
+      `refrences/reference_pid.xml`. A real click-through (both panels
+      open, trees mirror the property nesting, drawing/tree/tree
+      selection sync each way, Data/Inverse References populate) is
+      still owed in an actual browser.
 
 ## Decisions log
 

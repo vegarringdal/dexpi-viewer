@@ -2,69 +2,57 @@ import { IconChevronsDown, IconChevronsUp } from "@tabler/icons-react";
 import { PanelBody } from "@tredespace/ui/dockable";
 import { Button, TextInput } from "@tredespace/ui/widgets";
 import { type JSX, useEffect, useMemo, useRef, useState } from "react";
-import { requestZoomToObject } from "../../state/selection/selection.actions.ts";
-import { selectionState } from "../../state/selection/selection.state.ts";
-import { getLoadedDocument } from "../../state/viewer/viewer.actions.ts";
-import { viewerState } from "../../state/viewer/viewer.state.ts";
-import { FieldToggleRow } from "./FieldToggleRow.tsx";
-import {
-  type FilteredNode,
-  PlantTree,
-  type RevealRequest,
-  type SelectModifiers,
-  type ShowField,
-} from "./PlantTree.tsx";
-import {
-  ALL_SEARCH_FIELDS,
-  ancestorIds,
-  collectGroupIds,
-  filterNode,
-  type SearchField,
-} from "./plantTreeFilter.ts";
-import { TreeContextMenu } from "./TreeContextMenu.tsx";
-import { useTreeSelection } from "./useTreeSelection.ts";
+import { groupByProperty, type PlantModel } from "../../../lib/dexpi/plantModel.ts";
+import { setSelectedObject } from "../../../state/selection/selection.actions.ts";
+import { selectionState } from "../../../state/selection/selection.state.ts";
+import { getLoadedDocument } from "../../../state/viewer/viewer.actions.ts";
+import { viewerState } from "../../../state/viewer/viewer.state.ts";
+import { ObjectDataView } from "../objectDataView/ObjectDataView.tsx";
+import { type FilteredNode, PlantTree, type RevealRequest, type SelectModifiers } from "../PlantTree.tsx";
+import { ALL_SEARCH_FIELDS, ancestorIds, collectGroupIds, filterNode } from "../plantTreeFilter.ts";
+import { TreeContextMenu } from "../TreeContextMenu.tsx";
+import { TreeDataSplit } from "../TreeDataSplit.tsx";
+import { useTreeSelection } from "../useTreeSelection.ts";
 
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
 
-const SEARCH_FIELD_LABELS: Readonly<Record<SearchField, string>> = {
-  name: "Name",
-  type: "Type",
-  id: "ID",
-  persistentId: "Persistent ID",
-};
-
-const SHOW_FIELDS: readonly ShowField[] = ["type", "id", "persistentId"];
-
-const SHOW_FIELD_LABELS: Readonly<Record<ShowField, string>> = {
-  type: "Type",
-  id: "ID",
-  persistentId: "Persistent ID",
-};
+const SHOW_FIELDS = new Set<"type">(["type"]);
 
 // -----------------------------------------------------------------------------
 // Component
 // -----------------------------------------------------------------------------
 
-export function TopologyPanel(): JSX.Element {
+/**
+ * Mirrors the file's raw `ConceptualModel` XML containment exactly — one
+ * expandable group row per `<Components property=…>` bucket, one row per
+ * object underneath — with the selected object's Data and Inverse
+ * References embedded below. Starts fully collapsed; reveals and follows
+ * the app's global selection like the Explorer does.
+ */
+export function ConceptualModelTreePanel(): JSX.Element {
   const { docRevision, file } = viewerState.use();
   const { selectedId, selectedIds } = selectionState.use();
   const [query, setQuery] = useState("");
-  const [searchFields, setSearchFields] = useState<ReadonlySet<SearchField>>(new Set(ALL_SEARCH_FIELDS));
-  const [showFields, setShowFields] = useState<ReadonlySet<ShowField>>(new Set(["type"]));
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const [revealRequest, setRevealRequest] = useState<RevealRequest>(null);
   const revealNonceRef = useRef(0);
   const selectionFromTreeRef = useRef(false);
 
-  const roots = useMemo<readonly FilteredNode[]>(() => {
+  const plant = useMemo<PlantModel | null>(() => {
     void docRevision;
+    return getLoadedDocument()?.plant ?? null;
+  }, [docRevision]);
+
+  const grouped = useMemo<PlantModel | null>(() => (plant ? groupByProperty(plant) : null), [plant]);
+
+  const roots = useMemo<readonly FilteredNode[]>(() => {
     const normalized = query.trim().toLowerCase();
-    return (getLoadedDocument()?.plant.roots ?? [])
-      .map((r) => filterNode(r, normalized, searchFields))
+    return (grouped?.roots ?? [])
+      .map((r) => filterNode(r, normalized, new Set(ALL_SEARCH_FIELDS)))
       .filter((c): c is FilteredNode => c !== null);
-  }, [docRevision, query, searchFields]);
+  }, [grouped, query]);
 
   const forceExpand = query.trim().length > 0;
   const treeSelection = useTreeSelection(roots, expanded, forceExpand);
@@ -97,14 +85,13 @@ export function TopologyPanel(): JSX.Element {
   // Effects
   // ---------------------------------------------------------------------------
 
-  // A fresh document starts fully expanded.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: expand once per document, not per search keystroke.
+  // A fresh document starts fully collapsed.
   useEffect(() => {
     void docRevision;
-    setExpanded(collectGroupIds(roots, new Set()));
+    setExpanded(new Set());
   }, [docRevision]);
 
-  // A selection made in the drawing must become visible here: expand its
+  // A selection made anywhere else must become visible here: expand its
   // ancestors and scroll the row into view.
   useEffect(() => {
     if (!selectedId) {
@@ -116,17 +103,17 @@ export function TopologyPanel(): JSX.Element {
       return;
     }
 
-    const chain = ancestorIds(getLoadedDocument()?.plant, selectedId);
+    const chain = ancestorIds(grouped ?? undefined, selectedId);
     setExpanded((prev) => new Set([...prev, ...chain]));
     revealNonceRef.current += 1;
     setRevealRequest({ id: selectedId, nonce: revealNonceRef.current });
-  }, [selectedId]);
+  }, [selectedId, grouped]);
 
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
 
-  if (!file) {
+  if (!file || !plant) {
     return (
       <PanelBody className="flex h-full items-center justify-center p-4 text-center text-slate-500 text-xs">
         Open a DEXPI file to get started.
@@ -135,45 +122,29 @@ export function TopologyPanel(): JSX.Element {
   }
 
   return (
-    <PanelBody className="flex h-full flex-col gap-2 p-2">
-      <div className="flex shrink-0 items-center gap-1">
+    <PanelBody className="flex h-full flex-col p-0">
+      <div className="flex shrink-0 items-center gap-1 p-2 pb-1">
         <TextInput value={query} onChange={setQuery} placeholder="Search objects…" className="flex-1" />
         <Button iconOnly icon={<IconChevronsDown />} tooltip="Expand all" onClick={handleExpandAll} />
         <Button iconOnly icon={<IconChevronsUp />} tooltip="Collapse all" onClick={handleCollapseAll} />
-        <Button
-          disabled={!selectedId}
-          onClick={() => selectedId && requestZoomToObject(selectedId)}
-          tooltip="Zoom the drawing to the selected object"
-        >
-          Zoom to
-        </Button>
       </div>
-      <FieldToggleRow
-        label="Search in:"
-        fields={ALL_SEARCH_FIELDS}
-        labels={SEARCH_FIELD_LABELS}
-        active={searchFields}
-        requireOne
-        onChange={setSearchFields}
-      />
-      <FieldToggleRow
-        label="Show:"
-        fields={SHOW_FIELDS}
-        labels={SHOW_FIELD_LABELS}
-        active={showFields}
-        onChange={setShowFields}
-      />
-      <div className="min-h-0 flex-1">
-        <PlantTree
-          nodes={roots}
-          selectedIds={new Set(selectedIds)}
-          expanded={expanded}
-          forceExpand={forceExpand}
-          show={showFields}
-          revealRequest={revealRequest}
-          onSelect={handleSelect}
-          onToggle={handleToggle}
-          onContextMenu={treeSelection.handleContextMenu}
+      <div className="flex min-h-0 flex-1 flex-col">
+        <TreeDataSplit
+          tree={
+            <PlantTree
+              nodes={roots}
+              selectedIds={new Set(selectedIds)}
+              expanded={expanded}
+              forceExpand={forceExpand}
+              show={SHOW_FIELDS}
+              resizableTypeColumn
+              revealRequest={revealRequest}
+              onSelect={handleSelect}
+              onToggle={handleToggle}
+              onContextMenu={treeSelection.handleContextMenu}
+            />
+          }
+          data={<ObjectDataView plant={plant} nodeId={selectedId} onSelect={setSelectedObject} />}
         />
       </div>
       {treeSelection.menu && (

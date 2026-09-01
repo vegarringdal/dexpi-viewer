@@ -65,3 +65,28 @@ export function ancestorIds(plant: PlantModel | undefined, id: string): string[]
   }
   return chain;
 }
+
+/** A tree row plus the depth it renders at, in on-screen order. */
+export type FlatRow = Readonly<{ item: FilteredNode; depth: number }>;
+
+/**
+ * Flattens the tree into its visible rows, in display order — a collapsed
+ * group's children are skipped entirely. Shared by `PlantTree`'s
+ * virtualized rendering and `useTreeSelection`'s shift-range math, so the
+ * two can never disagree on "what order do rows appear in."
+ */
+export function flattenVisibleNodes(
+  items: readonly FilteredNode[],
+  expanded: ReadonlySet<string>,
+  forceExpand: boolean,
+  depth = 0,
+  out: FlatRow[] = [],
+): FlatRow[] {
+  for (const item of items) {
+    out.push({ item, depth });
+    if (item.children.length > 0 && (forceExpand || expanded.has(item.node.id))) {
+      flattenVisibleNodes(item.children, expanded, forceExpand, depth + 1, out);
+    }
+  }
+  return out;
+}

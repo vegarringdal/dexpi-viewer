@@ -1,5 +1,7 @@
 import { definePanel } from "@tredespace/ui/dockable";
 import { ConnectionsPanel } from "./panels/ConnectionsPanel.tsx";
+import { ConceptualModelTreePanel } from "./panels/conceptualModel/ConceptualModelTreePanel.tsx";
+import { DiagramTreePanel } from "./panels/diagramTree/DiagramTreePanel.tsx";
 import { DrawingPanel } from "./panels/drawing/DrawingPanel.tsx";
 import { HighlightPanel } from "./panels/HighlightPanel.tsx";
 import { IssuesPanel } from "./panels/IssuesPanel.tsx";
@@ -29,6 +31,18 @@ export const viewerPanels = [
   }),
   definePanel({ id: PANEL_IDS.drawing, title: "Drawing", closable: false, component: DrawingPanel }),
   definePanel({ id: PANEL_IDS.topology, title: "Explorer", minWidth: 200, component: TopologyPanel }),
+  definePanel({
+    id: PANEL_IDS.conceptualModelTree,
+    title: "Conceptual Model Tree",
+    minWidth: 220,
+    component: ConceptualModelTreePanel,
+  }),
+  definePanel({
+    id: PANEL_IDS.diagramTree,
+    title: "Diagram Tree",
+    minWidth: 220,
+    component: DiagramTreePanel,
+  }),
   definePanel({
     id: PANEL_IDS.topologyGraph,
     title: "Topology graph",

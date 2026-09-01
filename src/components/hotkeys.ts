@@ -158,6 +158,22 @@ const APP_HOTKEYS: HotkeyDef[] = [
     run: () => toggleDockPanel(PANEL_IDS.topology),
   },
   {
+    id: "panel.conceptualModelTree",
+    category: "Panels",
+    label: "Conceptual Model Tree",
+    description: "Toggle the raw ConceptualModel XML tree panel.",
+    defaultKeys: "T + C",
+    run: () => toggleDockPanel(PANEL_IDS.conceptualModelTree),
+  },
+  {
+    id: "panel.diagramTree",
+    category: "Panels",
+    label: "Diagram Tree",
+    description: "Toggle the raw Diagram XML tree panel.",
+    defaultKeys: "T + D",
+    run: () => toggleDockPanel(PANEL_IDS.diagramTree),
+  },
+  {
     id: "panel.properties",
     category: "Panels",
     label: "Properties",

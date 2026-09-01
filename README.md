@@ -130,6 +130,19 @@ All milestones M0–M9 are complete; the open items are niche
 (Proteus-era edge tolerances, profile LabelTemplate overlays, culling
 for truly huge files) and tracked in DESIGN.md.
 
+**Two raw-XML browsers** sit alongside the Explorer (ribbon Panels →
+Conceptual Model / Diagram Tree): the **Conceptual Model Tree** and
+**Diagram Tree** panels mirror the file's `ConceptualModel`/`Diagram`
+XML containment exactly — one expandable group row per `<Components
+property=…>` bucket, one row per object underneath — instead of the
+Explorer's flattened hierarchy. Both start collapsed and expand to
+reveal the current selection; the selected row's raw Data table and
+Inverse References (grouped by `ReferencingType.property`, e.g.
+`AttributeRepresentation.Object [2]`) render below the tree. A Diagram
+Tree row cross-links to its real conceptual object via its own
+`Represents`/`Object` reference, so selecting either tree, the drawing,
+or the Explorer keeps all of them in sync.
+
 ## Getting started
 
 ```bash

@@ -16,6 +16,9 @@ export type PlantNode = Readonly<{
   typeName: string;
   label: string;
   parentId: string | null;
+  /** The `<Components property=…>` bucket this object was found under in
+   *  its parent (e.g. "ActuatingSystems"); "" for top-level roots. */
+  ownerProperty: string;
   /** Core/PersistentIdentifier entries (name = Context, value = Value). */
   persistentIds: readonly PlantAttribute[];
   attributes: readonly PlantAttribute[];
@@ -31,6 +34,12 @@ export type PlantNode = Readonly<{
 }>;
 
 export type IncomingReference = Readonly<{ fromId: string; property: string }>;
+
+/** Which `EngineeringModel` composition(s) `buildPlantModel` walks:
+ *  "conceptual" (default) = `ConceptualModel` only; "diagram" = `Diagram`
+ *  only (synthetic xpath ids, since real Diagram objects carry none);
+ *  "full" = both, merged into one root list (Inspect's "drawing" mode). */
+export type PlantModelBranch = "conceptual" | "diagram" | "full";
 
 export type PlantModel = Readonly<{
   roots: readonly PlantNode[];
@@ -92,6 +101,7 @@ const LABEL_PRIORITY = [
   "PositionNumber",
   "InstrumentationLoopFunctionNumber",
   "ActuatingSystemNumber",
+  "SegmentNumber",
   "SubTagName",
   "DiscProfile/ObjectDisplayName",
   "Identifier",
@@ -185,27 +195,43 @@ function collectReferences(node: Element): PlantReference[] {
   return references;
 }
 
+/** Objects under `<Components property=…>` children, paired with the
+ *  property name of the block each one was found under. */
+function componentObjectsWithProperty(
+  node: Element,
+): readonly Readonly<{ property: string; element: Element }>[] {
+  const out: { property: string; element: Element }[] = [];
+  for (const comp of directChildrenByTag(node, "Components")) {
+    const property = comp.getAttribute("property") ?? "";
+    for (const child of directChildrenByTag(comp, "Object")) {
+      out.push({ property, element: child });
+    }
+  }
+  return out;
+}
+
 function walkPlant(
   node: Element,
   parentId: string | null,
+  ownerProperty: string,
   byId: Map<string, PlantNode>,
   referencedBy: Map<string, IncomingReference[]>,
   elementsById: Map<string, Element>,
-  includeDiagram: boolean,
+  branch: PlantModelBranch,
 ): PlantNode | null {
   const type = node.getAttribute("type") ?? "";
   if (isValueObject(type)) {
     return null;
   }
-  if (!includeDiagram && isDiagramType(type)) {
+  if (branch === "conceptual" && isDiagramType(type)) {
     return null;
   }
 
   const xpath = elementXPath(node);
   const explicitId = node.getAttribute("id") ?? "";
-  // Drawing objects in real files carry no ids — in diagram mode the
+  // Drawing objects in real files carry no ids — in diagram/full mode the
   // positional XPath stands in as a stable synthetic identity.
-  const id = explicitId || (includeDiagram ? xpath : "");
+  const id = explicitId || (branch !== "conceptual" ? xpath : "");
   if (!id) {
     return null;
   }
@@ -221,8 +247,10 @@ function walkPlant(
       referencedBy.set(target, list);
     }
   }
-  const children = componentObjects(node)
-    .map((child) => walkPlant(child, id, byId, referencedBy, elementsById, includeDiagram))
+  const children = componentObjectsWithProperty(node)
+    .map(({ property, element }) =>
+      walkPlant(element, id, property, byId, referencedBy, elementsById, branch),
+    )
     .filter((c): c is PlantNode => c !== null);
 
   const plantNode: PlantNode = {
@@ -231,6 +259,7 @@ function walkPlant(
     typeName,
     label: resolveLabel(attributes, explicitId || typeName),
     parentId,
+    ownerProperty,
     persistentIds: collectPersistentIds(node),
     attributes,
     undefinedAttributes: collected.undefined,
@@ -247,18 +276,30 @@ function walkPlant(
 // Entry point
 // -----------------------------------------------------------------------------
 
+function normalizeBranch(branch: PlantModelBranch | boolean): PlantModelBranch {
+  if (typeof branch === "boolean") {
+    return branch ? "full" : "conceptual";
+  }
+  return branch;
+}
+
 /**
- * Extracts the conceptual object hierarchy (the "plant"/process structure)
- * for the tree and properties panels. Diagram objects are excluded; Core
- * value objects (QualifiedValue etc.) are folded into their owner's
- * attributes instead of appearing as tree nodes.
+ * Extracts the object hierarchy for one `EngineeringModel` composition (or
+ * both) for the tree/properties panels. Core value objects (QualifiedValue
+ * etc.) are always folded into their owner's attributes instead of
+ * appearing as tree nodes.
  *
- * With `includeDiagram` the walk also keeps Core/Diagram objects (which
+ * `branch` selects which composition(s) to walk (see `PlantModelBranch`).
+ * `true`/`false` are accepted for backward compatibility, mapping to
+ * `"full"`/`"conceptual"`. Diagram-side objects (Diagram and full mode)
  * carry no ids in real files — their positional XPath becomes a synthetic
- * id) and starts from the document root so the Diagram trees are reached —
- * the Inspect panel's "drawing" mode.
+ * id — matching what Inspect's "drawing" mode already relied on.
  */
-export function buildPlantModel(root: Element, includeDiagram = false): PlantModel {
+export function buildPlantModel(
+  root: Element,
+  branch: PlantModelBranch | boolean = "conceptual",
+): PlantModel {
+  const mode = normalizeBranch(branch);
   const byId = new Map<string, PlantNode>();
   const referencedBy = new Map<string, IncomingReference[]>();
   const elementsById = new Map<string, Element>();
@@ -266,14 +307,14 @@ export function buildPlantModel(root: Element, includeDiagram = false): PlantMod
 
   const engineering = root.querySelector('Object[type="Core/EngineeringModel"]');
   const wrapped = engineering
-    ? includeDiagram
+    ? mode === "full"
       ? componentObjects(engineering)
-      : componentObjects(engineering, "ConceptualModel")
+      : componentObjects(engineering, mode === "diagram" ? "Diagram" : "ConceptualModel")
     : [];
   const startNodes = wrapped.length > 0 ? wrapped : directChildrenByTag(root, "Object");
 
   for (const start of startNodes) {
-    const node = walkPlant(start, null, byId, referencedBy, elementsById, includeDiagram);
+    const node = walkPlant(start, null, "", byId, referencedBy, elementsById, mode);
     if (node) {
       roots.push(node);
     }
@@ -290,7 +331,111 @@ export function fullPlantModel(root: Element): PlantModel {
     return cached;
   }
 
-  const model = buildPlantModel(root, true);
+  const model = buildPlantModel(root, "full");
   fullModels.set(root, model);
   return model;
+}
+
+const diagramModels = new WeakMap<Element, PlantModel>();
+
+/** The Diagram-branch-only model for the Diagram Tree panel, memoized per document root. */
+export function diagramPlantModel(root: Element): PlantModel {
+  const cached = diagramModels.get(root);
+  if (cached) {
+    return cached;
+  }
+
+  const model = buildPlantModel(root, "diagram");
+  diagramModels.set(root, model);
+  return model;
+}
+
+// -----------------------------------------------------------------------------
+// Property-grouped view — for the ConceptualModel Tree / Diagram Tree panels
+//
+// Those panels mirror the raw file structure exactly: each `<Components
+// property="X">` bucket becomes an expandable group row between an object
+// and its children, instead of `buildPlantModel`'s flat containment (which
+// folds every Components block together regardless of property name). Kept
+// as a separate, pure transform rather than changing `buildPlantModel`'s
+// output: `semanticGraph.ts`'s containment edges, `resolveOwningNode`'s
+// ownership walk, and the Properties panel's "Parent" chip all want raw
+// physical containment with real `parentId`s, not synthetic group nodes —
+// and the existing Explorer/`TopologyPanel` keeps reading `buildPlantModel`
+// untouched too.
+// -----------------------------------------------------------------------------
+
+const PROPERTY_GROUP_TYPE = "Explorer/PropertyGroup";
+
+function propertyGroupId(parentId: string, property: string): string {
+  return `${parentId}::${property}`;
+}
+
+function makePropertyGroup(parentId: string, property: string, children: readonly PlantNode[]): PlantNode {
+  return {
+    id: propertyGroupId(parentId, property),
+    type: PROPERTY_GROUP_TYPE,
+    typeName: property,
+    label: property,
+    parentId,
+    ownerProperty: property,
+    persistentIds: [],
+    attributes: [],
+    undefinedAttributes: [],
+    references: [],
+    xpath: "",
+    children,
+  };
+}
+
+/**
+ * Rebuilds one node's subtree so its direct children are bucketed under a
+ * synthetic group row per distinct `ownerProperty` value, preserving each
+ * bucket's original order of first appearance. Recurses first so nested
+ * property groups are inserted at every depth.
+ */
+function groupNodeChildren(node: PlantNode): PlantNode {
+  const rebuiltChildren = node.children.map(groupNodeChildren);
+  const byProperty = new Map<string, PlantNode[]>();
+  const order: string[] = [];
+  for (const child of rebuiltChildren) {
+    if (!byProperty.has(child.ownerProperty)) {
+      byProperty.set(child.ownerProperty, []);
+      order.push(child.ownerProperty);
+    }
+    byProperty.get(child.ownerProperty)?.push(child);
+  }
+
+  const children = order.map((property) => {
+    const groupId = propertyGroupId(node.id, property);
+    const reparented = (byProperty.get(property) ?? []).map((c) => ({ ...c, parentId: groupId }));
+    return makePropertyGroup(node.id, property, reparented);
+  });
+
+  return { ...node, children };
+}
+
+/**
+ * Groups every root's descendants by their owning XML property (see the
+ * section comment above). Roots themselves are left ungrouped — there is
+ * normally exactly one (`PlantModel1` for the conceptual branch, `Diagram1`
+ * for the diagram branch), so a top-level wrapper group would add nesting
+ * without organizing anything. Pure: does not mutate `plant` —
+ * `referencedBy`/`elementsById` are reused as-is (reference data and source
+ * elements are unaffected by tree shape).
+ */
+export function groupByProperty(plant: PlantModel): PlantModel {
+  const roots = plant.roots.map(groupNodeChildren);
+  const byId = new Map<string, PlantNode>();
+  const indexTree = (node: PlantNode): void => {
+    byId.set(node.id, node);
+    for (const child of node.children) {
+      indexTree(child);
+    }
+  };
+  for (const root of roots) {
+    indexTree(root);
+  }
+
+  return { roots, byId, referencedBy: plant.referencedBy, elementsById: plant.elementsById };
 }
