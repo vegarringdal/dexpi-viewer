@@ -28,8 +28,9 @@ Marks repeat every 6.5 mm starting 2.5 mm in (cadence measured from the official
 
 The profile defines label templates but not how a placement's rotation affects them. Recovered rules:
 
-- Labels follow the placement rotation **normalized to the readable half-plane**: 90→270 and 180→0 flip by 180° (offsets rotate with the flipped angle); 0 and 270 stay. Official evidence: vertical valves and line labels render `rotate(270)` whether the usage says 90 or 270; the 180°-rotated off-page connector's text stays upright at unrotated offsets.
-- **Exception:** PropertyBreak placements keep their value labels entirely in sheet space (the 270°-rotated breaks show them horizontal at unrotated offsets).
+- A label's **anchor follows the placement's rotation**, exactly like the symbol's own artwork, so the text stays on the geometry it annotates. Official evidence: ND0049 (actuator badge, type code 10.5 units from the origin — further than its own circle's radius) placed at 270° draws its "M" *inside* the circle, at the rotated offset.
+- A label's **glyphs are normalized to the readable half-plane**: 90→270 and 180→0; 0 and 270 stay. Upside-down and top-to-bottom text never appears in the official renderings — a vertical valve's tag renders `rotate(270)` whether the usage says 90 or 270, and a 180°-rotated symbol's text renders upright.
+- **Exception — sheet-space families:** PropertyBreak and OffPageConnector placements keep their text blocks entirely in sheet space, unrotated position *and* upright glyphs (the 270°-rotated breaks show their values horizontal at unrotated offsets; the 180°-rotated off-page connectors draw "TO TEST P&ID…" at the unrotated offsets).
 - Multi-line label values are ONE bottom-anchored block growing upward. Known delta: this viewer uses its global 1.4× line spacing; the official tool uses 1.0× for break labels (top line ~1.3 mm higher here).
 - Per-line whitespace is trimmed — browsers collapse it when rendering the official SVGs, and real data pads lines (a BreakValue line carries 48 leading spaces in DISC_EXAMPLE-14-12); drawing the literal spaces shoved the line ~44 mm sideways.
 

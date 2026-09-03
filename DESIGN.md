@@ -1993,3 +1993,64 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   sheet "Validation findings", freeze `A2`, auto-filter `A1:G23`, bold header,
   `line` cells typed `n`, 18.4 KB) — i.e. a third-party spreadsheet reader
   accepts the file, which is the closest check available without Excel itself.
+- **2026-09-03** Profile-label rotation, corrected (supersedes the
+  2026-08-22 entry above): a label's **anchor follows the placement's TRUE
+  rotation** — the same transform the symbol's own artwork gets — and only
+  its **glyph orientation** is normalized to the readable half-plane
+  (90→270, 180→0). The sheet-space families (PropertyBreak **and now
+  OffPageConnector**) opt out of both.
+  **What was wrong:** `normalizeLabelRotation` was applied to the label's
+  POSITION as well as its orientation, so a 90° placement's template offset
+  was rotated by 270 — a full 180° displacement of the anchor. Harmless
+  while offsets are ~1 unit; catastrophic for ND0049 (actuator badge, type
+  code at local (0,−10.5), circle at (0,−10) r3), which the director hit
+  with a 90°-rotated, mirrored placement: the "M"/"FM" texts rendered ~21
+  units away, on the opposite side of the anchor from their own circle.
+  **On the mirroring:** the director asked whether the text was being
+  "rotated then mirrored". Effectively yes — and that framing pinned it
+  down. Both artwork and label go through the same `transformPoint`
+  (mirror → rotate → translate), but the label's angle was
+  normalize(90) = 270 = −90, and `R(−θ)·M ≡ M·R(θ)`, so the label came out
+  exactly as if the two operations had been applied in the opposite order,
+  which for a 90° rotation is a 180° displacement. For ND0049 the mirror
+  flag itself is a red herring (its circle and type code both sit on x=0,
+  so mirroring x moves neither — verified through `transformPoint`: circle
+  → +10.0, label → −10.5 mirrored AND unmirrored).
+  **How the rule was settled (the ground truth the paused TODO thought was
+  missing):** the note claimed no official example places ND0049 rotated.
+  Not so — DISC_EXAMPLE-14-01..04 place it at 270°, position (292,160), and
+  the official SVG draws "M" at (283.15,160) rotate(270), i.e. inside the
+  circle at (282,160) at the ROTATED offset; sheet space would have put it
+  at (292,149.5), where nothing is drawn. Instrumenting which placements
+  actually render template overlays across all 15 official sheets:
+  1409 at 0°, 168 at 270° (81 with offsets > 4 units), 32 at 180°, **0 at
+  90°, 0 mirrored+rotated**. So the 90→270 branch that broke the director's
+  sheet was never validated by official data — it was inferred by symmetry
+  from the 180° case, and every one of those 32 labels belongs to
+  ND0009A/B, i.e. `FlowOutPipeOffPageConnector` /
+  `FlowOutSignalOffPageConnector` — a class family, not a general rule.
+  Hence the family exception rather than a position flip.
+  **Scored, not guessed:** a new `profileLabelsOfficial.test.ts` matches
+  every rendered label against the official SVG text carrying the same
+  string across all 15 sheets (same coordinate system, 5-unit tolerance;
+  alignment/baseline differences are 1–3 units, a wrong rotation rule
+  misses by 8–25). Current rule: **1862 matched / 12 missed** (the 12 are
+  pre-existing and unrelated — a duplicated "D-20HA001" sheet label and an
+  "SI" tag the sheets draw elsewhere). Positioning by the true rotation
+  WITHOUT the off-page exception scored 1857/17, and the 5 regressions were
+  exactly those connectors — which is how the exception was found rather
+  than assumed.
+  **Also:** `localTypeName`/`isPropertyBreakType`/`isOffPageConnectorType`
+  moved out of `heatTracing.ts` into a shared `typeNames.ts` (both modules
+  now key rendering rules off the same class-family predicates), and the
+  two synthetic rotated-label fixtures in `profileLabels.test.ts` were
+  re-anchored: instead of re-pointing their coordinates at whatever the new
+  code prints (the circular fix the TODO warned about), they now assert the
+  RULE — a badge fixture shaped like ND0049 (offset 3.5× its own radius),
+  placed at 90° both mirrored and not, must land its label *inside the
+  circle the scene actually draws*. Under the old rule that distance was
+  20.5 units with r=3.
+  Heavy-fixture note: the official catalogue is 30 MB, so the new sweep
+  memoizes its profile/sheet parses per file — without that, three
+  unrelated official-data tests started tripping vitest's 5 s timeout from
+  parallel load alone.

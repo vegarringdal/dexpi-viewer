@@ -1,5 +1,6 @@
 import type { ProfileLineStroke } from "./discProfile.ts";
 import { transformPoint } from "./flattenScene.ts";
+import { isOffPageConnectorType, isPropertyBreakType, localTypeName } from "./typeNames.ts";
 import type {
   Bounds,
   Point,
@@ -158,16 +159,6 @@ function isHeatTraceEligible(type: string): boolean {
 
 /** Literal enum value that explicitly turns heat tracing off at this level and below. */
 const NO_HEAT_TRACING = "NoHeatTracingSystem";
-
-/** Local class name, stripped of any `Plant/…`/`DiscProfile/…` namespace prefix. */
-function localTypeName(type: string): string {
-  return type.split(/[./]/).pop() ?? type;
-}
-
-/** Never traced, regardless of any inherited/own classification — a diagram-boundary marker, not hardware. */
-function isOffPageConnectorType(type: string): boolean {
-  return localTypeName(type).endsWith("OffPageConnector");
-}
 
 /** Ball valves always get straight-line trace, even if a catalogue symbol geometrically reads round. */
 function isBallValveType(type: string): boolean {
@@ -579,20 +570,6 @@ function resolveFlatSideIsWorldMax(shape: ShapeDef, transform: UseTransform, ver
   const flatWorld = transformPoint(transform, flatLocalPoint);
   const origin = transformPoint(transform, { x: 0, y: 0 });
   return vertical ? flatWorld.x >= origin.x : flatWorld.y >= origin.y;
-}
-
-/**
- * PropertyBreak objects (and any future *PropertyBreak subclass) are
- * logical annotations for a piping-class/area transition, not physical
- * heat-traced hardware — they carry no HeatTracingType of their own and
- * only land in `tracedIds` because they're nested `Items` alongside real
- * components in a traced segment. Their break-wing symbol still gets drawn
- * normally; it just never earns its own heat-trace mark (the segment's
- * pipe-level overlay already runs through the break point uninterrupted).
- * Same convention `validation.ts`'s `hasPropertyBreak` uses to spot one.
- */
-function isPropertyBreakType(type: string): boolean {
-  return type.endsWith("PropertyBreak");
 }
 
 /**

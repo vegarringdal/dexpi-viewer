@@ -2,7 +2,8 @@ import type { ProfileInstanceData, ProfileLabelTemplate } from "./discProfile.ts
 import { transformPrimitive } from "./flattenScene.ts";
 import { isRenderableLabelValue } from "./labelPolicy.ts";
 import { formatForRepresentation, type LookupIndex, lookupDisplayAttribute } from "./resolveTemplates.ts";
-import type { SceneNode, UseTransform } from "./types.ts";
+import { isOffPageConnectorType, isPropertyBreakType } from "./typeNames.ts";
+import type { SceneNode, ScenePrimitive, UseTransform } from "./types.ts";
 import { dataValue, directChildrenByTag, getData, refLocalName } from "./xml.ts";
 
 // -----------------------------------------------------------------------------
@@ -111,9 +112,10 @@ function ownValueText(el: Element, attributeName: string): string {
 const NO_INSTANCES: ReadonlyMap<string, ProfileInstanceData> = new Map();
 
 /**
- * Flips a placement rotation into the readable half-plane for label text:
+ * Flips a placement rotation into the readable half-plane for label GLYPHS:
  * 90 and 180 flip by 180° (top-to-bottom / upside-down text never appears
- * in the official renderings), 0 and 270 stay.
+ * in the official renderings), 0 and 270 stay. This governs orientation
+ * only — a label's anchor follows the placement's true rotation.
  */
 function normalizeLabelRotation(rotation: number): number {
   const r = ((rotation % 360) + 360) % 360;
@@ -202,6 +204,38 @@ export function resolveProfileLabelText(
 }
 
 /**
+ * One template text in world space: ANCHORED with `anchorRotation` (the
+ * placement's own rotation, so the label sits on the geometry it annotates)
+ * but DRAWN at `glyphRotation` (normalized, so it never reads upside-down).
+ * Both paths go through `transformPrimitive`, keeping mirroring and scaling
+ * in one place — only the two angles differ.
+ */
+function placeLabelText(
+  transform: UseTransform,
+  anchorRotation: number,
+  glyphRotation: number,
+  template: ProfileLabelTemplate,
+  value: string,
+): ScenePrimitive {
+  const local: ScenePrimitive = {
+    kind: "text",
+    value,
+    position: { x: template.position.x, y: template.position.y },
+    rotation: template.rotation,
+    size: template.size,
+    color: template.color,
+    font: template.font,
+    hAlign: template.hAlign,
+    vAlign: template.vAlign,
+  };
+  const anchored = transformPrimitive({ ...transform, rotation: anchorRotation }, local);
+  const oriented = transformPrimitive({ ...transform, rotation: glyphRotation }, local);
+  return anchored.kind === "text" && oriented.kind === "text"
+    ? { ...anchored, rotation: oriented.rotation }
+    : anchored;
+}
+
+/**
  * World-space text nodes for every pending placement's LabelTemplates —
  * resolved per instance, transformed by the instance's use-transform, and
  * drawn on top as ordinary label primitives (canvas and exports alike).
@@ -226,23 +260,20 @@ export function buildProfileLabelOverlays(
       continue;
     }
 
-    // Labels follow the placement's rotation NORMALIZED to stay readable
-    // (90→270, 180→0; offsets rotate with the flipped angle too) — the
-    // official renderings draw a vertical valve's tag and a vertical
-    // pipe's line label rotate(270) whether the usage says 90 or 270, and
-    // a 180°-rotated off-page connector's text upright at the unrotated
-    // offsets. Sole exception: PropertyBreak placements keep their value
-    // labels in sheet space entirely (the 270°-rotated breaks show them
-    // horizontal at unrotated offsets). Verified against
-    // DISC_EXAMPLE-14-12's full rotated-usage inventory.
+    // A label's ANCHOR follows the placement's true rotation — the same
+    // transform the symbol's own artwork gets — so a rotated symbol's label
+    // stays on the geometry it annotates (ND0049 at 270° in
+    // DISC_EXAMPLE-14-01..04 draws its type code INSIDE the circle, at the
+    // rotated 10.5-unit offset). Only the GLYPH orientation is normalized.
+    // Sheet-space families opt out of both: PropertyBreak and
+    // OffPageConnector text blocks stay unrotated at the template offsets
+    // (the 180°-rotated off-page connectors' "TO TEST P&ID…" and the
+    // 270°-rotated breaks' values render horizontal in the official SVGs).
+    // All three behaviours are pinned by profileLabelsOfficial.test.ts.
     const representedType = index.byId.get(entry.objectId)?.getAttribute("type") ?? "";
-    const labelRotation = representedType.endsWith("PropertyBreak")
-      ? 0
-      : normalizeLabelRotation(entry.transform.rotation);
-    const labelTransform: UseTransform = {
-      ...entry.transform,
-      rotation: labelRotation,
-    };
+    const isSheetSpaceLabel = isPropertyBreakType(representedType) || isOffPageConnectorType(representedType);
+    const anchorRotation = isSheetSpaceLabel ? 0 : entry.transform.rotation;
+    const glyphRotation = isSheetSpaceLabel ? 0 : normalizeLabelRotation(entry.transform.rotation);
     const roleCounters = new Map<string, number>();
     for (const template of entry.templates) {
       const value = resolveProfileLabelText(template.text, entry.objectId, index, roleCounters, instances);
@@ -251,17 +282,7 @@ export function buildProfileLabelOverlays(
       }
 
       const lines = value.split(/\r?\n/).filter((line) => line.trim().length > 0);
-      const prim = transformPrimitive(labelTransform, {
-        kind: "text",
-        value: lines.join("\n"),
-        position: { x: template.position.x, y: template.position.y },
-        rotation: template.rotation,
-        size: template.size,
-        color: template.color,
-        font: template.font,
-        hAlign: template.hAlign,
-        vAlign: template.vAlign,
-      });
+      const prim = placeLabelText(entry.transform, anchorRotation, glyphRotation, template, lines.join("\n"));
       nodes.push({ kind: "prim", prim, objectId: entry.objectId, role: "label" });
     }
   }

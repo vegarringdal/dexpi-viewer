@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { parseDiscProfile } from "./discProfile.ts";
+import { flattenScene } from "./flattenScene.ts";
 import { parseDexpiDocument } from "./parseDocument.ts";
-import type { TextPrim } from "./types.ts";
+import type { Bounds, TextPrim } from "./types.ts";
+
+const EMPTY_BOUNDS: Bounds = { minX: 0, minY: 0, maxX: 0, maxY: 0 };
 
 // -----------------------------------------------------------------------------
 // Fixtures — synthetic, format reconstructed from the prior-art viewer
@@ -698,22 +701,95 @@ describe("TypeCode placeholder via published profile instances", () => {
 // connector, the 270°-rotated property breaks).
 // -----------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
+// Rotated placements
+//
+// The rule (evidence in profileLabelsOfficial.test.ts): a label's ANCHOR
+// follows the placement's true rotation, exactly like the symbol's own
+// artwork, so the text stays on the geometry it annotates; only the GLYPH
+// orientation is normalized into the readable half-plane (90→270, 180→0).
+// Sheet-space families (PropertyBreak, OffPageConnector) opt out of both.
+//
+// The Balloon fixture's label offset (1 unit) is far smaller than its circle
+// (r=3), so BOTH conventions leave the text inside the bubble — which is why
+// the ND0049 badge fixture below, whose offset is bigger than its own circle,
+// is the one that actually discriminates.
+// -----------------------------------------------------------------------------
+
+/** ND0049-shaped badge: stem, circle at local (0,-10) r3, type code at
+ *  local (0,-10.5) — an offset 3.5× the circle's radius. */
+const BADGE_PROFILE = `<?xml version="1.0" encoding="UTF-8"?>
+<Model name="Profile">
+  <Object id="SymB" name="Badge" type="Profile/Symbol">
+    <Components property="Variants">
+      <Object type="Profile/SymbolVariant">
+        <Components property="Primitives">
+          <Object type="Core/Diagram.Circle">
+            <Data property="Center">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>-10</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+            <Data property="Radius"><Double>3</Double></Data>
+          </Object>
+        </Components>
+        <Components property="LabelTemplates">
+          <Object type="Profile/LabelTemplate">
+            <Data property="Text"><String>&lt;TagName&gt;</String></Data>
+            <Data property="Size"><Double>3.3</Double></Data>
+            <Data property="Position">
+              <AggregatedDataValue type="Core/Diagram.Point">
+                <Data property="X"><Double>0</Double></Data>
+                <Data property="Y"><Double>-10.5</Double></Data>
+              </AggregatedDataValue>
+            </Data>
+          </Object>
+        </Components>
+      </Object>
+    </Components>
+  </Object>
+</Model>`;
+
+/** The placed badge's circle, in world space, for "is the label inside it?". */
+function badgeCircle(xml: string): { x: number; y: number; radius: number } {
+  const profile = parseDiscProfile(BADGE_PROFILE).data ?? null;
+  const doc = parseDexpiDocument(xml, profile).data;
+  const circle = flattenScene(doc?.scene ?? { nodes: [], shapes: new Map(), bounds: EMPTY_BOUNDS }).find(
+    (prim) => prim.kind === "circle",
+  );
+  if (circle?.kind !== "circle") {
+    throw new Error("badge circle missing");
+  }
+
+  return { x: circle.center.x, y: circle.center.y, radius: circle.radius };
+}
+
+function badgePlacement(rotation: number, isMirrored: boolean): string {
+  return MAIN_XML.replace(
+    '<References objects="DiscProfile/Balloon" property="Symbol"/>',
+    `<Data property="Rotation"><Double>${String(rotation)}</Double></Data>
+            <Data property="IsMirrored"><Boolean>${String(isMirrored)}</Boolean></Data>
+            <References objects="DiscProfile/Badge" property="Symbol"/>`,
+  );
+}
+
 describe("labels on rotated symbol usages", () => {
-  // Official convention: labels follow the placement rotation normalized to
-  // the readable half-plane (90→270, 180→0, offsets rotate with the flipped
-  // angle) — except PropertyBreak placements, whose labels stay sheet-space.
-  it("flips a 180° placement upright at the unrotated template offset", () => {
+  it("keeps a 180° placement's label on its geometry, drawn upright", () => {
     const rotated = MAIN_XML.replace(
       '<References objects="DiscProfile/Balloon" property="Symbol"/>',
       `<Data property="Rotation"><Double>180</Double></Data>
             <References objects="DiscProfile/Balloon" property="Symbol"/>`,
     );
     const label = overlayTexts(rotated).find((t) => t.value.startsWith("PT-100"));
-    expect(label?.position).toEqual({ x: 10, y: 21 });
+    // Anchor rotates with the placement: local (0,1) → (0,-1), i.e. 1 unit
+    // BELOW the bubble centre at (10,20) — still inside its r=3 circle.
+    expect(label?.position).toEqual({ x: 10, y: 19 });
+    // ...but the glyphs stay upright; 180° text is never drawn upside-down.
     expect(label?.rotation).toBe(0);
   });
 
-  it("flips a 90° placement to 270 and rotates the offset with it", () => {
+  it("keeps a 90° placement's label on its geometry, drawn bottom-to-top", () => {
     const rotated = MAIN_XML.replace(
       '<References objects="DiscProfile/Balloon" property="Symbol"/>',
       `<Data property="Rotation"><Double>90</Double></Data>
@@ -721,9 +797,33 @@ describe("labels on rotated symbol usages", () => {
     );
     const label = overlayTexts(rotated).find((t) => t.value.startsWith("PT-100"));
     expect(label?.rotation).toBe(270);
-    expect(label?.position.x ?? 0).toBeCloseTo(11);
+    // local (0,1) rotated 90° → (-1,0) from the bubble centre.
+    expect(label?.position.x ?? 0).toBeCloseTo(9);
     expect(label?.position.y ?? 0).toBeCloseTo(20);
   });
+
+  // The reported ND0049 bug: a badge whose label offset (10.5) exceeds its
+  // own circle's radius (3). Positioning by the normalized glyph angle sent
+  // the text a full 21 units across the anchor — the opposite side of the
+  // drawing from its circle. Mirrored or not: both of the badge's features
+  // sit on the symbol's centre line, so IsMirrored must not move the label
+  // relative to the circle.
+  for (const isMirrored of [false, true]) {
+    it(`draws a rotated badge's label inside its own circle (mirrored: ${String(isMirrored)})`, () => {
+      const xml = badgePlacement(90, isMirrored);
+      const circle = badgeCircle(xml);
+      const label = overlayTexts(xml, BADGE_PROFILE).find((t) => t.value === "PT-100");
+      if (!label) {
+        throw new Error("badge label missing");
+      }
+
+      expect(circle.x).toBeCloseTo(20);
+      expect(circle.y).toBeCloseTo(20);
+      const distance = Math.hypot(label.position.x - circle.x, label.position.y - circle.y);
+      expect(distance).toBeLessThan(circle.radius);
+      expect(label.rotation).toBe(270);
+    });
+  }
 });
 
 describe("labels on rotated LABEL-ONLY symbols", () => {
