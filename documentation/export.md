@@ -2,12 +2,30 @@
 
 ![The highlighted Export section of the ribbon](images/export-ribbon.png)
 
-Ribbon → Export:
+The ribbon carries three export sections.
 
-- **SVG** — a spec-mapped, standalone SVG of the drawing with full visual fidelity.
+**Export** — the drawing exactly as the file authors it, in its own colors:
+
 - **PDF** — a vector PDF with embedded metric-compatible fonts (Carlito / Liberation / DejaVu subsets).
-- **CSV** — the validation findings as a CSV file, with your severity overrides applied.
-- **Excel** — the same findings as an Excel workbook (`.xlsx`): a frozen, bold header row, an auto-filter on every column and `line` as a real number, so sorting and filtering work with a double-click on Windows. No delimiter or locale guessing, unlike CSV.
+- **SVG** — a spec-mapped, standalone SVG of the drawing with full visual fidelity.
+
+**As viewed** — the same two formats, but showing what is on your screen right now:
+
+- Black & white mode, if it is on.
+- Highlight colors, including hidden legend groups (hidden stays hidden) and **Dim others**.
+- The upstream/downstream trace overlays.
+- The alignment underlay, at its current opacity, tint, hide-white and under/over placement.
+
+An *as viewed* export is always **light**: white paper and dark ink, whichever theme the app is in. The dark theme is a screen comfort setting, not a property of the drawing — a dark-theme export would print as pale ink on nothing. So switching theme changes nothing in the exported file; everything else in the list above does.
+
+The selection and hover marks are deliberately left out — they follow your pointer, they are not part of the drawing. Files are named `<drawing>-as-viewed.pdf` / `.svg`.
+
+Because the underlay is an image, an *as viewed* export that includes one is part raster and noticeably larger than the plain vector export. Everything else stays vector.
+
+**Validation** — the findings, with your severity overrides applied:
+
+- **Excel** — the findings as an Excel workbook (`.xlsx`): a frozen, bold header row, an auto-filter on every column and `line` as a real number, so sorting and filtering work with a double-click on Windows. No delimiter or locale guessing, unlike CSV.
+- **CSV** — the same findings as a CSV file.
 
 Both reports carry the same columns:
 

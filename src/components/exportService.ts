@@ -1,5 +1,4 @@
 import { sceneToSvg } from "../lib/dexpi/exportSvg.ts";
-import type { DexpiDocument } from "../lib/dexpi/types.ts";
 import {
   categoryOfRule,
   type IssueSeverity,
@@ -11,23 +10,13 @@ import { downloadBlob } from "../lib/download.ts";
 import { fail, ok, type Result } from "../lib/result.ts";
 import { buildXlsx, type SheetColumn, type SheetData } from "../lib/xlsx.ts";
 import { getEffectiveIssues } from "../state/validation/validation.actions.ts";
-import { getLoadedDocument } from "../state/viewer/viewer.actions.ts";
 import { viewerState } from "../state/viewer/viewer.state.ts";
 import { sceneToPdf } from "./exportPdf.ts";
+import { baseName, requireDocument } from "./exportShared.ts";
 
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
-
-function requireDocument(): Result<DexpiDocument> {
-  const doc = getLoadedDocument();
-  return doc ? ok(doc) : fail("No document loaded.");
-}
-
-function baseName(): string {
-  const name = viewerState.get().file?.name ?? "dexpi-drawing";
-  return name.replace(/\.xml$/i, "");
-}
 
 type ScanState = { index: number; line: number };
 

@@ -2054,3 +2054,70 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   memoizes its profile/sheet parses per file — without that, three
   unrelated official-data tests started tripping vitest's 5 s timeout from
   parallel load alone.
+- **2026-09-03** Selection halo survives deep zoom (director: "if I select
+  and zoom in a lot the yellow outline is gone"). The marker-pen halo was
+  sized as `7 × minWidthMm` (the 2026-08-23 entry above), and every stroke
+  width is `max(stroke.width × widthScale, minWidthMm)` — with
+  `minWidthMm = minStrokePx / viewport.scale` that factor only ever widened
+  HAIRLINES. Past roughly 530% zoom (`7 / scale < 0.35 mm`, a typical line
+  width) the clamp stopped binding, the halo was drawn at *exactly* the
+  authored width, and the blue re-stroke on top covered it pixel-for-pixel.
+  A factor on a zoom-relative clamp can't express "always thicker than the
+  line", so the halo now carries an additive `extraWidthMm` on the draw
+  context, set from `SELECTION_HALO_PAD_PX (3) × 2 × mmPerPx`: the yellow
+  sticks out a constant ~3 screen px on each side at ANY zoom, which is
+  within a pixel of what the old factor produced at fit/100% zoom, so the
+  approved look at normal zooms is unchanged. `SceneDrawOptions` gained
+  `mmPerPx` (= `1 / viewport.scale`) for zoom-invariant overlay geometry;
+  the surviving 2.5× hairline clamp on overlay passes is now the named
+  `HIGHLIGHT_MIN_WIDTH_FACTOR`, shared by the classification pass.
+- **2026-09-03** Export ribbon split three ways + "As viewed" exports
+  (director). The single Export section became **Export** (PDF, SVG — the
+  drawing as authored), **As viewed** (PDF, SVG) and **Validation** (Excel,
+  CSV); two mini buttons per section is one clean column each, so both drawing
+  sections keep the plain "PDF"/"SVG" labels and the section title carries the
+  distinction. `E + SHIFT&P` / `E + SHIFT&S` are the new shortcuts.
+  **What "as viewed" means:** black & white, classification tints, "dim
+  others", the trace overlays and the underlay — but NOT the selection halo or
+  hover (director: "we can skip selected yellow outline"); those are where the
+  pointer happens to be, not a property of the drawing.
+  **How:** the canvas paints highlights as extra PASSES over the drawing (a
+  veil, then re-strokes); the file writers emit each primitive exactly once and
+  have no pass mechanism. Rather than teach both writers about view state, a
+  pure `lib/dexpi/sceneAsViewed.ts` bakes every pass into the colors and hands
+  back a DERIVED SceneGraph — the writers stay untouched apart from an optional
+  underlay argument. The compositing is reproduced arithmetically rather than
+  approximated: veil = 80% paper over the color, tinted fill = 35% tint over
+  the veiled fill, tinted stroke = the tint (the re-stroke is opaque) — the same
+  constants the renderer uses, cross-checked in `sceneAsViewed.test.ts`.
+  Catalogue shapes are shared by many usages, so a shape is cloned once per
+  DISTINCT treatment (`shapeId|rules`), not per placement.
+  Export colors come from the **light** palette whatever theme the app is in:
+  a dark-theme B/W export would otherwise print as pale ink on nothing. That is
+  stated where it can be acted on rather than left as a surprise — the As viewed
+  buttons' tooltip and the manual both say the export is always light and that
+  the theme changes nothing in the file (director).
+  **Underlay:** the canvas draws it through a Skia paint (SrcIn tint filter,
+  Multiply for hide-white, alpha). PDF and SVG have neither filter, so
+  `lib/canvas/underlayExport.ts` bakes tint and hide-white into the pixels via
+  a 2D canvas and only the opacity travels as data. Hide-white becomes
+  white→transparent rather than a multiply blend — identical against a white
+  sheet, and the only version both formats can reproduce. The underlay is a
+  raster (up to 4096 px), so an as-viewed export with one is part-raster and
+  correspondingly larger; `placement` decides whether it lands under or over
+  the drawing, as on screen.
+  `requireDocument`/`baseName` moved to `exportShared.ts` so the report service
+  and the new as-viewed service can both use them, and the ribbon's
+  `reportError` became `ribbon/exportError.ts` shared by all three sections.
+- **2026-09-03** Selection readability in dark mode (director, from a
+  screenshot): the halo read as muddy OLIVE and the selected label was
+  unreadable. Two causes, two fixes. (1) `selectionFill` was 55% alpha in the
+  dark palette — over the near-black paper that desaturates into olive; it is
+  now 92% (and light 85%), so the marker-pen yellow stays yellow. (2) The blue
+  re-stroke pass was drawing selected TEXT in accent blue directly on top of
+  the yellow backdrop rect — light blue on yellow, unreadable. Text over a
+  backdrop now draws in a new `palette.selectionInk` (near-black in BOTH
+  themes, because the backdrop is light in both) via a `glyphColor` override
+  that applies to glyphs only, and the backdrop rect itself is now drawn fully
+  opaque regardless of the halo alpha, so the content pass's glyphs underneath
+  can no longer ghost through it.

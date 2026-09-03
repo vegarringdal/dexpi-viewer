@@ -144,8 +144,10 @@ export function useCanvasStage(): CanvasStageHandles {
         underlay.visible &&
         underlay.placement === "under" &&
         underlay.opacityPercent > 0;
+      const scale = Math.max(viewport.scale, 1e-9);
       const options: SceneDrawOptions = {
-        minWidthMm: rendering.minStrokePx / Math.max(viewport.scale, 1e-9),
+        minWidthMm: rendering.minStrokePx / scale,
+        mmPerPx: 1 / scale,
         widthScale: rendering.strokeWidthScale,
         hidePaper,
         monochrome: highlight.monochrome,

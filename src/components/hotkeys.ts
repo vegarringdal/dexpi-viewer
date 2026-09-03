@@ -10,6 +10,7 @@ import {
   requestViewCommand,
   setViewerError,
 } from "../state/viewer/viewer.actions.ts";
+import { exportPdfAsViewed, exportSvgAsViewed } from "./asViewedExport.ts";
 import { exportIssuesCsv, exportIssuesXlsx, exportPdf, exportSvg } from "./exportService.ts";
 import { PANEL_IDS } from "./panelIds.ts";
 import { openDocs } from "./ribbon/HelpSection.tsx";
@@ -43,8 +44,9 @@ function reportError(result: Result<void>): void {
 /**
  * Default keymap (every binding rebindable in Settings → Shortcuts):
  * plain letters/digits for app actions (they can never collide with browser
- * chords), leader sequences for grouped ones — E then P/S/C/X exports,
- * Z then I/O zooms — and Ctrl-combos only for the file-open family.
+ * chords), leader sequences for grouped ones — E then P/S/C/X exports (shifted
+ * P/S for the as-viewed pair), Z then I/O zooms — and Ctrl-combos only for the
+ * file-open family.
  */
 const APP_HOTKEYS: HotkeyDef[] = [
   {
@@ -140,6 +142,26 @@ const APP_HOTKEYS: HotkeyDef[] = [
     description: "Export the drawing as a standalone SVG.",
     defaultKeys: "E + S",
     run: () => reportError(exportSvg()),
+  },
+  {
+    id: "export.pdfAsViewed",
+    category: "Export",
+    label: "Export PDF (as viewed)",
+    description: "Export the drawing as shown — B/W, highlights and underlay — as a PDF.",
+    defaultKeys: "E + SHIFT&P",
+    run: () => {
+      void exportPdfAsViewed().then(reportError);
+    },
+  },
+  {
+    id: "export.svgAsViewed",
+    category: "Export",
+    label: "Export SVG (as viewed)",
+    description: "Export the drawing as shown — B/W, highlights and underlay — as an SVG.",
+    defaultKeys: "E + SHIFT&S",
+    run: () => {
+      void exportSvgAsViewed().then(reportError);
+    },
   },
   {
     id: "export.report",

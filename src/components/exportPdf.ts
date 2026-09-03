@@ -1,10 +1,11 @@
 import fontkit from "@pdf-lib/fontkit";
-import { degrees, LineCapStyle, PDFDocument, type PDFFont, type PDFPage, rgb } from "pdf-lib";
+import { degrees, LineCapStyle, PDFDocument, type PDFFont, type PDFImage, type PDFPage, rgb } from "pdf-lib";
 import { type FaceKey, faceKeyFor, loadFontData } from "../lib/canvas/fonts.ts";
 import { flattenScene } from "../lib/dexpi/flattenScene.ts";
 import { primitiveToPathData } from "../lib/dexpi/pathData.ts";
 import { baselineOffsetMm, layoutTextLines } from "../lib/dexpi/textLayout.ts";
 import type { RgbColor, SceneGraph, ScenePrimitive, TextPrim } from "../lib/dexpi/types.ts";
+import type { ExportImage } from "../lib/exportImage.ts";
 
 // -----------------------------------------------------------------------------
 // PDF export
@@ -99,8 +100,29 @@ function drawPdfText(ctx: PdfContext, prim: TextPrim): void {
   }
 }
 
-/** Renders the scene graph into a single-page PDF; returns the file bytes. */
-export async function sceneToPdf(scene: SceneGraph): Promise<Uint8Array> {
+/**
+ * Places a raster image on the page. PDF y is up, so the rect's BOTTOM edge in
+ * drawing mm gives the image's origin.
+ */
+function drawImage(ctx: PdfContext, image: ExportImage, embedded: PDFImage): void {
+  const { left, top, right, bottom } = image.rect;
+  ctx.page.drawImage(embedded, {
+    x: (left + ctx.ox) * MM_TO_PT,
+    y: ctx.pageHeightPt - (bottom + ctx.oy) * MM_TO_PT,
+    width: (right - left) * MM_TO_PT,
+    height: (bottom - top) * MM_TO_PT,
+    opacity: image.opacity,
+  });
+}
+
+/**
+ * Renders the scene graph into a single-page PDF; returns the file bytes.
+ * `underlay` embeds a reference image below or above the drawing.
+ */
+export async function sceneToPdf(
+  scene: SceneGraph,
+  underlay: ExportImage | null = null,
+): Promise<Uint8Array> {
   const b = scene.bounds;
   const widthPt = (b.maxX - b.minX + 2 * MARGIN_MM) * MM_TO_PT;
   const heightPt = (b.maxY - b.minY + 2 * MARGIN_MM) * MM_TO_PT;
@@ -130,6 +152,11 @@ export async function sceneToPdf(scene: SceneGraph): Promise<Uint8Array> {
     pageHeightPt: heightPt,
   };
 
+  const embeddedUnderlay = underlay ? await pdf.embedPng(underlay.png) : null;
+  if (underlay && embeddedUnderlay && underlay.placement === "under") {
+    drawImage(ctx, underlay, embeddedUnderlay);
+  }
+
   for (const prim of prims) {
     if (prim.kind === "text") {
       drawPdfText(ctx, prim);
@@ -137,5 +164,9 @@ export async function sceneToPdf(scene: SceneGraph): Promise<Uint8Array> {
       drawGeometry(ctx, prim);
     }
   }
+  if (underlay && embeddedUnderlay && underlay.placement === "over") {
+    drawImage(ctx, underlay, embeddedUnderlay);
+  }
+
   return pdf.save();
 }

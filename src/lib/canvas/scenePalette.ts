@@ -1,4 +1,5 @@
 import type { Theme } from "../../state/theme/theme.state.ts";
+import type { RgbColor } from "../dexpi/types.ts";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -17,6 +18,9 @@ export type ScenePalette = Readonly<{
   accent: PaletteColor;
   /** Marker-pen yellow: the selection halo stroke and text backdrop. */
   selectionFill: PaletteColor;
+  /** Glyph color for selected text sitting ON the yellow backdrop — the
+   *  backdrop is light in BOTH themes, so the ink is dark in both. */
+  selectionInk: PaletteColor;
   /** Upstream trace overlay (amber). */
   traceUp: PaletteColor;
   /** Downstream trace overlay (green). */
@@ -37,7 +41,8 @@ const DARK_PALETTE: ScenePalette = {
   grid: [1, 1, 1, 0.045],
   ink: [0.886, 0.91, 0.941, 1],
   accent: [0.376, 0.647, 0.98, 1],
-  selectionFill: [1, 0.85, 0.3, 0.55],
+  selectionFill: [1, 0.86, 0.25, 0.92],
+  selectionInk: [0.08, 0.1, 0.14, 1],
   traceUp: [0.98, 0.75, 0.14, 1],
   traceDown: [0.29, 0.87, 0.5, 1],
   // No blue in the ramp — selection is blue and must stay unmistakable.
@@ -59,7 +64,8 @@ const LIGHT_PALETTE: ScenePalette = {
   grid: [0, 0, 0, 0.05],
   ink: [0.118, 0.161, 0.231, 1],
   accent: [0.145, 0.388, 0.922, 1],
-  selectionFill: [1, 0.84, 0.2, 0.7],
+  selectionFill: [1, 0.84, 0.2, 0.85],
+  selectionInk: [0.08, 0.1, 0.14, 1],
   traceUp: [0.85, 0.55, 0.0, 1],
   traceDown: [0.09, 0.64, 0.29, 1],
   // No blue in the ramp — selection is blue and must stay unmistakable.
@@ -75,6 +81,15 @@ const LIGHT_PALETTE: ScenePalette = {
 
 export function getScenePalette(theme: Theme): ScenePalette {
   return theme === "dark" ? DARK_PALETTE : LIGHT_PALETTE;
+}
+
+/** A palette color as 0–255 RGB — the form the file exporters write. */
+export function paletteColorToRgb(color: PaletteColor): RgbColor {
+  return {
+    r: Math.round(color[0] * 255),
+    g: Math.round(color[1] * 255),
+    b: Math.round(color[2] * 255),
+  };
 }
 
 /** The categorical color for a classification group index (ramp cycles). */

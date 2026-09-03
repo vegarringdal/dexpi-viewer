@@ -34,8 +34,16 @@ type DrawContext = Readonly<{
    * they render at their authored width.
    */
   strokeDivisor: number;
+  /**
+   * Added to every stroke width on a halo pass, in drawing mm, so the halo
+   * stays wider than the stroke redrawn over it at ANY zoom.
+   */
+  extraWidthMm: number;
   /** When set, everything draws in this color (selection/hover pass). */
   overrideColor: PaletteColor | null;
+  /** Overrides `overrideColor` for GLYPHS only — the pass that re-draws
+   *  selected text over its yellow backdrop needs dark ink, not accent blue. */
+  glyphColor: PaletteColor | null;
   /** Halo pass: text draws as a filled backdrop rect instead of glyphs. */
   textBackdrop: boolean;
 }>;
@@ -93,7 +101,8 @@ function makeStrokePaint(ctx: DrawContext, stroke: Stroke): Paint {
     paint.setColor(ctx.ck.Color4f(...adaptColor(ctx, stroke.color)));
   }
   paint.setStyle(ctx.ck.PaintStyle.Stroke);
-  paint.setStrokeWidth(Math.max(stroke.width * ctx.widthScale, ctx.minWidthMm) / ctx.strokeDivisor);
+  const widthMm = Math.max(stroke.width * ctx.widthScale, ctx.minWidthMm) + ctx.extraWidthMm;
+  paint.setStrokeWidth(widthMm / ctx.strokeDivisor);
   const isButt = stroke.rounding === "Butt";
   paint.setStrokeCap(isButt ? ctx.ck.StrokeCap.Butt : ctx.ck.StrokeCap.Round);
   paint.setStrokeJoin(isButt ? ctx.ck.StrokeJoin.Miter : ctx.ck.StrokeJoin.Round);
@@ -173,7 +182,7 @@ function drawText(ctx: DrawContext, prim: TextPrim): void {
   }
 
   const paint = new ctx.ck.Paint();
-  paint.setColor(ctx.ck.Color4f(...(ctx.overrideColor ?? adaptColor(ctx, prim.color))));
+  paint.setColor(ctx.ck.Color4f(...(ctx.glyphColor ?? ctx.overrideColor ?? adaptColor(ctx, prim.color))));
   paint.setStyle(ctx.ck.PaintStyle.Fill);
   paint.setAntiAlias(true);
   ctx.canvas.save();
@@ -231,7 +240,11 @@ function drawTextBackdrop(
   const top = dy + first.offsetY - prim.size * 0.8;
   const bottom = dy + last.offsetY + prim.size * 0.25;
   const paint = new ctx.ck.Paint();
-  paint.setColor(ctx.ck.Color4f(...ctx.overrideColor));
+  // Opaque regardless of the halo color's alpha: the rect has to MASK the
+  // glyphs the content pass already drew, or they ghost through the yellow
+  // and the label reads muddy under the dark ink drawn on top.
+  const [r, g, b] = ctx.overrideColor;
+  paint.setColor(ctx.ck.Color4f(r, g, b, 1));
   paint.setStyle(ctx.ck.PaintStyle.Fill);
   paint.setAntiAlias(true);
   ctx.canvas.save();
@@ -450,6 +463,8 @@ const PAPER_MARGIN_MM = 5;
 export type SceneDrawOptions = Readonly<{
   /** Below this width (mm) strokes clamp up (= minStrokePx / viewport.scale). */
   minWidthMm: number;
+  /** Drawing mm per screen px (= 1 / viewport.scale) — for zoom-invariant overlays. */
+  mmPerPx: number;
   widthScale: number;
   /** Skip the opaque paper rect — an underlay behind the drawing must show through. */
   hidePaper?: boolean;
@@ -478,7 +493,9 @@ function makeContext(
     monochrome: options.monochrome === true,
     textBackdrop: false,
     strokeDivisor: 1,
+    extraWidthMm: 0,
     overrideColor: null,
+    glyphColor: null,
   };
 }
 
@@ -543,12 +560,20 @@ export function drawSceneHighlights(
   ]);
   // Marker-pen halo: the selection's own geometry re-stroked thick in
   // yellow UNDER the blue pass (a bounding rect covered far too much);
-  // text gets a filled yellow rect instead of doubled glyphs.
+  // text gets a filled yellow rect instead of doubled glyphs. The extra
+  // width is in SCREEN px, not a factor on the min-width clamp — a factor
+  // stops widening anything once zoom makes the clamp non-binding, and the
+  // blue pass then covers the halo exactly.
+  const backdropText = options.selectionTextRect !== false;
   drawHighlightPass(ctx, scene, highlight.selectedIds, palette.selectionFill, {
-    widthFactor: 7,
-    textBackdrop: options.selectionTextRect !== false,
+    extraWidthMm: SELECTION_HALO_PAD_PX * 2 * options.mmPerPx,
+    textBackdrop: backdropText,
   });
-  drawHighlightPass(ctx, scene, highlight.selectedIds, palette.accent);
+  // The blue re-stroke would put light accent glyphs on that yellow rect —
+  // unreadable (director). Text on a backdrop draws in dark ink instead.
+  drawHighlightPass(ctx, scene, highlight.selectedIds, palette.accent, {
+    glyphColor: backdropText ? palette.selectionInk : null,
+  });
 }
 
 /** The mm→device-px canvas matrix for a viewport. */
@@ -584,8 +609,10 @@ export function drawDexpiScene(
   highlight: SceneHighlight,
 ): void {
   const rendering = renderingState.get();
+  const scale = Math.max(viewport.scale, 1e-9);
   const options: SceneDrawOptions = {
-    minWidthMm: rendering.minStrokePx / Math.max(viewport.scale, 1e-9),
+    minWidthMm: rendering.minStrokePx / scale,
+    mmPerPx: 1 / scale,
     widthScale: rendering.strokeWidthScale,
   };
 
@@ -598,6 +625,12 @@ export function drawDexpiScene(
 }
 
 const EMPTY_SET: ReadonlySet<string> = new Set();
+
+/** Hairlines are clamped up further on overlay passes, so a tint stays readable. */
+const HIGHLIGHT_MIN_WIDTH_FACTOR = 2.5;
+
+/** The selection halo sticks out this many screen px on each side, at any zoom. */
+const SELECTION_HALO_PAD_PX = 3;
 
 function singleton(objectId: string | null): ReadonlySet<string> {
   return objectId ? new Set([objectId]) : EMPTY_SET;
@@ -620,7 +653,11 @@ function drawClassificationPass(
   for (const node of scene.nodes) {
     const color = node.objectId !== null ? classification.get(node.objectId) : undefined;
     if (color !== undefined) {
-      drawNode({ ...ctx, overrideColor: color, minWidthMm: ctx.minWidthMm * 2.5 }, scene, node);
+      drawNode(
+        { ...ctx, overrideColor: color, minWidthMm: ctx.minWidthMm * HIGHLIGHT_MIN_WIDTH_FACTOR },
+        scene,
+        node,
+      );
     }
   }
 }
@@ -658,7 +695,7 @@ function drawHighlightPass(
   scene: SceneGraph,
   objectIds: ReadonlySet<string>,
   color: PaletteColor,
-  pass: Readonly<{ widthFactor?: number; textBackdrop?: boolean }> = {},
+  pass: Readonly<{ extraWidthMm?: number; textBackdrop?: boolean; glyphColor?: PaletteColor | null }> = {},
 ): void {
   if (objectIds.size === 0) {
     return;
@@ -667,7 +704,9 @@ function drawHighlightPass(
   const highlightCtx: DrawContext = {
     ...ctx,
     overrideColor: color,
-    minWidthMm: ctx.minWidthMm * (pass.widthFactor ?? 2.5),
+    minWidthMm: ctx.minWidthMm * HIGHLIGHT_MIN_WIDTH_FACTOR,
+    extraWidthMm: pass.extraWidthMm ?? 0,
+    glyphColor: pass.glyphColor ?? null,
     textBackdrop: pass.textBackdrop === true,
   };
   for (const node of scene.nodes) {

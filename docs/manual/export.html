@@ -51,12 +51,26 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
 <main><h1>Exports</h1>
 <p><img src="images/export-ribbon.png" alt="The highlighted Export section of the ribbon"></p>
-<p>Ribbon → Export:</p>
+<p>The ribbon carries three export sections.</p>
+<p><strong>Export</strong> — the drawing exactly as the file authors it, in its own colors:</p>
 <ul>
-<li><strong>SVG</strong> — a spec-mapped, standalone SVG of the drawing with full visual fidelity.</li>
 <li><strong>PDF</strong> — a vector PDF with embedded metric-compatible fonts (Carlito / Liberation / DejaVu subsets).</li>
-<li><strong>CSV</strong> — the validation findings as a CSV file, with your severity overrides applied.</li>
-<li><strong>Excel</strong> — the same findings as an Excel workbook (<code>.xlsx</code>): a frozen, bold header row, an auto-filter on every column and <code>line</code> as a real number, so sorting and filtering work with a double-click on Windows. No delimiter or locale guessing, unlike CSV.</li>
+<li><strong>SVG</strong> — a spec-mapped, standalone SVG of the drawing with full visual fidelity.</li>
+</ul>
+<p><strong>As viewed</strong> — the same two formats, but showing what is on your screen right now:</p>
+<ul>
+<li>Black &amp; white mode, if it is on.</li>
+<li>Highlight colors, including hidden legend groups (hidden stays hidden) and <strong>Dim others</strong>.</li>
+<li>The upstream/downstream trace overlays.</li>
+<li>The alignment underlay, at its current opacity, tint, hide-white and under/over placement.</li>
+</ul>
+<p>An <em>as viewed</em> export is always <strong>light</strong>: white paper and dark ink, whichever theme the app is in. The dark theme is a screen comfort setting, not a property of the drawing — a dark-theme export would print as pale ink on nothing. So switching theme changes nothing in the exported file; everything else in the list above does.</p>
+<p>The selection and hover marks are deliberately left out — they follow your pointer, they are not part of the drawing. Files are named <code>&lt;drawing&gt;-as-viewed.pdf</code> / <code>.svg</code>.</p>
+<p>Because the underlay is an image, an <em>as viewed</em> export that includes one is part raster and noticeably larger than the plain vector export. Everything else stays vector.</p>
+<p><strong>Validation</strong> — the findings, with your severity overrides applied:</p>
+<ul>
+<li><strong>Excel</strong> — the findings as an Excel workbook (<code>.xlsx</code>): a frozen, bold header row, an auto-filter on every column and <code>line</code> as a real number, so sorting and filtering work with a double-click on Windows. No delimiter or locale guessing, unlike CSV.</li>
+<li><strong>CSV</strong> — the same findings as a CSV file.</li>
 </ul>
 <p>Both reports carry the same columns:</p>
 <table>

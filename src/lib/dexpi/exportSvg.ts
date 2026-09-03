@@ -1,3 +1,4 @@
+import type { ExportImage } from "../exportImage.ts";
 import { baselineOffsetMm, layoutTextLines } from "./textLayout.ts";
 import type { RgbColor, SceneGraph, ScenePrimitive, Stroke, UseNode } from "./types.ts";
 
@@ -154,11 +155,41 @@ function emitUse(scene: SceneGraph, node: UseNode): string {
 }
 
 // -----------------------------------------------------------------------------
+// Underlay
+// -----------------------------------------------------------------------------
+
+/** Base64 for a byte array, chunked so a multi-MB PNG cannot blow the
+ *  argument limit of String.fromCharCode. */
+function toBase64(bytes: Uint8Array): string {
+  const CHUNK = 0x8000;
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(binary);
+}
+
+/** The underlay as an <image> with an inline data URI, so the SVG stays a
+ *  single self-contained file. preserveAspectRatio="none" matches the canvas,
+ *  which stretches the bitmap onto the destination rect. */
+function emitImage(image: ExportImage): string {
+  const { left, top, right, bottom } = image.rect;
+  const opacity = image.opacity < 1 ? ` opacity="${num(image.opacity)}"` : "";
+  return (
+    `<image x="${num(left)}" y="${num(top)}" width="${num(right - left)}" height="${num(bottom - top)}"` +
+    `${opacity} preserveAspectRatio="none" href="data:image/png;base64,${toBase64(image.png)}"/>`
+  );
+}
+
+// -----------------------------------------------------------------------------
 // Entry point
 // -----------------------------------------------------------------------------
 
-/** Renders the scene graph to a standalone SVG document (drawing mm units). */
-export function sceneToSvg(scene: SceneGraph): string {
+/**
+ * Renders the scene graph to a standalone SVG document (drawing mm units).
+ * `underlay` embeds a reference image below or above the drawing.
+ */
+export function sceneToSvg(scene: SceneGraph, underlay: ExportImage | null = null): string {
   const b = scene.bounds;
   const x = b.minX - MARGIN_MM;
   const y = b.minY - MARGIN_MM;
@@ -170,10 +201,14 @@ export function sceneToSvg(scene: SceneGraph): string {
     .filter((s) => s.length > 0)
     .join("\n  ");
 
+  const under = underlay && underlay.placement === "under" ? [`  ${emitImage(underlay)}`] : [];
+  const over = underlay && underlay.placement === "over" ? [`  ${emitImage(underlay)}`] : [];
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${num(width)}mm" height="${num(height)}mm" viewBox="${num(x)} ${num(y)} ${num(width)} ${num(height)}">`,
     `  <rect x="${num(x)}" y="${num(y)}" width="${num(width)}" height="${num(height)}" fill="white"/>`,
+    ...under,
     `  ${body}`,
+    ...over,
     "</svg>",
     "",
   ].join("\n");
