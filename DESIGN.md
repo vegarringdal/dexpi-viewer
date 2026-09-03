@@ -1892,3 +1892,60 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   imported (confirmed: no reference anywhere in `src/`). `npm run
   typecheck` and `npm run lint` both still pass against the bumped
   version, no code changes needed on this side.
+- **2026-09-03** Validation CSV `line`/`xpath` now locate the OFFENDING
+  ELEMENT, not the object that happens to own it (director: a SCH-002 row
+  said "Reference TargetItem points to missing object …" but pointed at the
+  owning object's line/XPath — you want the `<References>` element itself).
+  Three parts:
+  1. `ValidationIssue` gains an optional `xpath` string — the positional
+     XPath of the element the rule is really talking about. Deliberately a
+     STRING, not an `Element`: the 2026-08-31 "issues stay plain data"
+     stance holds (they live on `DexpiDocument`, get spread by
+     `applySeverityOverrides`, and are read by panels/graph code that has no
+     business holding DOM handles). Rules set it wherever a finer element
+     exists — `<References>` for SCH-002/SCH-004/MDL-007, the `<Data>`
+     element for MDL-004 and META-002's `AttributeName`, `<Components>` for
+     MDL-006, the usage/line/nozzle/segment element for GFX-*/CON-*, the
+     first occurrence for the MDL aggregates (`Aggregate` now carries that
+     element alongside `firstId`, kept in sync so line and objectId always
+     describe the same occurrence). Absent on rules that span many elements
+     (the GFX-001 profile-symbol aggregate, MDL-000); those fall back to the
+     `objectId` object as before.
+  2. `elementXPath` moved `plantModel.ts` → `xml.ts`. It is a generic DOM
+     helper with no plant-model semantics, and `validation.ts` /
+     `modelValidation.ts` already import `xml.ts` — importing `plantModel.ts`
+     from a rule module would have been a layer inversion.
+  3. Line numbers are no longer id-keyed. The old `<Object … id="…">` regex
+     scan could only ever locate id-bearing objects; `buildLineIndex` now
+     keys EVERY element by its XPath, by pairing a raw-text scan of opening
+     tags (`openingTagLines` — quote-aware, so `>` inside an attribute value
+     doesn't end a tag; comments/CDATA/PIs/DOCTYPE skipped) with a top-down
+     `xpathsInDocumentOrder` walk of the DOM. Both are pre-order, so the two
+     sequences correspond element-for-element; on a length mismatch the index
+     is dropped whole rather than emitting lines that are off by some
+     elements. The walk computes XPaths top-down (one tag count per parent),
+     O(elements) instead of `elementXPath`'s per-element ancestor+sibling
+     re-walk. Side benefit: id-less objects (e.g. `Core/EngineeringModel`,
+     which owns the `ExportDateTime` MDL-003 finding) now get a line and an
+     XPath too — that row used to be blank in both columns.
+  Verified: `exportService.test.ts` covers the reference element case, the
+  quote/comment-aware line counting, and the objectId fallback, plus an
+  end-to-end invariant over `reference_pid.xml` — every CSV row's reported
+  line really contains the tag its XPath ends in (all rows located).
+  `validationRules.test.ts` pins SCH-002's locator on the second
+  `<References>` and META-002's on the fragment's `<Data>`.
+- **2026-09-03** vitest CAN run in this sandbox after all — the blocker was
+  never our code: `jsdom@30` pulls `undici@8`, which requires Node ≥ 22.19
+  because it imports `markAsUncloneable` from `node:worker_threads` (absent
+  in the sandbox's Node 20.20.2), so the fork worker died before any test
+  ran. Running with a `--require` shim that stubs that one export
+  (`NODE_OPTIONS="--require wtshim.cjs" npx vitest run`) executes the whole
+  suite: 252 passed. Nothing was changed in the repo for this — the real fix
+  is Node ≥ 22 in the dev environment (or pinning jsdom back). One
+  PRE-EXISTING failure surfaced this way and is unrelated to the CSV work
+  (confirmed by re-running it on a clean checkout):
+  `objectDiagram.test.ts > collects outgoing references, children, and
+  profile-instance stubs` expects a profile-instance stub card to be
+  `navigable: false`, and it now comes back `true` — presumably drift from
+  the 2026-09-02 "profile catalogue resolves throughout Inspect" round.
+  Left untouched pending the director's call on which side is right.

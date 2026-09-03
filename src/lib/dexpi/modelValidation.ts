@@ -1,6 +1,6 @@
 import { type MetaModel, type MetaProperty, resolveMetaModel } from "./metaModel.ts";
 import type { ValidationIssue } from "./validation.ts";
-import { dataValue, directChildrenByTag, isDataReference, refLocalName } from "./xml.ts";
+import { dataValue, directChildrenByTag, elementXPath, isDataReference, refLocalName } from "./xml.ts";
 
 // -----------------------------------------------------------------------------
 // Model-driven validation (M10)
@@ -105,15 +105,28 @@ function extendedCompatible(
   return !sawKnown;
 }
 
-type Aggregate = { count: number; firstId: string | null };
+/** One aggregated finding: how many times it occurred, plus the first
+ *  occurrence that is addressable (its owner id and the exact element),
+ *  which is what the panel jumps to and the CSV report locates. */
+type Aggregate = { count: number; firstId: string | null; first: Element };
 
-function bump(map: Map<string, Aggregate>, key: string, objectId: string | null): void {
-  const entry = map.get(key) ?? { count: 0, firstId: objectId };
-  entry.count += 1;
-  if (entry.firstId === null) {
-    entry.firstId = objectId;
+function bump(map: Map<string, Aggregate>, key: string, element: Element, objectId: string | null): void {
+  const entry = map.get(key);
+  if (!entry) {
+    map.set(key, { count: 1, firstId: objectId, first: element });
+    return;
   }
-  map.set(key, entry);
+
+  entry.count += 1;
+  if (entry.firstId === null && objectId !== null) {
+    entry.firstId = objectId;
+    entry.first = element;
+  }
+}
+
+/** `{ xpath }` when the element is known, nothing when it isn't. */
+function xpathOf(el: Element | undefined): Readonly<{ xpath?: string }> {
+  return el ? { xpath: elementXPath(el) } : {};
 }
 
 function nearestId(el: Element): string | null {
@@ -177,16 +190,17 @@ export function validateAgainstModel(
     const objectId = nearestId(el);
     const cls = resolveClass(model, type);
     if (!cls) {
-      bump(unknownClasses, type, objectId);
+      bump(unknownClasses, type, el, objectId);
       continue;
     }
 
     if (cls.isAbstract) {
-      bump(abstractClasses, type, objectId);
+      bump(abstractClasses, type, el, objectId);
     }
 
     const presentNames = new Set<string>();
     const referenceCounts = new Map<string, number>();
+    const referenceElements = new Map<string, Element>();
 
     for (const data of directChildrenByTag(el, "Data")) {
       const name = data.getAttribute("property") ?? "";
@@ -196,7 +210,7 @@ export function validateAgainstModel(
 
       const prop = cls.properties.get(name);
       if (!prop) {
-        bump(unknownData, `${type}|${name}`, objectId);
+        bump(unknownData, `${type}|${name}`, data, objectId);
         continue;
       }
 
@@ -219,6 +233,7 @@ export function validateAgainstModel(
             objectId,
             suggestion: `Use one of the ${String(literals.length)} literals the DEXPI ${model.version} model defines for ${prop.target}.`,
             attributeName: name,
+            xpath: elementXPath(data),
           });
         }
       }
@@ -233,7 +248,7 @@ export function validateAgainstModel(
       presentNames.add(name);
       const prop = cls.properties.get(name);
       if (!prop) {
-        bump(unknownComponents, `${type}|${name}`, objectId);
+        bump(unknownComponents, `${type}|${name}`, comp, objectId);
         continue;
       }
 
@@ -246,6 +261,7 @@ export function validateAgainstModel(
             message: `"${name}" on ${type} holds ${String(childCount)} components; the model allows at most ${String(prop.upper)}.`,
             objectId,
             suggestion: "Remove the extra components.",
+            xpath: elementXPath(comp),
           });
         }
       }
@@ -260,7 +276,7 @@ export function validateAgainstModel(
       presentNames.add(name);
       const prop = cls.properties.get(name);
       if (!prop) {
-        bump(unknownReferences, `${type}|${name}`, objectId);
+        bump(unknownReferences, `${type}|${name}`, refs, objectId);
         continue;
       }
 
@@ -269,6 +285,9 @@ export function validateAgainstModel(
         .filter((t) => t.length > 0)
         .map((t) => (t.startsWith("#") ? t.slice(1) : t));
       referenceCounts.set(name, (referenceCounts.get(name) ?? 0) + targets.length);
+      if (!referenceElements.has(name)) {
+        referenceElements.set(name, refs);
+      }
 
       if ((prop.kind === "reference" || prop.kind === "composition") && prop.target) {
         for (const target of targets) {
@@ -284,6 +303,7 @@ export function validateAgainstModel(
               message: `"${name}" on ${type} points at "${target}" (${targetType}), which is not a ${prop.target}.`,
               objectId,
               suggestion: `The model requires a ${prop.target} (or a subclass) here.`,
+              xpath: elementXPath(refs),
             });
           }
         }
@@ -299,6 +319,7 @@ export function validateAgainstModel(
           message: `"${name}" on ${type} carries ${String(count)} reference targets; the model allows at most ${String(prop.upper)}.`,
           objectId,
           suggestion: "Remove the extra reference targets.",
+          ...xpathOf(referenceElements.get(name)),
         });
       }
     }
@@ -312,6 +333,7 @@ export function validateAgainstModel(
           objectId,
           suggestion: `Add "${name}" with a value.`,
           attributeName: name,
+          xpath: elementXPath(el),
         });
       }
     }
@@ -324,6 +346,7 @@ export function validateAgainstModel(
       message: `Unknown class "${type}" (${String(agg.count)}×) — not in the DEXPI ${model.version} information model.`,
       objectId: agg.firstId,
       suggestion: "Check the type name against the spec, or namespace-prefix extension classes.",
+      xpath: elementXPath(agg.first),
     });
   }
   for (const [type, agg] of abstractClasses) {
@@ -333,6 +356,7 @@ export function validateAgainstModel(
       message: `Abstract class "${type}" is instantiated (${String(agg.count)}×).`,
       objectId: agg.firstId,
       suggestion: "Use a concrete subclass.",
+      xpath: elementXPath(agg.first),
     });
   }
   const aggregated: ReadonlyArray<readonly [Map<string, Aggregate>, string, string]> = [
@@ -349,6 +373,7 @@ export function validateAgainstModel(
         message: `${label} "${name ?? ""}" is not defined for ${type ?? ""} (${String(agg.count)}×).`,
         objectId: agg.firstId,
         suggestion: "Check the property name against the spec, or namespace-prefix extension attributes.",
+        xpath: elementXPath(agg.first),
         ...(name ? { attributeName: name } : {}),
       });
     }

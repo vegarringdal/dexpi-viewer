@@ -5,6 +5,8 @@ import { buildLookupIndex, lookupAttribute } from "./resolveTemplates.ts";
 import {
   componentObjects,
   directChildrenByTag,
+  elementXPath,
+  getData,
   numberFromData,
   referenceTargets,
   stringFromData,
@@ -33,6 +35,12 @@ export type ValidationIssue = Readonly<{
    *  it — lets structural views (Inspect) mark the row instead of dumping
    *  the message. */
   attributeName?: string;
+  /** Positional XPath of the element the finding is REALLY about — the
+   *  offending `<References>`/`<Data>` element, not merely the object that
+   *  owns it (`objectId` stays the selectable owner, which for some rules
+   *  is a different object entirely). Absent on aggregate findings, which
+   *  span many elements. */
+  xpath?: string;
 }>;
 
 /**
@@ -104,14 +112,15 @@ export function categoryOfRule(ruleId: string): ValidationCategory {
 
 /** SCH-001 — every object id must be unique (one finding per reused id). */
 function checkDuplicateIds(root: Element, issues: ValidationIssue[]): void {
-  const counts = new Map<string, number>();
+  const occurrences = new Map<string, { count: number; first: Element }>();
   for (const el of root.querySelectorAll("Object[id]")) {
     const id = el.getAttribute("id");
     if (id) {
-      counts.set(id, (counts.get(id) ?? 0) + 1);
+      const seen = occurrences.get(id);
+      occurrences.set(id, seen ? { count: seen.count + 1, first: seen.first } : { count: 1, first: el });
     }
   }
-  for (const [id, count] of counts) {
+  for (const [id, { count, first }] of occurrences) {
     if (count > 1) {
       issues.push({
         ruleId: "SCH-001",
@@ -119,6 +128,7 @@ function checkDuplicateIds(root: Element, issues: ValidationIssue[]): void {
         message: `Duplicate object id "${id}" (${count} occurrences).`,
         objectId: id,
         suggestion: "Give every object a unique id — duplicated ids break references and selection.",
+        xpath: elementXPath(first),
       });
     }
   }
@@ -159,6 +169,7 @@ function checkDanglingReferences(
         message: `Reference "${property}" points to missing object "${target}".`,
         objectId: ownerId,
         suggestion: "Remove the reference or add the missing object.",
+        xpath: elementXPath(refs),
       });
     }
   }
@@ -182,6 +193,7 @@ function checkIdSyntax(root: Element, issues: ValidationIssue[]): void {
         message: `Object id "${id}" is not a valid DEXPI identifier (letters, digits, underscores; no leading digit).`,
         objectId: id,
         suggestion: "Rename the id to match [A-Za-z_][A-Za-z_0-9]*.",
+        xpath: elementXPath(el),
       });
     }
   }
@@ -200,6 +212,7 @@ function checkReferenceSyntax(root: Element, issues: ValidationIssue[]): void {
           objectId: refs.parentElement?.getAttribute("id") ?? null,
           suggestion:
             'Local objects are referenced as "#TheirId", published-model names as "Model/Name.Name".',
+          xpath: elementXPath(refs),
         });
       }
     }
@@ -252,6 +265,7 @@ function checkShapeUsages(
       message: `Shape usage references unknown catalogue shape "${ref}".`,
       objectId: nearestId(usage),
       suggestion: "Add the shape to a ShapeCatalogue, or load the DISC profile that defines it.",
+      xpath: elementXPath(usage),
     });
   }
 
@@ -301,6 +315,7 @@ function checkConnectorLines(
         message: "ConnectorLine has fewer than two resolvable points and cannot be drawn.",
         objectId: nearestId(line),
         suggestion: "Give the connector Source/Target node positions or at least two InnerPoints.",
+        xpath: elementXPath(line),
       });
     }
   }
@@ -318,6 +333,7 @@ function checkDiagramExtent(root: Element, issues: ValidationIssue[]): void {
         message: "Diagram declares no usable Min/Max extent; bounds were computed from geometry.",
         objectId: diagram.getAttribute("id"),
         suggestion: "Set MinX/MinY/MaxX/MaxY on the Diagram object.",
+        xpath: elementXPath(diagram),
       });
     }
   }
@@ -345,6 +361,7 @@ function checkFlowEndpoints(root: Element, issues: ValidationIssue[]): void {
         message: `Flow item is missing its ${missing} connection.`,
         objectId: el.getAttribute("id"),
         suggestion: "Connect the item, or confirm it intentionally ends at a drawing boundary (off-page).",
+        xpath: elementXPath(el),
       });
     }
   }
@@ -390,6 +407,7 @@ function checkOrphanedPipingNodes(root: Element, issues: ValidationIssue[]): voi
         message: `PipingNode "${id}" is not referenced by any connection.`,
         objectId: id,
         suggestion: "Connect this piping node to a pipe connection, or remove it if unused.",
+        xpath: elementXPath(node),
       });
     }
   }
@@ -421,6 +439,7 @@ function checkUnconnectedNozzles(root: Element, issues: ValidationIssue[]): void
       message: `Nozzle "${id}" has no piping connected to it or its nodes.`,
       objectId: id,
       suggestion: "Connect the nozzle, or confirm it is an intentional spare.",
+      xpath: elementXPath(nozzle),
     });
   }
 }
@@ -514,6 +533,7 @@ function checkNominalDiameterMismatch(
         message: `Connection joins mismatched nominal diameters: ${sourceNodeId} = ${mismatch[0]}, ${targetNodeId} = ${mismatch[1]}.`,
         objectId: nearestId(el),
         suggestion: "Align the nominal diameters, or insert a reducer between the two sides.",
+        xpath: elementXPath(el),
       });
     }
   }
@@ -581,6 +601,7 @@ function checkPipingClassChange(
           message: `Piping class changes from "${segmentClass}" to "${itemClass}" between segments "${segmentId}" and "${itemSegmentId}" without a PropertyBreak.`,
           objectId: segmentId,
           suggestion: "Add a PropertyBreak at the transition, or align the piping classes.",
+          xpath: elementXPath(segment),
         });
       }
     }
@@ -620,6 +641,7 @@ function checkTemplateAttributeReferences(root: Element, issues: ValidationIssue
         suggestion:
           "Correct the AttributeName to a valid property of the object (or one it directly references), or remove the fragment.",
         attributeName,
+        xpath: elementXPath(getData(fragment, "AttributeName") ?? fragment),
       });
     }
   }

@@ -41,6 +41,42 @@ describe("schema lexical rules (SCH-003/SCH-004)", () => {
   });
 });
 
+describe("issue locators (issue.xpath)", () => {
+  it("points a dangling reference at the References element, not its owner", () => {
+    const issues = validateDocument(
+      rootOf(`<Model name="M">
+        <Object id="Seg" type="Plant/Piping.PipingNetworkSegment">
+          <Components property="Items">
+            <Object id="Pipe" type="Plant/Piping.Pipe">
+              <References objects="#Here" property="SourceItem"/>
+              <References objects="#Ghost" property="TargetItem"/>
+            </Object>
+          </Components>
+        </Object>
+        <Object id="Here" type="Plant/Piping.PipingNode"/>
+      </Model>`),
+    );
+    const dangling = issues.filter((i) => i.ruleId === "SCH-002");
+    expect(dangling.map((i) => i.objectId)).toEqual(["Pipe"]);
+    expect(dangling[0]?.xpath).toBe("/Model/Object[1]/Components/Object/References[2]");
+  });
+
+  it("points a bad template attribute at its AttributeName data, not the object it names", () => {
+    const issues = validateDocument(
+      rootOf(`<Model name="M">
+        <Object id="Pipe" type="Plant/Piping.Pipe"/>
+        <Object id="Frag" type="Core/Diagram.AttributeRepresentation">
+          <Data property="AttributeName"><String>NoSuchProperty</String></Data>
+          <References objects="#Pipe" property="Object"/>
+        </Object>
+      </Model>`),
+    );
+    const template = issues.filter((i) => i.ruleId === "META-002");
+    expect(template.map((i) => i.objectId)).toEqual(["Pipe"]);
+    expect(template[0]?.xpath).toBe("/Model/Object[2]/Data");
+  });
+});
+
 describe("unconnected nozzles (CON-003)", () => {
   const NOZZLE = `<Object id="Tank" type="Plant/ProcessEquipment.Tank">
     <Components property="Nozzles">

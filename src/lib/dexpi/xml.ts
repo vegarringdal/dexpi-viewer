@@ -105,6 +105,36 @@ export function isDataReference(value: DataValue): value is DataReference {
   return typeof value === "object" && value !== null && "kind" in value && value.kind === "ref";
 }
 
+/**
+ * Positional XPath of an element (`/Model/Object[2]/Components[1]/Object[4]`)
+ * — pastes into `xmllint --xpath` etc., and pinpoints the element even when
+ * ids are duplicated. Indices are 1-based per tag name, XPath-style, and
+ * omitted for an only child of its tag.
+ */
+export function elementXPath(el: Element): string {
+  const segments: string[] = [];
+  let current: Element | null = el;
+  while (current) {
+    const parent: Element | null = current.parentElement;
+    let index = 1;
+    let hasSiblingsOfTag = false;
+    if (parent) {
+      for (const sibling of parent.children) {
+        if (sibling === current) {
+          break;
+        }
+        if (sibling.tagName === current.tagName) {
+          index++;
+        }
+      }
+      hasSiblingsOfTag = [...parent.children].filter((s) => s.tagName === current?.tagName).length > 1;
+    }
+    segments.unshift(hasSiblingsOfTag ? `${current.tagName}[${index}]` : current.tagName);
+    current = parent;
+  }
+  return `/${segments.join("/")}`;
+}
+
 // -----------------------------------------------------------------------------
 // Aggregated values
 // -----------------------------------------------------------------------------
