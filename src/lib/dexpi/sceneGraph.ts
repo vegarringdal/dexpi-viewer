@@ -429,12 +429,14 @@ export function computeSceneBounds(
 }
 
 /**
- * Bounds of every scene node representing `objectId`, or null when the
- * object has no drawn geometry. Degenerate extents are padded so fitting
- * to a single point/dot still produces a usable viewport.
+ * Union bounds of every scene node representing any of `objectIds`, or null
+ * when none of them have drawn geometry. Degenerate extents are padded so
+ * fitting to a single point/dot (or a tight cluster) still produces a
+ * usable viewport.
  */
-export function computeObjectBounds(scene: SceneGraph, objectId: string): Bounds | null {
-  const nodes = scene.nodes.filter((n) => n.objectId === objectId);
+export function computeObjectsBounds(scene: SceneGraph, objectIds: readonly string[]): Bounds | null {
+  const ids = new Set(objectIds);
+  const nodes = scene.nodes.filter((n) => n.objectId !== null && ids.has(n.objectId));
   if (nodes.length === 0) {
     return null;
   }

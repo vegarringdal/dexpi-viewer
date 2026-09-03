@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import type { IssueSeverity, ValidationIssue } from "../../lib/dexpi/validation.ts";
-import { requestZoomToObject, setSelectedObject } from "../../state/selection/selection.actions.ts";
+import { requestZoomToObjects, setSelectedObject } from "../../state/selection/selection.actions.ts";
 import { getLoadedDocument } from "../../state/viewer/viewer.actions.ts";
 
 // -----------------------------------------------------------------------------
@@ -47,7 +47,7 @@ export function IssueRow({
   const handleJump = (): void => {
     if (issue.objectId) {
       setSelectedObject(issue.objectId);
-      requestZoomToObject(issue.objectId);
+      requestZoomToObjects([issue.objectId]);
     }
   };
 

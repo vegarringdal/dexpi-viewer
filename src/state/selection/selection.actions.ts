@@ -25,9 +25,9 @@ export function setHoveredObject(hoveredId: string | null): void {
   selectionState.set({ hoveredId });
 }
 
-/** Asks the canvas stage to zoom to the object's drawn geometry. */
-export function requestZoomToObject(objectId: string): void {
-  selectionState.set({ zoomTargetId: objectId, zoomSeq: selectionState.get().zoomSeq + 1 });
+/** Asks the canvas stage to zoom to the union bounds of the objects' drawn geometry. */
+export function requestZoomToObjects(objectIds: readonly string[]): void {
+  selectionState.set({ zoomTargetIds: objectIds, zoomSeq: selectionState.get().zoomSeq + 1 });
 }
 
 export function clearSelection(): void {

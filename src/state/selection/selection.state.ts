@@ -6,8 +6,8 @@ export type SelectionState = Readonly<{
   /** Full multi-selection in click order; always contains selectedId when set. */
   selectedIds: readonly string[];
   hoveredId: string | null;
-  /** Object to zoom the canvas to; `zoomSeq` bumps to re-trigger. */
-  zoomTargetId: string | null;
+  /** Objects to zoom the canvas to (union bounds); `zoomSeq` bumps to re-trigger. */
+  zoomTargetIds: readonly string[];
   zoomSeq: number;
 }>;
 
@@ -15,6 +15,6 @@ export const selectionState = createStore<SelectionState>({
   selectedId: null,
   selectedIds: [],
   hoveredId: null,
-  zoomTargetId: null,
+  zoomTargetIds: [],
   zoomSeq: 0,
 });

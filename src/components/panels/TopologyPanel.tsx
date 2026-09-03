@@ -2,7 +2,7 @@ import { IconChevronsDown, IconChevronsUp } from "@tabler/icons-react";
 import { PanelBody } from "@tredespace/ui/dockable";
 import { Button, TextInput } from "@tredespace/ui/widgets";
 import { type JSX, useEffect, useMemo, useRef, useState } from "react";
-import { requestZoomToObject } from "../../state/selection/selection.actions.ts";
+import { requestZoomToObjects } from "../../state/selection/selection.actions.ts";
 import { selectionState } from "../../state/selection/selection.state.ts";
 import { getLoadedDocument } from "../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../state/viewer/viewer.state.ts";
@@ -141,9 +141,9 @@ export function TopologyPanel(): JSX.Element {
         <Button iconOnly icon={<IconChevronsDown />} tooltip="Expand all" onClick={handleExpandAll} />
         <Button iconOnly icon={<IconChevronsUp />} tooltip="Collapse all" onClick={handleCollapseAll} />
         <Button
-          disabled={!selectedId}
-          onClick={() => selectedId && requestZoomToObject(selectedId)}
-          tooltip="Zoom the drawing to the selected object"
+          disabled={selectedIds.length === 0}
+          onClick={() => requestZoomToObjects(selectedIds)}
+          tooltip="Fit the drawing to the selected object(s) — with several selected (e.g. via Select children), the view frames the union of all their bounds"
         >
           Zoom to
         </Button>

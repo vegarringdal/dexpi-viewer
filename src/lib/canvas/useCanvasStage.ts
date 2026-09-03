@@ -15,7 +15,7 @@ import {
 } from "../../state/viewer/viewer.actions.ts";
 import { type ViewCommand, viewerState } from "../../state/viewer/viewer.state.ts";
 import { matchCustomFilters } from "../dexpi/customHighlightFilter.ts";
-import { computeObjectBounds } from "../dexpi/sceneGraph.ts";
+import { computeObjectsBounds } from "../dexpi/sceneGraph.ts";
 import {
   drawSceneContent,
   drawSceneHighlights,
@@ -248,14 +248,14 @@ export function useCanvasStage(): CanvasStageHandles {
     paint.delete();
   }
 
-  function zoomToObject(objectId: string | null): void {
+  function zoomToObjects(objectIds: readonly string[]): void {
     const runtime = runtimeRef.current;
     const doc = getLoadedDocument();
-    if (!runtime || !doc || !objectId || runtime.cssWidth <= 0) {
+    if (!runtime || !doc || objectIds.length === 0 || runtime.cssWidth <= 0) {
       return;
     }
 
-    const bounds = computeObjectBounds(doc.scene, objectId);
+    const bounds = computeObjectsBounds(doc.scene, objectIds);
     if (!bounds) {
       return;
     }
@@ -390,10 +390,10 @@ export function useCanvasStage(): CanvasStageHandles {
       }
     });
     const unsubSelection = selectionState.subscribe(() => {
-      const { zoomSeq, zoomTargetId } = selectionState.get();
+      const { zoomSeq, zoomTargetIds } = selectionState.get();
       if (zoomSeq !== seenZoomSeq) {
         seenZoomSeq = zoomSeq;
-        zoomToObject(zoomTargetId);
+        zoomToObjects(zoomTargetIds);
       }
       redraw();
     });

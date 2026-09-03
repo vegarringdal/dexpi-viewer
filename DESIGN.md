@@ -2165,3 +2165,23 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   that applies to glyphs only, and the backdrop rect itself is now drawn fully
   opaque regardless of the halo alpha, so the content pass's glyphs underneath
   can no longer ghost through it.
+- **2026-09-03** "Zoom to" now fits the whole selection, not just the
+  primary object. Root cause: Explorer's "Select children" sets
+  `selectedIds` to the whole subtree but leaves the primary `selectedId`
+  pointing at the parent GROUP node, which has no drawn geometry of its
+  own — `computeObjectBounds(scene, selectedId)` returned null and the
+  button silently did nothing unless the anchor happened to be a leaf
+  with geometry. `computeObjectBounds` became `computeObjectsBounds(scene,
+  objectIds)` (`sceneGraph.ts`): it now unions the scene nodes of ALL
+  given ids through the existing `computeSceneBounds` before padding —
+  no new geometry math, since that function already accepted an
+  arbitrary node array. The zoom-target state/action followed suit
+  (`zoomTargetId` → `zoomTargetIds`, `requestZoomToObject` →
+  `requestZoomToObjects`), and `useCanvasStage`'s `zoomToObject` →
+  `zoomToObjects` fits the union box (same `MAX_OBJECT_ZOOM_PERCENT`
+  clamp as before). The Explorer button now passes the full
+  `selectedIds` instead of the single anchor; the Issues jump-link and
+  the Topology graph's double-click still zoom to one object, now
+  wrapped as a single-element array. Effect: selecting far-apart items
+  (multi-select, or a group with scattered children) frames a bounding
+  box containing all of them, instead of the zoom action being a no-op.

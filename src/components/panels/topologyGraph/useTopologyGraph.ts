@@ -12,7 +12,7 @@ import {
   type SemanticNode,
 } from "../../../lib/graph/semanticGraph.ts";
 import {
-  requestZoomToObject,
+  requestZoomToObjects,
   setHoveredObject,
   setSelectedObject,
   toggleSelectedObject,
@@ -170,7 +170,7 @@ export function useTopologyGraph(): Readonly<{
   };
 
   const handleNodeDoubleClick = (id: string): void => {
-    requestZoomToObject(id);
+    requestZoomToObjects([id]);
   };
 
   const handleNodeHover = (id: string | null): void => {
