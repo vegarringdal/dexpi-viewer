@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parseDexpiDocument } from "../lib/dexpi/parseDocument.ts";
 import type { ValidationIssue } from "../lib/dexpi/validation.ts";
-import { buildIssuesCsv } from "./exportService.ts";
+import { buildIssueReportRows, buildIssuesCsv, buildIssuesSheet } from "./exportService.ts";
 
 // -----------------------------------------------------------------------------
 // buildIssuesCsv — pure CSV body builder, split out from exportIssuesCsv's
@@ -111,6 +111,59 @@ describe("buildIssuesCsv", () => {
     const rows = buildIssuesCsv(issues, root, XML).split("\n");
 
     expect(rows[1]).toBe('SCH-001,schema,error,Seg1,5,"/Model/Object","Duplicate ""id"""');
+  });
+});
+
+// -----------------------------------------------------------------------------
+// buildIssuesSheet — the same rows for the Excel writer. Only the typing of
+// the cells differs from the CSV: `line` stays a number so Excel sorts and
+// filters it as one.
+// -----------------------------------------------------------------------------
+
+describe("buildIssuesSheet", () => {
+  const root = parseRoot(XML);
+
+  it("keeps line numeric and blanks it when nothing resolved", () => {
+    const issues: ValidationIssue[] = [
+      {
+        ruleId: "SCH-002",
+        severity: "error",
+        message: "Dangling reference",
+        objectId: "Pipe1",
+        xpath: "/Model/Object/Components/Object/References",
+      },
+      { ruleId: "MDL-000", severity: "info", message: "No model version", objectId: null },
+    ];
+    const sheet = buildIssuesSheet(buildIssueReportRows(issues, root, XML));
+
+    expect(sheet.columns.map((column) => column.header)).toEqual([
+      "rule",
+      "category",
+      "severity",
+      "objectId",
+      "line",
+      "xpath",
+      "message",
+    ]);
+    expect(sheet.rows[0]).toEqual([
+      "SCH-002",
+      "schema",
+      "error",
+      "Pipe1",
+      9,
+      "/Model/Object/Components/Object/References",
+      "Dangling reference",
+    ]);
+    expect(sheet.rows[1]).toEqual(["MDL-000", "model", "info", "", "", "", "No model version"]);
+  });
+
+  it("shares its header with the CSV report", () => {
+    const header = buildIssuesCsv([], root, XML).split("\n")[0];
+    expect(
+      buildIssuesSheet([])
+        .columns.map((column) => column.header)
+        .join(","),
+    ).toBe(header);
   });
 });
 

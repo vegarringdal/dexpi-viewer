@@ -10,7 +10,7 @@ A fast, browser-local viewer and verificator for **DEXPI 2.0 XML** P&ID files. E
 - [Inspect panel](inspect.md) — the UML-style object diagram for debugging
 - [Conceptual Model Tree & Diagram Tree](xml-trees.md) — raw-XML browsers mirroring the file's own structure
 - [Topology & highlighting](topology.md) — the semantic graph, tracing, classification tints
-- [Exports](export.md) — SVG, PDF, CSV report
+- [Exports](export.md) — SVG, PDF, CSV / Excel report
 - [Conventions beyond the spec](conventions.md) — where no spec exists and what this viewer does instead
 
 ## Reference

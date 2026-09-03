@@ -40,10 +40,12 @@ arcs), node-position-stitched connector lines, and the title block.
 **M5 (connectivity) and M6 (export, validation, DISC profiles) are done
 too**: trace upstream (amber) / downstream (green) from any selection;
 export the drawing as spec-mapped **SVG** or vector **PDF** (embedded
-metric-compatible fonts) and the validation findings as **CSV**, each row
-carrying the source XML line number and an XPath locator of the offending
-element itself — the `<References>`/`<Data>` element a finding is about, not
-just the object that owns it — alongside the rule/severity/message;
+metric-compatible fonts) and the validation findings as **CSV** or an
+**Excel** workbook (`.xlsx`, frozen header + auto-filter, written without a
+spreadsheet dependency), each row carrying the source XML line number and an
+XPath locator of the offending element itself — the `<References>`/`<Data>`
+element a finding is about, not just the object that owns it — alongside the
+rule/severity/message;
 twenty-three validation rules in five categories — Schema (SCH), Graphics
 (GFX), Connectivity (CON, incl. unconnected nozzles and nominal-diameter
 mismatches at connection points), **Model (MDL)** — every object checked

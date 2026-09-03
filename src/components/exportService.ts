@@ -1,9 +1,15 @@
 import { sceneToSvg } from "../lib/dexpi/exportSvg.ts";
 import type { DexpiDocument } from "../lib/dexpi/types.ts";
-import { categoryOfRule, type ValidationIssue } from "../lib/dexpi/validation.ts";
+import {
+  categoryOfRule,
+  type IssueSeverity,
+  type ValidationCategory,
+  type ValidationIssue,
+} from "../lib/dexpi/validation.ts";
 import { elementXPath } from "../lib/dexpi/xml.ts";
 import { downloadBlob } from "../lib/download.ts";
 import { fail, ok, type Result } from "../lib/result.ts";
+import { buildXlsx, type SheetColumn, type SheetData } from "../lib/xlsx.ts";
 import { getEffectiveIssues } from "../state/validation/validation.actions.ts";
 import { getLoadedDocument } from "../state/viewer/viewer.actions.ts";
 import { viewerState } from "../state/viewer/viewer.state.ts";
@@ -164,21 +170,47 @@ function buildLineIndex(xmlText: string, root: Element): ReadonlyMap<string, num
   return index;
 }
 
-function csvCell(value: string): string {
-  return `"${value.replaceAll('"', '""')}"`;
-}
+// -----------------------------------------------------------------------------
+// The report
+// -----------------------------------------------------------------------------
+
+/** One row of the validation report, shared by the CSV and Excel writers. */
+export type IssueReportRow = Readonly<{
+  rule: string;
+  category: ValidationCategory;
+  severity: IssueSeverity;
+  objectId: string;
+  /** Source line of the located element; null when nothing resolved. */
+  line: number | null;
+  xpath: string;
+  message: string;
+}>;
+
+const REPORT_COLUMNS: readonly SheetColumn[] = [
+  { header: "rule", width: 10 },
+  { header: "category", width: 13 },
+  { header: "severity", width: 10 },
+  { header: "objectId", width: 30 },
+  { header: "line", width: 8 },
+  { header: "xpath", width: 58 },
+  { header: "message", width: 90 },
+];
+
+const SHEET_NAME = "Validation findings";
+const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 /**
- * The full CSV report body (header + one row per issue) — pure and exported
- * for direct testing, separate from the DOM-download side effect in
- * `exportIssuesCsv`.
- *
- * `line`/`xpath` locate the element the finding is REALLY about (the
- * offending `<References>`/`<Data>` element, as reported by the rule in
- * `issue.xpath`), falling back to the owning object named by `objectId`
- * for rules that have no finer locator.
+ * The report as data — one row per finding, severity overrides already
+ * applied by the caller. `line`/`xpath` locate the element the finding is
+ * REALLY about (the offending `<References>`/`<Data>` element, as reported by
+ * the rule in `issue.xpath`), falling back to the owning object named by
+ * `objectId` for rules that have no finer locator.
  */
-export function buildIssuesCsv(issues: readonly ValidationIssue[], root: Element, xmlText: string): string {
+export function buildIssueReportRows(
+  issues: readonly ValidationIssue[],
+  root: Element,
+  xmlText: string,
+): readonly IssueReportRow[] {
   const lineByXPath = buildLineIndex(xmlText, root);
   const elementsById = new Map<string, Element>();
   for (const el of root.querySelectorAll("Object[id]")) {
@@ -188,24 +220,63 @@ export function buildIssuesCsv(issues: readonly ValidationIssue[], root: Element
     }
   }
 
-  const rows = [
-    "rule,category,severity,objectId,line,xpath,message",
-    ...issues.map((issue) => {
-      const owner = issue.objectId ? elementsById.get(issue.objectId) : undefined;
-      const xpath = issue.xpath ?? (owner ? elementXPath(owner) : "");
-      const line = lineByXPath.get(xpath) ?? "";
-      return [
-        issue.ruleId,
-        categoryOfRule(issue.ruleId),
-        issue.severity,
-        issue.objectId ?? "",
-        line,
-        csvCell(xpath),
-        csvCell(issue.message),
-      ].join(",");
-    }),
-  ];
-  return rows.join("\n");
+  return issues.map((issue) => {
+    const owner = issue.objectId ? elementsById.get(issue.objectId) : undefined;
+    const xpath = issue.xpath ?? (owner ? elementXPath(owner) : "");
+    return {
+      rule: issue.ruleId,
+      category: categoryOfRule(issue.ruleId),
+      severity: issue.severity,
+      objectId: issue.objectId ?? "",
+      line: lineByXPath.get(xpath) ?? null,
+      xpath,
+      message: issue.message,
+    };
+  });
+}
+
+function csvCell(value: string): string {
+  return `"${value.replaceAll('"', '""')}"`;
+}
+
+/**
+ * The full CSV report body (header + one row per issue) — pure and exported
+ * for direct testing, separate from the DOM-download side effect in
+ * `exportIssuesCsv`.
+ */
+export function buildIssuesCsv(issues: readonly ValidationIssue[], root: Element, xmlText: string): string {
+  const rows = buildIssueReportRows(issues, root, xmlText).map((row) =>
+    [
+      row.rule,
+      row.category,
+      row.severity,
+      row.objectId,
+      row.line === null ? "" : String(row.line),
+      csvCell(row.xpath),
+      csvCell(row.message),
+    ].join(","),
+  );
+  return [REPORT_COLUMNS.map((column) => column.header).join(","), ...rows].join("\n");
+}
+
+/**
+ * The same report as a single-sheet workbook. `line` stays a NUMBER so Excel
+ * sorts and filters it as one; everything else is text.
+ */
+export function buildIssuesSheet(rows: readonly IssueReportRow[]): SheetData {
+  return {
+    name: SHEET_NAME,
+    columns: REPORT_COLUMNS,
+    rows: rows.map((row) => [
+      row.rule,
+      row.category,
+      row.severity,
+      row.objectId,
+      row.line ?? "",
+      row.xpath,
+      row.message,
+    ]),
+  };
 }
 
 // -----------------------------------------------------------------------------
@@ -249,5 +320,22 @@ export function exportIssuesCsv(): Result<void> {
   const xmlText = viewerState.get().file?.text ?? "";
   const csv = buildIssuesCsv(getEffectiveIssues(), docResult.data.root, xmlText);
   downloadBlob(csv, `${baseName()}-validation.csv`, "text/csv");
+  return ok(undefined);
+}
+
+/**
+ * Writes the same findings as an .xlsx workbook — the format Windows opens
+ * with a double-click, with no CSV delimiter/locale guessing, a frozen bold
+ * header and an auto-filter already on the columns.
+ */
+export function exportIssuesXlsx(): Result<void> {
+  const docResult = requireDocument();
+  if (!docResult.data) {
+    return fail(docResult.error?.msg ?? "No document loaded.");
+  }
+
+  const xmlText = viewerState.get().file?.text ?? "";
+  const rows = buildIssueReportRows(getEffectiveIssues(), docResult.data.root, xmlText);
+  downloadBlob(buildXlsx(buildIssuesSheet(rows)), `${baseName()}-validation.xlsx`, XLSX_MIME);
   return ok(undefined);
 }

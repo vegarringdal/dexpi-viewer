@@ -7,13 +7,20 @@ import {
   RULE_TITLES,
   type ValidationIssue,
 } from "../../lib/dexpi/validation.ts";
+import type { Result } from "../../lib/result.ts";
 import { validationConfigState } from "../../state/validation/validation.state.ts";
 import { getLoadedDocument, setViewerError } from "../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../state/viewer/viewer.state.ts";
-import { exportIssuesCsv } from "../exportService.ts";
+import { exportIssuesCsv, exportIssuesXlsx } from "../exportService.ts";
 import { IssueRow } from "./IssuesParts.tsx";
 import { type CategoryFilter, IssuesToolbar, type SeverityFilter } from "./IssuesToolbar.tsx";
 import { RuleSeverityConfig } from "./RuleSeverityConfig.tsx";
+
+function reportExportError(result: Result<void>): void {
+  if (result.error) {
+    setViewerError(result.error.msg);
+  }
+}
 
 export function IssuesPanel(): JSX.Element {
   const { file, docRevision } = viewerState.use();
@@ -55,10 +62,11 @@ export function IssuesPanel(): JSX.Element {
   }
 
   const handleExportCsv = (): void => {
-    const result = exportIssuesCsv();
-    if (result.error) {
-      setViewerError(result.error.msg);
-    }
+    reportExportError(exportIssuesCsv());
+  };
+
+  const handleExportXlsx = (): void => {
+    reportExportError(exportIssuesXlsx());
   };
 
   const handleExpandAll = (): void => setGroupsOpen((p) => ({ open: true, seq: p.seq + 1 }));
@@ -77,6 +85,7 @@ export function IssuesPanel(): JSX.Element {
         onExpandAll={handleExpandAll}
         onCollapseAll={handleCollapseAll}
         onExportCsv={handleExportCsv}
+        onExportXlsx={handleExportXlsx}
       />
       <div className="min-h-0 flex-1 overflow-auto">
         {isConfigOpen && <RuleSeverityConfig />}

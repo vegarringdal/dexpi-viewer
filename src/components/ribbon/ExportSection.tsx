@@ -1,10 +1,10 @@
-import { IconFileTypeCsv, IconFileTypePdf, IconFileTypeSvg } from "@tabler/icons-react";
+import { IconFileTypeCsv, IconFileTypePdf, IconFileTypeSvg, IconFileTypeXls } from "@tabler/icons-react";
 import { RibbonButton, RibbonSection } from "@tredespace/ui/widgets";
 import type { JSX } from "react";
 import type { Result } from "../../lib/result.ts";
 import { setViewerError } from "../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../state/viewer/viewer.state.ts";
-import { exportIssuesCsv, exportPdf, exportSvg } from "../exportService.ts";
+import { exportIssuesCsv, exportIssuesXlsx, exportPdf, exportSvg } from "../exportService.ts";
 
 function reportError(result: Result<void>): void {
   if (result.error) {
@@ -12,7 +12,7 @@ function reportError(result: Result<void>): void {
   }
 }
 
-/** PDF / SVG / validation-CSV export buttons. */
+/** PDF / SVG / validation-report (CSV, Excel) export buttons. */
 export function ExportSection(): JSX.Element {
   const { file } = viewerState.use();
   const hasDocument = file !== null;
@@ -43,12 +43,21 @@ export function ExportSection(): JSX.Element {
       />
       <RibbonButton
         icon={<IconFileTypeCsv />}
-        label="Report"
+        label="CSV"
         size="mini"
         disabled={!hasDocument}
         tooltip="Save the validation findings as CSV"
         shortcut="export.report"
         onClick={() => reportError(exportIssuesCsv())}
+      />
+      <RibbonButton
+        icon={<IconFileTypeXls />}
+        label="Excel"
+        size="mini"
+        disabled={!hasDocument}
+        tooltip="Save the validation findings as an Excel workbook (.xlsx)"
+        shortcut="export.reportXlsx"
+        onClick={() => reportError(exportIssuesXlsx())}
       />
     </RibbonSection>
   );

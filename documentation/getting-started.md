@@ -30,7 +30,7 @@ The layout persists across sessions; if you get lost, ribbon → **Reset** resto
 
 ## Shortcuts
 
-Every ribbon action has a keyboard shortcut, rebindable in Settings → Shortcuts (click *Record*, press the new keys). Plain keys drive the app so nothing collides with the browser: **F** fit, **0** zoom 100%, **Z** then **I**/**O** zoom in/out, **D** theme, **B** black & white, digits **1–9** toggle the original panels, **T** then **C**/**D** toggles Conceptual Model Tree / Diagram Tree, **E** then **P**/**S**/**C** export PDF/SVG/report, **Ctrl+O** open a file, **F1** this manual. *Export keymap* saves your overrides as a portable JSON file; *Import keymap* applies one — unknown ids and conflicting keys are skipped, with a report of what happened.
+Every ribbon action has a keyboard shortcut, rebindable in Settings → Shortcuts (click *Record*, press the new keys). Plain keys drive the app so nothing collides with the browser: **F** fit, **0** zoom 100%, **Z** then **I**/**O** zoom in/out, **D** theme, **B** black & white, digits **1–9** toggle the original panels, **T** then **C**/**D** toggles Conceptual Model Tree / Diagram Tree, **E** then **P**/**S**/**C**/**X** export PDF/SVG/CSV report/Excel report, **Ctrl+O** open a file, **F1** this manual. *Export keymap* saves your overrides as a portable JSON file; *Import keymap* applies one — unknown ids and conflicting keys are skipped, with a report of what happened.
 
 ## Status bar
 

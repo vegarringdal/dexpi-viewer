@@ -10,7 +10,7 @@ import {
   requestViewCommand,
   setViewerError,
 } from "../state/viewer/viewer.actions.ts";
-import { exportIssuesCsv, exportPdf, exportSvg } from "./exportService.ts";
+import { exportIssuesCsv, exportIssuesXlsx, exportPdf, exportSvg } from "./exportService.ts";
 import { PANEL_IDS } from "./panelIds.ts";
 import { openDocs } from "./ribbon/HelpSection.tsx";
 
@@ -43,7 +43,7 @@ function reportError(result: Result<void>): void {
 /**
  * Default keymap (every binding rebindable in Settings → Shortcuts):
  * plain letters/digits for app actions (they can never collide with browser
- * chords), leader sequences for grouped ones — E then P/S/C exports,
+ * chords), leader sequences for grouped ones — E then P/S/C/X exports,
  * Z then I/O zooms — and Ctrl-combos only for the file-open family.
  */
 const APP_HOTKEYS: HotkeyDef[] = [
@@ -148,6 +148,14 @@ const APP_HOTKEYS: HotkeyDef[] = [
     description: "Export the validation findings as CSV.",
     defaultKeys: "E + C",
     run: () => reportError(exportIssuesCsv()),
+  },
+  {
+    id: "export.reportXlsx",
+    category: "Export",
+    label: "Export validation report (Excel)",
+    description: "Export the validation findings as an .xlsx workbook.",
+    defaultKeys: "E + X",
+    run: () => reportError(exportIssuesXlsx()),
   },
   {
     id: "panel.explorer",

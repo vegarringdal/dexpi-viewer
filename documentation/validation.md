@@ -16,7 +16,7 @@ Rules are grouped in five categories — see the full [rule reference](rules.md)
 
 ## Working with findings
 
-- Filter by severity and category; groups collapse per rule; **CSV** exports the findings.
+- Filter by severity and category; groups collapse per rule; **CSV** and **Excel** export the findings (see [Exports](export.md)).
 - Click a finding's object link to select and zoom to it.
 - The **severity configuration** (sliders icon) overrides any rule's severity — Error / Warning / Info / **Ignore** — persisted across sessions.
 

@@ -1949,3 +1949,47 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   `navigable: false`, and it now comes back `true` — presumably drift from
   the 2026-09-02 "profile catalogue resolves throughout Inspect" round.
   Left untouched pending the director's call on which side is right.
+- **2026-09-03** Validation report also exports as **Excel** (`.xlsx`),
+  director request ("easier to use on Windows"). Written by hand, no
+  dependency: `src/lib/zip.ts` (stored-entry ZIP writer, CRC-32 table, fixed
+  1980 entry timestamps so a report is byte-reproducible) plus
+  `src/lib/xlsx.ts` (minimal SpreadsheetML — one sheet, inline strings,
+  numeric cells, bold frozen header, auto-filter, per-column widths).
+  **Why not a library:** the licence question the director raised has a clean
+  answer for both routes (`exceljs`/`write-excel-file` are MIT, SheetJS
+  community is Apache-2.0 — all one-way compatible with this project's
+  AGPL-3.0-only), so this was decided on engineering grounds instead: a
+  7-column report needs perhaps 200 lines of the OOXML grammar, against
+  ~1 MB of `exceljs` in the bundle, a new entry in the generated third-party
+  notices, and a transitive zip dependency. Registry access was confirmed
+  first (`npm view exceljs version` → 4.4.0), so this was a choice, not a
+  workaround. If the report ever needs real formatting (merged cells, charts,
+  multiple sheets, styled ranges) that trade flips and `exceljs` is the one to
+  reach for.
+  **Shared shape:** `exportService.ts` now has one `buildIssueReportRows`
+  (rule, category, severity, objectId, line, xpath, message) that both writers
+  consume — `buildIssuesCsv` formats it as text, `buildIssuesSheet` as cells —
+  so the two reports can never drift apart (a test pins their headers to each
+  other). `line` stays a NUMBER in the workbook so Excel sorts/filters it
+  numerically instead of lexically ("9" before "10").
+  **Excel's pickiness, learned the hard way:** worksheet children must appear
+  in schema order (dimension → sheetViews → cols → sheetData → autoFilter);
+  `styles.xml` needs the `gray125` fill at index 1 and a named "Normal"
+  `cellStyle` or readers warn about a missing default style; XML 1.0 control
+  characters must be stripped from cell text (`escapeXml` keeps tab/LF/CR).
+  **UI:** ribbon Export gains an **Excel** button (`IconFileTypeXls`, hotkey
+  `E + X`, id `export.reportXlsx`) and the CSV button's label changed from the
+  vague "Report" to **CSV**; the Validation panel toolbar gained a matching
+  Excel button next to CSV. `documentation/export.md` now documents both
+  reports and the column table — NOTE: `documentation/images/export-ribbon.png`
+  still shows the old three-button ribbon and needs a fresh screenshot (can't
+  be taken from this sandbox).
+  **Verified for real, not just in unit tests:** `zip.test.ts` reads its own
+  archives back through a minimal central-directory reader and checks the
+  CRC-32 of "hello" against the published value; `xlsx.test.ts` asserts the
+  generated parts; `exportService.test.ts` covers the sheet rows. On top of
+  that, the reference P&ID's report was written to a real file and opened with
+  python `zipfile` (every CRC intact) and `openpyxl` (23 rows × 7 columns,
+  sheet "Validation findings", freeze `A2`, auto-filter `A1:G23`, bold header,
+  `line` cells typed `n`, 18.4 KB) — i.e. a third-party spreadsheet reader
+  accepts the file, which is the closest check available without Excel itself.

@@ -23,6 +23,7 @@ type IssuesToolbarProps = Readonly<{
   onExpandAll: () => void;
   onCollapseAll: () => void;
   onExportCsv: () => void;
+  onExportXlsx: () => void;
 }>;
 
 // -----------------------------------------------------------------------------
@@ -65,6 +66,7 @@ export function IssuesToolbar(props: IssuesToolbarProps): JSX.Element {
     onExpandAll,
     onCollapseAll,
     onExportCsv,
+    onExportXlsx,
   } = props;
 
   const filterButton = (value: SeverityFilter): JSX.Element => (
@@ -86,6 +88,9 @@ export function IssuesToolbar(props: IssuesToolbarProps): JSX.Element {
           <Button iconOnly icon={<IconChevronsUp />} tooltip="Collapse all groups" onClick={onCollapseAll} />
           <Button onClick={onExportCsv} tooltip="Save the findings as CSV">
             CSV
+          </Button>
+          <Button onClick={onExportXlsx} tooltip="Save the findings as an Excel workbook (.xlsx)">
+            Excel
           </Button>
           <Button
             iconOnly
