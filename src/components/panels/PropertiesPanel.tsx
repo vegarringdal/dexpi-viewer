@@ -6,7 +6,14 @@ import { validationConfigState } from "../../state/validation/validation.state.t
 import { getLoadedDocument } from "../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../state/viewer/viewer.state.ts";
 import { IssueRow } from "./IssuesParts.tsx";
-import { ChipList, DataTable, EmptyNote, ObjectChip, Section } from "./PropertiesSections.tsx";
+import {
+  ChipList,
+  DataTable,
+  EmptyNote,
+  IdentitySection,
+  ObjectChip,
+  Section,
+} from "./PropertiesSections.tsx";
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -18,23 +25,6 @@ function CenteredNote({ text }: Readonly<{ text: string }>): JSX.Element {
       {text}
     </PanelBody>
   );
-}
-
-/**
- * Identity rows for the spec's PersistentIdentifiers (Context + Value).
- * Always at least one row, so it is visible that the file carries none.
- */
-function persistentIdRows(
-  persistentIds: readonly { name: string; value: string }[],
-): readonly { name: string; value: string }[] {
-  if (persistentIds.length === 0) {
-    return [{ name: "Persistent ID", value: "—" }];
-  }
-
-  return persistentIds.map((pid) => ({
-    name: pid.name === "Identifier" ? "Persistent ID" : `Persistent ID (${pid.name})`,
-    value: pid.value,
-  }));
 }
 
 // -----------------------------------------------------------------------------
@@ -65,29 +55,11 @@ export function PropertiesPanel(): JSX.Element {
   const incoming = doc.plant.referencedBy.get(selectedId) ?? [];
   const issues = getEffectiveIssues().filter((issue) => issue.objectId === selectedId);
 
-  const identityRows: readonly { name: string; value: string }[] = [
-    { name: "ID", value: node.id },
-    { name: "Type", value: node.type },
-    ...persistentIdRows(node.persistentIds),
-    { name: "XPath", value: node.xpath },
-  ];
-
   return (
     <PanelBody className="h-full overflow-auto p-3">
       <h3 className="font-semibold text-slate-200 text-xs">{node.label}</h3>
 
-      <Section title="Identity">
-        <dl className="grid grid-cols-[minmax(90px,45%)_1fr] gap-x-3 gap-y-1 text-xs">
-          {identityRows.map((row) => (
-            <div key={row.name} className="contents">
-              <dt className="truncate text-slate-400" title={row.name}>
-                {row.name}
-              </dt>
-              <dd className="select-all break-all font-mono text-slate-200">{row.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </Section>
+      <IdentitySection node={node} />
 
       <Section title="Data">
         <DataTable attributes={node.attributes} undefinedAttributes={node.undefinedAttributes} />

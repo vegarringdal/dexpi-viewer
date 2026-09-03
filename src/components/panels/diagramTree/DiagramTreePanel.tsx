@@ -1,11 +1,19 @@
 import { IconChevronsDown, IconChevronsUp } from "@tabler/icons-react";
 import { PanelBody } from "@tredespace/ui/dockable";
 import { Button, TextInput } from "@tredespace/ui/widgets";
-import { type JSX, useEffect, useMemo, useRef, useState } from "react";
-import { diagramPlantModel, groupByProperty, type PlantModel } from "../../../lib/dexpi/plantModel.ts";
+import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  diagramPlantModel,
+  groupByProperty,
+  nearestRepresentedId,
+  type PlantModel,
+} from "../../../lib/dexpi/plantModel.ts";
+import { clearDiagramReveal } from "../../../state/diagramReveal/diagramReveal.actions.ts";
+import { diagramRevealState } from "../../../state/diagramReveal/diagramReveal.state.ts";
+import { requestInspectReveal } from "../../../state/inspectReveal/inspectReveal.actions.ts";
 import { setSelectedObject } from "../../../state/selection/selection.actions.ts";
 import { selectionState } from "../../../state/selection/selection.state.ts";
-import { getLoadedDocument } from "../../../state/viewer/viewer.actions.ts";
+import { getLoadedDocument, getLoadedProfile } from "../../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../../state/viewer/viewer.state.ts";
 import { ObjectDataView } from "../objectDataView/ObjectDataView.tsx";
 import { type FilteredNode, PlantTree, type RevealRequest } from "../PlantTree.tsx";
@@ -17,25 +25,6 @@ import { TreeDataSplit } from "../TreeDataSplit.tsx";
 // -----------------------------------------------------------------------------
 
 const SHOW_FIELDS = new Set<"type">(["type"]);
-
-/** The reference properties that tie a Diagram-side object back to the
- *  ConceptualModel object it draws (a shape/group) or annotates (a label). */
-const CROSS_LINK_PROPERTIES = ["Represents", "Object"];
-
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
-
-function crossLinkTarget(diagramModel: PlantModel, diagramNodeId: string): string | undefined {
-  const node = diagramModel.byId.get(diagramNodeId);
-  for (const property of CROSS_LINK_PROPERTIES) {
-    const target = node?.references.find((r) => r.property === property)?.targets[0];
-    if (target) {
-      return target;
-    }
-  }
-  return undefined;
-}
 
 // -----------------------------------------------------------------------------
 // Component
@@ -86,13 +75,32 @@ export function DiagramTreePanel(): JSX.Element {
   const handleSelect = (id: string): void => {
     selectionFromTreeRef.current = true;
     setSelectedDiagramId(id);
+    // Mirrors Inspect's navigate(): ask Inspect to center on the EXACT
+    // clicked row directly (most Diagram-side rows carry a synthetic id
+    // global selection can't resolve for other panels), and separately
+    // best-effort push global selection to the nearest represented real
+    // object, when there is one, for Properties/canvas/trace.
+    requestInspectReveal(id);
     if (diagramModel) {
-      const target = crossLinkTarget(diagramModel, id);
+      const target = nearestRepresentedId(diagramModel, id);
       if (target) {
         setSelectedObject(target);
       }
     }
   };
+
+  /** Selects `id` in this tree, expands its ancestor chain, and scrolls it
+   *  into view — the shared tail of both sync paths below. */
+  const revealDiagramNode = useCallback(
+    (id: string): void => {
+      setSelectedDiagramId(id);
+      const chain = ancestorIds(grouped ?? undefined, id);
+      setExpanded((prev) => new Set([...prev, ...chain]));
+      revealNonceRef.current += 1;
+      setRevealRequest({ id, nonce: revealNonceRef.current });
+    },
+    [grouped],
+  );
 
   const handleToggle = (id: string): void => {
     setExpanded((prev) => {
@@ -120,9 +128,13 @@ export function DiagramTreePanel(): JSX.Element {
     setSelectedDiagramId(null);
   }, [docRevision]);
 
-  // A selection made elsewhere (drawing, ConceptualModel Tree, …) reveals
-  // its Diagram-side representation here, unless the row already shown
-  // already represents it (don't fight a user's pick among duplicates).
+  // A selection made elsewhere (drawing, ConceptualModel Tree, Inspect, …)
+  // reveals its Diagram-side representation here, unless the row already
+  // shown already represents it (don't fight a user's pick among
+  // duplicates). Direct match first — the selected id can itself be a
+  // diagram-side object with a real id (e.g. an InstrumentationNodePosition,
+  // which nothing Represents/Object-references) — then the usual
+  // Represents/Object cross-link for a real conceptual object.
   useEffect(() => {
     if (!selectedId || !diagramModel) {
       return;
@@ -133,7 +145,14 @@ export function DiagramTreePanel(): JSX.Element {
       return;
     }
 
-    if (selectedDiagramId && crossLinkTarget(diagramModel, selectedDiagramId) === selectedId) {
+    if (selectedDiagramId && nearestRepresentedId(diagramModel, selectedDiagramId) === selectedId) {
+      return;
+    }
+
+    if (diagramModel.byId.has(selectedId)) {
+      if (selectedDiagramId !== selectedId) {
+        revealDiagramNode(selectedId);
+      }
       return;
     }
 
@@ -146,12 +165,27 @@ export function DiagramTreePanel(): JSX.Element {
       return;
     }
 
-    setSelectedDiagramId(match.fromId);
-    const chain = ancestorIds(grouped ?? undefined, match.fromId);
-    setExpanded((prev) => new Set([...prev, ...chain]));
-    revealNonceRef.current += 1;
-    setRevealRequest({ id: match.fromId, nonce: revealNonceRef.current });
-  }, [selectedId, diagramModel, grouped, selectedDiagramId]);
+    revealDiagramNode(match.fromId);
+  }, [selectedId, diagramModel, selectedDiagramId, revealDiagramNode]);
+
+  // Inspect (and anything else) can ask for the EXACT node to be revealed —
+  // independent of global selection, which can't carry a synthetic id
+  // meaningfully for other panels. `nonce` is the sole trigger so
+  // re-requesting the same id still re-fires (e.g. clicking the same
+  // Inspect card twice).
+  const { requestedId, nonce } = diagramRevealState.use();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: nonce is the sole re-trigger; requestedId/diagramModel/revealDiagramNode are read fresh each fire.
+  useEffect(() => {
+    if (requestedId && diagramModel?.byId.has(requestedId)) {
+      revealDiagramNode(requestedId);
+    }
+  }, [nonce]);
+
+  // A fresh document invalidates any pending reveal request from before it loaded.
+  useEffect(() => {
+    void docRevision;
+    clearDiagramReveal();
+  }, [docRevision]);
 
   // ---------------------------------------------------------------------------
   // Render
@@ -182,13 +216,21 @@ export function DiagramTreePanel(): JSX.Element {
               forceExpand={forceExpand}
               show={SHOW_FIELDS}
               resizableTypeColumn
+              profile={getLoadedProfile()}
               revealRequest={revealRequest}
               onSelect={handleSelect}
               onToggle={handleToggle}
               onContextMenu={handleSelect}
             />
           }
-          data={<ObjectDataView plant={diagramModel} nodeId={selectedDiagramId} onSelect={handleSelect} />}
+          data={
+            <ObjectDataView
+              plant={diagramModel}
+              nodeId={selectedDiagramId}
+              onSelect={handleSelect}
+              profile={getLoadedProfile()}
+            />
+          }
         />
       </div>
     </PanelBody>

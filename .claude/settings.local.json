@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(node -e \"const m = require\\('@tabler/icons-react'\\); const names = Object.keys\\(m\\).filter\\(n => /Hierarchy|Sitemap|BinaryTree|Diagram|Drawing|Vector|Blueprint/i.test\\(n\\)\\); console.log\\(names.slice\\(0,40\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(find / -iname \"chromium-cli*\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20; echo \"---\"; ls /tmp/claude-1000/bundled-skills/*/*/ 2>/dev/null | grep -i chrom)",
+      "Read(//tmp/claude-1000/bundled-skills/**)",
+      "Bash(node -e \"require.resolve\\('playwright'\\)\")",
+      "Bash(npm config *)",
+      "Bash(timeout 5 curl -sI https://registry.npmjs.org)",
+      "Bash(timeout 120 npm install --no-save playwright)",
+      "Bash(timeout 180 npx playwright install --with-deps chromium)",
+      "Bash(timeout 180 npx playwright install chromium)",
+      "Bash(curl -s http://localhost:5173/src/main.tsx -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:5173/src/components/panels/conceptualModel/ConceptualModelTreePanel.tsx\" -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:5173/src/components/panels/diagramTree/DiagramTreePanel.tsx\" -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:5173/src/components/panels/objectDataView/ObjectDataView.tsx\" -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5173/)",
+      "Bash(curl -s http://localhost:5174/)",
+      "Bash(kill 248317 248318)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:5173/src/components/panels/PlantTree.tsx\")",
+      "Bash(awk '/type=\"Plant\\\\/Piping.PipingNetworkSegment\"/{print NR\": \"$0; found=1; next} found && /<Data property=/{print NR\": \"$0} found && /<\\\\/Object>/{c++; if\\(c>3\\) exit}' /workspace/refrences/reference_pid.xml)",
+      "Bash(curl -s -o /dev/null -w \"PropertiesSections.tsx -> %{http_code}\\\\n\" \"http://localhost:5173/src/components/panels/PropertiesSections.tsx\")",
+      "Bash(curl -s -o /dev/null -w \"plantModel.ts -> %{http_code}\\\\n\" \"http://localhost:5173/src/lib/dexpi/plantModel.ts\")",
+      "Bash(npx biome *)",
+      "Bash(curl -s http://localhost:5173/manual/xml-trees.html)",
+      "Bash(curl -s -o /dev/null -w \"manual/index.html -> %{http_code}\\\\n\" http://localhost:5173/manual/index.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(apt list *)",
+      "Bash(git status *)",
+      "Bash(apt-cache policy *)",
+      "Bash(python3 -c \"print\\('python ok'\\)\")",
+      "Bash(find /tmp/claude-1000 -iname \"*.png\" -newer /workspace/package.json 2>/dev/null | head -20 *)",
+      "Read(//tmp/claude-1000/**)",
+      "Bash(find /tmp -iname \"*.png\" -newer /workspace/DESIGN.md -mmin -30 2>/dev/null | grep -v node_modules *)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/manual/images/xml-trees-overview.png)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/manual/xml-trees.html)"
+    ]
+  }
+}

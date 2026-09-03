@@ -71,13 +71,19 @@ function rowTooltip(row: DiagramRow): string | undefined {
 }
 
 /** Drawing cards have XPath ids — too long for a tooltip; say what the card
- *  IS instead (right-click still copies the XPath). */
+ *  IS instead (right-click still copies the XPath). A profile stub/
+ *  unresolved card has nothing of its own to inspect, so its `navigateId`
+ *  points at the real object that referenced it instead — say so, rather
+ *  than implying the click goes to `card.id` itself. */
 function cardTooltip(card: PlacedCard["card"]): string | undefined {
   if (card.drawing) {
     return "Drawing-side object — not in the Properties panel. Click to inspect; right-click to copy data or XPath.";
   }
-  if (card.navigable) {
+  if (card.navigable && card.navigateId === card.id) {
     return `${card.id} — click to inspect`;
+  }
+  if (card.navigable && card.navigateId) {
+    return `Not itself an object in this document — click to inspect ${card.navigateId}, which references it`;
   }
 
   return card.id || undefined;
@@ -100,8 +106,8 @@ export function InspectCardView({ placed, isCenter, onNavigate, onMenu }: Inspec
   };
 
   const handleClick = (): void => {
-    if (card.navigable) {
-      onNavigate(card.id);
+    if (card.navigable && card.navigateId) {
+      onNavigate(card.navigateId);
     }
   };
 

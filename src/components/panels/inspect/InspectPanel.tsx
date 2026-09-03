@@ -87,14 +87,20 @@ export function InspectPanel(): JSX.Element {
     );
   }
 
-  const handleNavigate = (placed: PlacedCard): void => {
+  // `id` is what InspectCardView actually asked to navigate to — a stub
+  // card's `navigateId` (the real object that referenced it) when it has
+  // no plant data of its own, `placed.card.id` otherwise. The pin still
+  // keys off `placed.card.id`: when they differ, the new center won't be
+  // at the clicked card's old screen position anyway, so the effect below
+  // falls back to fitToContent instead of forcing a wrong pin.
+  const handleNavigate = (placed: PlacedCard, id: string): void => {
     pendingPinRef.current = {
       id: placed.card.id,
       scale,
       screenX: x + placed.x * scale,
       screenY: y + placed.y * scale,
     };
-    navigate(placed.card.id);
+    navigate(id);
   };
 
   const handleMenu = (id: string, x: number, y: number): void => {
@@ -178,7 +184,7 @@ export function InspectPanel(): JSX.Element {
                 key={placed.key}
                 placed={placed}
                 isCenter={false}
-                onNavigate={() => handleNavigate(placed)}
+                onNavigate={(id) => handleNavigate(placed, id)}
                 onMenu={handleMenu}
               />
             ))}

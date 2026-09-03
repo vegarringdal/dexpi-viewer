@@ -1,5 +1,6 @@
-import type { ProfileInstanceData } from "../dexpi/discProfile.ts";
+import type { ProfileInstanceData, ProfileSymbol } from "../dexpi/discProfile.ts";
 import { isDiagramType, type PlantModel, type PlantNode } from "../dexpi/plantModel.ts";
+import { profileSymbolDetailRows } from "../dexpi/profileSymbolSummary.ts";
 import type { IssueSeverity, ValidationIssue } from "../dexpi/validation.ts";
 
 // -----------------------------------------------------------------------------
@@ -35,8 +36,16 @@ export type DiagramCard = Readonly<{
   issueRows: readonly string[];
   /** True for a reference target that resolves to nothing — shown, in red. */
   broken: boolean;
-  /** False for profile-instance stubs and unresolved targets. */
+  /** Whether clicking this card does anything. True for real objects and
+   *  for profile stubs / unresolved targets that have a `navigateId`
+   *  fallback (there's nothing to inspect in the catalogue or a broken
+   *  reference itself, but the object that referenced it is real). */
   navigable: boolean;
+  /** What clicking a navigable card re-centers on — `id` for a real
+   *  object; for a profile stub or unresolved target (not itself a plant
+   *  object), the referencing object's real id instead, so "click to
+   *  inspect" still goes somewhere. Null when there's truly nothing. */
+  navigateId: string | null;
   /** Drawing-side (Core/Diagram) object — rendered with a dashed border. */
   drawing: boolean;
   /** Positional XPath of the object's element in the source XML. */
@@ -157,24 +166,75 @@ function cardFor(node: PlantNode, navigable: boolean, issuesById: IssuesById): D
     issueRows: issueRowsFor(unmapped),
     broken: false,
     navigable,
+    navigateId: node.id,
     drawing: isDiagramType(node.type),
     xpath: node.xpath,
   };
 }
 
-function stubCard(target: string, instances: ReadonlyMap<string, ProfileInstanceData>): DiagramCard {
+function symbolRows(symbol: ProfileSymbol): DiagramRow[] {
+  return profileSymbolDetailRows(symbol).map((row) => ({ ...row, tone: "normal" }));
+}
+
+/**
+ * A reference target with no matching object in the document: resolved
+ * against the loaded profile's published instances (e.g. a TypeCode's
+ * Abbreviation) first, then its symbol catalogue (e.g. a SymbolUsage's
+ * Symbol reference) — unresolved only when neither carries it. There's
+ * nothing to inspect in the catalogue itself (or, unresolved, nothing at
+ * all), but `sourceId` — the real object whose reference this is — is
+ * always a legitimate place to land, so every stub is navigable to it.
+ */
+function stubCard(
+  target: string,
+  instances: ReadonlyMap<string, ProfileInstanceData>,
+  symbols: ReadonlyMap<string, ProfileSymbol>,
+  sourceId: string,
+): DiagramCard {
   const data = instances.get(target) ?? instances.get(target.split("/").pop() ?? target);
+  if (data) {
+    return {
+      id: target,
+      title: target.split(".").pop() ?? target,
+      subtitle: "profile instance",
+      rows: [...data.entries()].map(([name, value]): DiagramRow => ({ name, value, tone: "normal" })),
+      severity: null,
+      issueRows: [],
+      broken: false,
+      navigable: true,
+      navigateId: sourceId,
+      drawing: false,
+      xpath: null,
+    };
+  }
+
+  const symbol = symbols.get(target) ?? symbols.get(target.split("/").pop() ?? target);
+  if (symbol) {
+    return {
+      id: target,
+      title: symbol.name,
+      subtitle: "profile symbol",
+      rows: symbolRows(symbol),
+      severity: null,
+      issueRows: [],
+      broken: false,
+      navigable: true,
+      navigateId: sourceId,
+      drawing: false,
+      xpath: null,
+    };
+  }
+
   return {
     id: target,
     title: target.split(".").pop() ?? target,
-    subtitle: data ? "profile instance" : "unresolved target",
-    rows: data
-      ? [...data.entries()].map(([name, value]): DiagramRow => ({ name, value, tone: "normal" }))
-      : [],
-    severity: data ? null : "error",
-    issueRows: data ? [] : ["Reference target resolves to nothing in this document or the profile"],
-    broken: !data,
-    navigable: false,
+    subtitle: "unresolved target",
+    rows: [],
+    severity: "error",
+    issueRows: ["Reference target resolves to nothing in this document or the profile"],
+    broken: true,
+    navigable: true,
+    navigateId: sourceId,
     drawing: false,
     xpath: null,
   };
@@ -185,6 +245,7 @@ type Pending = Readonly<{ card: DiagramCard; property: string; relation: Diagram
 type Frontier = Readonly<{ id: string; key: string }>;
 
 const NO_INSTANCES: ReadonlyMap<string, ProfileInstanceData> = new Map();
+const NO_SYMBOLS: ReadonlyMap<string, ProfileSymbol> = new Map();
 
 /**
  * Builds the instance diagram around `objectId` up to `depth` hops per side,
@@ -199,6 +260,7 @@ export function buildObjectDiagram(
   instances: ReadonlyMap<string, ProfileInstanceData> = NO_INSTANCES,
   depth: number = MIN_DIAGRAM_DEPTH,
   issuesById: IssuesById = NO_ISSUES,
+  symbols: ReadonlyMap<string, ProfileSymbol> = NO_SYMBOLS,
 ): ObjectDiagram | null {
   const node = plant.byId.get(objectId);
   if (!node) {
@@ -247,7 +309,7 @@ export function buildObjectDiagram(
           });
         } else {
           out.push({
-            card: stubCard(target, instances),
+            card: stubCard(target, instances, symbols, source.id),
             property: ref.property,
             relation: "profile",
             fromKey,
@@ -311,6 +373,7 @@ export function buildObjectDiagram(
           issueRows: [],
           broken: false,
           navigable: false,
+          navigateId: null,
           drawing: false,
           xpath: null,
         },

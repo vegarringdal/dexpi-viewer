@@ -350,6 +350,31 @@ export function diagramPlantModel(root: Element): PlantModel {
   return model;
 }
 
+/** Reference properties that tie a Diagram-side object back to the
+ *  ConceptualModel object it draws (a shape/group) or annotates (a label). */
+export const REPRESENTS_REFERENCE_PROPERTIES = ["Represents", "Object"] as const;
+
+/**
+ * The conceptual object a diagram-side node actually draws: `id`'s own
+ * Represents/Object reference if it carries one, else the nearest
+ * ancestor's — a bare leaf (e.g. a SymbolUsage with no id of its own)
+ * represents the same real object as its enclosing group. Null when
+ * nothing in the chain up to the root carries one.
+ */
+export function nearestRepresentedId(model: PlantModel, id: string): string | null {
+  let current: PlantNode | undefined = model.byId.get(id);
+  while (current) {
+    for (const property of REPRESENTS_REFERENCE_PROPERTIES) {
+      const target = current.references.find((r) => r.property === property)?.targets[0];
+      if (target) {
+        return target;
+      }
+    }
+    current = current.parentId ? model.byId.get(current.parentId) : undefined;
+  }
+  return null;
+}
+
 // -----------------------------------------------------------------------------
 // Property-grouped view — for the ConceptualModel Tree / Diagram Tree panels
 //

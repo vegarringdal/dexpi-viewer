@@ -242,7 +242,6 @@ export function buildProfileLabelOverlays(
     const labelTransform: UseTransform = {
       ...entry.transform,
       rotation: labelRotation,
-      isMirrored: false,
     };
     const roleCounters = new Map<string, number>();
     for (const template of entry.templates) {

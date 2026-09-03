@@ -1296,6 +1296,150 @@ Scope note: covers per-object SHAPE only — cross-object semantics
       SegmentNumber, resize-handle visibility, scroll perf, indented
       values) — real usage this time, not just the sandbox's static
       checks.
+- **2026-09-02** `profileLabels.ts` mirroring fix: `buildProfileLabelOverlays`
+  was hard-coding `isMirrored: false` on a LabelTemplate's own transform
+  instead of inheriting the placement's real mirror state — a mirrored
+  ShapeUsage drew correctly but its overlay label (e.g. a TypeCode badge)
+  used un-mirrored math, landing on the wrong side. Fixed: the label
+  transform now spreads the placement's transform as-is. Verified against
+  a reporter's real file by running the app's parse/scene-graph code
+  offline (not guessed).
+- **2026-09-02** Profile catalogue now resolves throughout Inspect and the
+  Diagram Tree, not just the canvas (director/reporter round, several
+  iterations against a real file with duplicate/rotated `ActuatingSystem`
+  data): `stubCard()`/`buildObjectDiagram` (`objectDiagram.ts`) checked
+  only the profile's published *instances* for an unresolved reference
+  target — never its *symbol* catalogue — so a `SymbolUsage`'s `Symbol`
+  reference always rendered as a false "unresolved target" even with the
+  profile loaded. Now checks `profile.symbols` too, rendering a "profile
+  symbol" card. That card's rows went from a bare variant/primitive count
+  to the actual content — shape id, condition, and every primitive/
+  LabelTemplate, each prefixed with its real DEXPI/profile class name
+  (`Core/Diagram.Ellipse`, `Profile/LabelTemplate`, …) — via a new shared
+  `src/lib/dexpi/profileSymbolSummary.ts` (`profileSymbolDetailRows`,
+  `resolveSymbolReferenceName`), reused by the Diagram Tree's own
+  References section. *Noted for later, not done*: representing each
+  primitive/label as its own full graph node instead of rows on the
+  parent card (bigger `buildObjectDiagram` change).
+  Since a profile stub has nothing of its own to navigate into, `DiagramCard`
+  gained `navigateId` (separate from its own `id`): a stub now re-centers on
+  the real object that referenced it instead of being a dead end. Exposed a
+  pre-existing wiring bug while landing this: `InspectPanel.tsx`'s
+  `onNavigate={() => handleNavigate(placed)}` silently discarded whatever id
+  `InspectCardView`'s click handler actually passed (always used
+  `placed.card.id`) — harmless while a card's `id` and `navigateId` were
+  always the same, but a stub's now legitimately differ, and navigating to
+  a bare catalogue string like `"DiscProfile/ND0049"` (not a node in any
+  plant model) made `buildObjectDiagram` return null, blanking the whole
+  panel. Fixed to forward the actual id.
+- **2026-09-02** Diagram-side navigation/identity follow-ups (same round,
+  reporter's real file): (1) `plantModel.ts` gained
+  `nearestRepresentedId(model, id)` — walks a node's own chain then its
+  ancestors for the first `Represents`/`Object` reference target, i.e. the
+  real conceptual object a diagram-side node (or its closest enclosing
+  group) actually draws; `useInspectDiagram.navigate()` and
+  `DiagramTreePanel`'s row-click now both use it (replacing
+  `DiagramTreePanel`'s narrower, own-references-only `crossLinkTarget`),
+  so clicking a bare `SymbolUsage` with no reference of its own
+  cross-links to global selection via its enclosing group, in both
+  panels symmetrically. Clicking a synthetic node in Inspect always
+  re-centers Inspect on the exact node clicked first (an earlier version
+  of this fix skipped straight to the represented object instead,
+  regressing "expand into this node"); the global-selection nudge to the
+  represented object is a separate, non-destructive side effect (a ref
+  guard stops it resetting the local re-center that fired first). (2)
+  Since `nearestRepresentedId` picks *a* real object a node represents,
+  not necessarily the *exact* clicked node, a small dedicated store
+  (`src/state/diagramReveal/`, deliberately separate from global
+  `selectionState` — most Diagram-side ids are synthetic and would
+  degrade Properties/canvas if pushed through there) lets Inspect ask the
+  Diagram Tree to reveal that exact node directly. (3)
+  `DiagramTreePanel`'s reverse sync (a selection made elsewhere revealing
+  itself in the tree) only searched *inbound* Represents/Object
+  references — never checked whether the selected id was simply one of
+  its own diagram-node ids — so selecting a real-id diagram-only object
+  (e.g. an `InstrumentationNodePosition`) elsewhere never revealed it in
+  the tree; added a direct-match check ahead of the inbound search. (4)
+  `PlantTree.tsx`'s hover tooltip showed a synthetic (positional-XPath)
+  id under "ID:" — misleading, since it's an internal stand-in, not a
+  real DEXPI id — now omitted there for synthetic ids (real ids stay,
+  middle-elided past 60 chars: the shared tooltip widget, vendored
+  prebuilt under `external/` and not editable here, only wraps at
+  whitespace and would otherwise overflow its fixed-width box on an
+  unbroken XPath). (5) New shared `IdentitySection`
+  (`PropertiesSections.tsx`, factored out of `PropertiesPanel.tsx`) shows
+  ID (omitted for a synthetic id)/Type/Persistent ID/XPath, now used by
+  the Properties panel AND both tree panels' embedded `ObjectDataView` —
+  XPath is always visible there, properly labeled, instead of only (or
+  not at all) in the tooltip. (6) `ObjectDataView` gained an outgoing
+  **References** section (it previously showed only inverse references),
+  resolving each target in three steps — the panel's OWN model, then the
+  document's ConceptualModel, then the profile catalogue (instance or
+  symbol, expandable to the same detail rows as the Inspect card) — with
+  an explicit "unresolved" marker only when none of them has it. The
+  middle step is load-bearing for the Diagram Tree, whose model holds
+  Diagram-branch objects only: every `Represents`/`Object` target is a
+  ConceptualModel id (1110 of them in the reporter's file, none in the
+  panel's own model), so a two-step version marked essentially every
+  diagram row's reference falsely broken-red. Conceptual hits render as
+  the existing `ObjectChip`, which navigates through GLOBAL selection —
+  the panel's own `onSelect` expects a diagram-tree id. Also a prominent
+  one-line "Symbol: ND0049" summary right under the header for a
+  `Symbol`/`Shape`-carrying row, since that's the single most useful fact
+  about an object otherwise described only by Position/Rotation/Scale.
+  (7) The tree row's own resizable type column (right of the tree/
+  vertical splitter) picks up the same resolved name when a row's label
+  is nothing but its own type name — in EITHER spelling, bare
+  (`SymbolUsage`) or qualified (`Diagram.ShapeUsage`), since
+  `resolveLabel` falls back to the qualified one while the main column
+  shows the bare one. Strictly additive: when no profile symbol resolves
+  (a `Core/Diagram.ShapeUsage` pointing into the document's own shape
+  catalogue rather than the profile's), the column keeps exactly the
+  previous label rule. `PlantTree`/`TreeRow` gained an optional
+  `profile` prop; both tree panels pass their loaded profile through.
+  All verified against the reporter's real file by running the app's
+  parsing/graph-building/resolution code directly (offline, not guessed);
+  `npm run check` clean throughout. `vitest` still can't execute in this
+  sandbox (same pre-existing Node/jsdom mismatch as M11's own entry
+  above) — `objectDiagram.ts`'s signature changes are backward-compatible
+  optional-parameter additions, so no regression is expected, but this is
+  worth a real `npm run test` pass outside the sandbox.
+- **2026-09-02** Diagram Tree → Inspect sync, the mirror of the above
+  (director spotted the asymmetry: selecting in Inspect revealed the row
+  in the Diagram Tree, but clicking a Diagram Tree row whose content only
+  Inspect can show didn't move Inspect). `DiagramTreePanel.handleSelect`
+  only pushed global selection when `nearestRepresentedId` found a real
+  object, and Inspect's center is otherwise driven by its own panel-local
+  state that nothing outside could reach — so a row with nothing
+  representable anywhere in its chain moved nothing at all. Added the
+  symmetric `src/state/inspectReveal/` store (same shape/rationale as
+  `diagramReveal`): every Diagram Tree row click asks Inspect to center on
+  the EXACT clicked id, and Inspect's handler also forces `showDrawing`
+  on, since every Diagram Tree row lives only in the diagram-inclusive
+  model — ignoring ids no model holds, i.e. `groupByProperty`'s synthetic
+  `parent::Property` group rows (1638 of them in the reporter's file),
+  which would otherwise force drawing mode on and blank the panel.
+  Both directions now: exact node through the dedicated channel, nearest
+  represented real object through global selection for Properties/canvas.
+  `DiagramTreePanel`'s `selectionFromTree` ref keeps its own global-
+  selection write from bouncing back through its sync effect, and its
+  reveal effect is declared AFTER that sync effect so the exact requested
+  row wins over the merely-representing one when both fire in one commit.
+- **2026-09-02** Inspect's panel-local re-center is self-describing rather
+  than effect-reset (`useInspectDiagram`, found in review of the round
+  above). It used to be a bare id cleared by an effect on
+  `[selectedId, showDrawing]`, with a "was that me?" ref so the panel's
+  own writes (navigate()'s global-selection nudge, the reveal handler's
+  `setShowDrawing(true)`) didn't wipe the center they had just set. That
+  ref leaks: it must be consumed by exactly one later run of that effect,
+  but a no-op write — forcing drawing mode that is ALREADY on — re-runs
+  nothing, so the flag survives and swallows the NEXT genuine selection
+  change, freezing Inspect on a stale center. `localCenter` now records
+  the context it is valid for (`forSelectedId`/`forShowDrawing`/
+  `forDocRevision`) and is simply ignored once any of them moves on — no
+  flag, no effect ordering to get right. A small cleanup effect nulls an
+  inactive one so it can't re-activate later if the selection happens to
+  return to the value it was recorded for.
 
 ## Decisions log
 

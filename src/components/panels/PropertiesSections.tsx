@@ -1,5 +1,5 @@
 import type { JSX, ReactNode } from "react";
-import type { PlantAttribute, PlantModel } from "../../lib/dexpi/plantModel.ts";
+import type { PlantAttribute, PlantModel, PlantNode } from "../../lib/dexpi/plantModel.ts";
 import { setHoveredObject, setSelectedObject } from "../../state/selection/selection.actions.ts";
 import { getLoadedDocument } from "../../state/viewer/viewer.actions.ts";
 import { useDragResize } from "./useDragResize.ts";
@@ -35,6 +35,56 @@ export function TraceDot({ kind }: Readonly<{ kind: "upstream" | "downstream" }>
 
 export function EmptyNote({ text }: Readonly<{ text: string }>): JSX.Element {
   return <div className="text-slate-500 text-xs">{text}</div>;
+}
+
+/**
+ * Identity rows for the spec's PersistentIdentifiers (Context + Value).
+ * Always at least one row, so it is visible that the file carries none.
+ */
+function persistentIdRows(
+  persistentIds: readonly { name: string; value: string }[],
+): readonly { name: string; value: string }[] {
+  if (persistentIds.length === 0) {
+    return [{ name: "Persistent ID", value: "—" }];
+  }
+
+  return persistentIds.map((pid) => ({
+    name: pid.name === "Identifier" ? "Persistent ID" : `Persistent ID (${pid.name})`,
+    value: pid.value,
+  }));
+}
+
+/**
+ * ID / Type / Persistent ID / XPath for any plant node. A Diagram-side
+ * object with no `id=` attribute in the source XML is keyed by its
+ * positional XPath instead (see `plantModel.ts`'s `walkPlant`) — that's an
+ * internal-only stand-in, never a real DEXPI id, so the ID row is omitted
+ * rather than showing the XPath twice under a misleading label; XPath
+ * always gets its own row regardless.
+ */
+export function IdentitySection({ node }: Readonly<{ node: PlantNode }>): JSX.Element {
+  const isSyntheticId = node.id === node.xpath;
+  const rows: readonly { name: string; value: string }[] = [
+    ...(isSyntheticId ? [] : [{ name: "ID", value: node.id }]),
+    { name: "Type", value: node.type },
+    ...persistentIdRows(node.persistentIds),
+    { name: "XPath", value: node.xpath },
+  ];
+
+  return (
+    <Section title="Identity">
+      <dl className="grid grid-cols-[minmax(90px,45%)_1fr] gap-x-3 gap-y-1 text-xs">
+        {rows.map((row) => (
+          <div key={row.name} className="contents">
+            <dt className="truncate text-slate-400" title={row.name}>
+              {row.name}
+            </dt>
+            <dd className="select-all break-all font-mono text-slate-200">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </Section>
+  );
 }
 
 /**

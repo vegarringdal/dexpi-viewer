@@ -1,6 +1,8 @@
 import { IconChevronDown, IconChevronRight, IconFile, IconFolder } from "@tabler/icons-react";
 import { type JSX, useEffect, useMemo, useRef, useState } from "react";
+import type { DiscProfile } from "../../lib/dexpi/discProfile.ts";
 import type { PlantNode } from "../../lib/dexpi/plantModel.ts";
+import { resolveSymbolReferenceName } from "../../lib/dexpi/profileSymbolSummary.ts";
 import { setHoveredObject } from "../../state/selection/selection.actions.ts";
 import { flattenVisibleNodes } from "./plantTreeFilter.ts";
 
@@ -43,6 +45,9 @@ type PlantTreeProps = Readonly<{
    *  used by the ConceptualModel/Diagram Tree panels. Explorer omits this
    *  and keeps today's auto-width layout. */
   resizableTypeColumn?: boolean;
+  /** Resolves a ShapeUsage/SymbolUsage row's Symbol/Shape reference for the
+   *  type column, when its label carries no more specific name of its own. */
+  profile?: DiscProfile | null;
   /** Scrolls the named row into view once, when this changes. */
   revealRequest?: RevealRequest;
   onSelect: (id: string, modifiers: SelectModifiers) => void;
@@ -62,6 +67,22 @@ const ROW_HEIGHT_PX = 22;
  *  programmatic reveal doesn't flash empty space before the next paint. */
 const OVERSCAN_ROWS = 8;
 
+/** The row tooltip's fixed-width box only wraps at whitespace — cap a
+ *  single unbroken token (a synthetic drawing id) below that width. */
+const TOOLTIP_ID_MAX_CHARS = 60;
+
+/** Elides the middle of a long, space-free token — keeps both the leading
+ *  and trailing context, which for a positional XPath id is usually the
+ *  most identifying part. */
+function truncateMiddle(value: string, maxChars: number): string {
+  if (value.length <= maxChars) {
+    return value;
+  }
+
+  const keep = Math.floor((maxChars - 1) / 2);
+  return `${value.slice(0, keep)}…${value.slice(value.length - keep)}`;
+}
+
 // -----------------------------------------------------------------------------
 // Row
 // -----------------------------------------------------------------------------
@@ -74,6 +95,7 @@ type RowProps = Readonly<{
   selectedIds: ReadonlySet<string>;
   show: ReadonlySet<ShowField>;
   resizableTypeColumn: boolean | undefined;
+  profile: DiscProfile | null | undefined;
   onSelect: (id: string, modifiers: SelectModifiers) => void;
   onToggle: (id: string) => void;
   onContextMenu: (id: string, x: number, y: number) => void;
@@ -88,6 +110,7 @@ function TreeRow(props: RowProps): JSX.Element {
     selectedIds,
     show,
     resizableTypeColumn,
+    profile,
     onSelect,
     onToggle,
     onContextMenu,
@@ -99,13 +122,31 @@ function TreeRow(props: RowProps): JSX.Element {
   // In resizable-column mode the main column carries the type (matching
   // the raw XML property-grid layout) and the side column carries the
   // resolved value/tag — the reverse of the Explorer's name-first layout.
+  // A row with no naming attribute falls back to its type name (see
+  // plantModel.ts's resolveLabel) in EITHER spelling — `SymbolUsage` or
+  // the qualified `Diagram.ShapeUsage` — so both mean "the label adds
+  // nothing here"; for a ShapeUsage/SymbolUsage the profile Symbol/Shape
+  // reference it draws is the far more useful thing to put there. Only
+  // when that resolves: a shape from the document's own catalogue (not
+  // the profile's) still falls through to the plain label rule below.
+  const labelIsJustItsType = node.label === shortType || node.label === node.typeName;
+  const resolvedSymbolName = labelIsJustItsType ? resolveSymbolReferenceName(node, profile) : null;
   const mainText = resizableTypeColumn ? shortType : node.label;
-  const sideText = resizableTypeColumn ? (node.label === shortType ? "" : node.label) : shortType;
+  const sideText = resizableTypeColumn
+    ? (resolvedSymbolName ?? (node.label === shortType ? "" : node.label))
+    : shortType;
   const persistentIds = node.persistentIds.map((pid) => pid.value).join(", ");
+  // A Diagram-side object with no id="" in the source XML is keyed by its
+  // positional XPath instead (plantModel.ts's walkPlant) — an internal-only
+  // stand-in, not a real DEXPI id, so it's left off this line entirely
+  // (the Data panel below always shows the XPath properly labeled). A real
+  // id is still truncated: the tooltip widget only wraps at whitespace, and
+  // an unbroken long token would overflow its fixed-width box otherwise.
+  const isSyntheticId = node.id === node.xpath;
   const tooltip = [
     `Name: ${node.label}`,
     `Type: ${shortType}`,
-    `ID: ${node.id}`,
+    ...(isSyntheticId ? [] : [`ID: ${truncateMiddle(node.id, TOOLTIP_ID_MAX_CHARS)}`]),
     `Persistent ID: ${persistentIds || "—"}`,
   ].join("\n");
 
@@ -207,6 +248,7 @@ export function PlantTree(props: PlantTreeProps): JSX.Element {
     forceExpand,
     show,
     resizableTypeColumn,
+    profile,
     revealRequest,
     onSelect,
     onToggle,
@@ -280,6 +322,7 @@ export function PlantTree(props: PlantTreeProps): JSX.Element {
             selectedIds={selectedIds}
             show={show}
             resizableTypeColumn={resizableTypeColumn}
+            profile={profile}
             onSelect={onSelect}
             onToggle={onToggle}
             onContextMenu={onContextMenu}

@@ -5,7 +5,7 @@ import { type JSX, useEffect, useMemo, useRef, useState } from "react";
 import { groupByProperty, type PlantModel } from "../../../lib/dexpi/plantModel.ts";
 import { setSelectedObject } from "../../../state/selection/selection.actions.ts";
 import { selectionState } from "../../../state/selection/selection.state.ts";
-import { getLoadedDocument } from "../../../state/viewer/viewer.actions.ts";
+import { getLoadedDocument, getLoadedProfile } from "../../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../../state/viewer/viewer.state.ts";
 import { ObjectDataView } from "../objectDataView/ObjectDataView.tsx";
 import { type FilteredNode, PlantTree, type RevealRequest, type SelectModifiers } from "../PlantTree.tsx";
@@ -138,13 +138,21 @@ export function ConceptualModelTreePanel(): JSX.Element {
               forceExpand={forceExpand}
               show={SHOW_FIELDS}
               resizableTypeColumn
+              profile={getLoadedProfile()}
               revealRequest={revealRequest}
               onSelect={handleSelect}
               onToggle={handleToggle}
               onContextMenu={treeSelection.handleContextMenu}
             />
           }
-          data={<ObjectDataView plant={plant} nodeId={selectedId} onSelect={setSelectedObject} />}
+          data={
+            <ObjectDataView
+              plant={plant}
+              nodeId={selectedId}
+              onSelect={setSelectedObject}
+              profile={getLoadedProfile()}
+            />
+          }
         />
       </div>
       {treeSelection.menu && (
