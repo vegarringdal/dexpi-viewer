@@ -14,6 +14,7 @@ import {
   setZoomPercent,
 } from "../../state/viewer/viewer.actions.ts";
 import { type ViewCommand, viewerState } from "../../state/viewer/viewer.state.ts";
+import { matchCustomFilters } from "../dexpi/customHighlightFilter.ts";
 import { computeObjectBounds } from "../dexpi/sceneGraph.ts";
 import {
   drawSceneContent,
@@ -135,6 +136,20 @@ export function useCanvasStage(): CanvasStageHandles {
           }
         }
       });
+      if (highlight.mode === "custom") {
+        const colorsByFilterId = new Map(
+          highlight.customFilters.map((f) => [f.id, hexToColor4f(f.colorHex)] as const),
+        );
+        for (const match of matchCustomFilters(doc.plant.byId.values(), highlight.customFilters)) {
+          const color = colorsByFilterId.get(match.filterId);
+          if (!color) {
+            continue;
+          }
+          for (const id of match.objectIds) {
+            classification.set(id, color);
+          }
+        }
+      }
       const rendering = renderingState.get();
       const underlay = underlayState.get();
       // An underlay behind the drawing needs the opaque paper rect gone,

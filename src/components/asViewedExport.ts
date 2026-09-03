@@ -1,5 +1,7 @@
 import { classifyColor, getScenePalette, paletteColorToRgb } from "../lib/canvas/scenePalette.ts";
 import { buildExportUnderlay, hasVisibleUnderlay } from "../lib/canvas/underlayExport.ts";
+import { hexToColor4f } from "../lib/canvas/underlaySource.ts";
+import { matchCustomFilters } from "../lib/dexpi/customHighlightFilter.ts";
 import { sceneToSvg } from "../lib/dexpi/exportSvg.ts";
 import { sceneAsViewed, type ViewAppearance } from "../lib/dexpi/sceneAsViewed.ts";
 import type { Bounds, RgbColor, SceneGraph } from "../lib/dexpi/types.ts";
@@ -10,6 +12,7 @@ import { highlightState } from "../state/highlight/highlight.state.ts";
 import { traceState } from "../state/trace/trace.state.ts";
 import { getUnderlayBitmap } from "../state/underlay/underlay.actions.ts";
 import { underlayState } from "../state/underlay/underlay.state.ts";
+import { getLoadedDocument } from "../state/viewer/viewer.actions.ts";
 import { sceneToPdf } from "./exportPdf.ts";
 import { baseName, requireDocument } from "./exportShared.ts";
 
@@ -60,6 +63,24 @@ function viewAppearance(): ViewAppearance {
     for (const id of group.objectIds) {
       tints.set(id, color);
       classifiedCount += 1;
+    }
+  }
+
+  if (highlight.mode === "custom") {
+    const doc = getLoadedDocument();
+    const colorsByFilterId = new Map(
+      highlight.customFilters.map((f) => [f.id, hexToColor4f(f.colorHex)] as const),
+    );
+    const matches = doc ? matchCustomFilters(doc.plant.byId.values(), highlight.customFilters) : [];
+    for (const match of matches) {
+      const color = colorsByFilterId.get(match.filterId);
+      if (!color) {
+        continue;
+      }
+      for (const id of match.objectIds) {
+        tints.set(id, paletteColorToRgb(color));
+        classifiedCount += 1;
+      }
     }
   }
 

@@ -13,26 +13,33 @@ import { highlightState } from "../../state/highlight/highlight.state.ts";
 import { themeState } from "../../state/theme/theme.state.ts";
 import { getLoadedDocument } from "../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../state/viewer/viewer.state.ts";
+import { CustomHighlightEditor } from "./CustomHighlightEditor.tsx";
 
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
 
-const MODE_LABELS: Readonly<Record<Exclude<HighlightMode, "off">, string>> = {
+type FixedHighlightMode = Exclude<HighlightMode, "off" | "custom">;
+
+const MODE_LABELS: Readonly<Record<FixedHighlightMode, string>> = {
   heatTrace: "Heat traced",
   signal: "Signal & instrument lines",
   fluidCode: "Fluid code",
   pipingClass: "Piping class",
 };
 
-const SELECTABLE_MODES = Object.keys(MODE_LABELS).filter(isHighlightMode);
+const SELECTABLE_MODES = Object.keys(MODE_LABELS).filter(isFixedHighlightMode);
 
 // -----------------------------------------------------------------------------
 // Helper functions
 // -----------------------------------------------------------------------------
 
-function isHighlightMode(value: string | null): value is Exclude<HighlightMode, "off"> {
+function isFixedHighlightMode(value: string | null): value is FixedHighlightMode {
   return value !== null && value in MODE_LABELS;
+}
+
+function isHighlightMode(value: string | null): value is HighlightMode {
+  return value === "off" || value === "custom" || isFixedHighlightMode(value);
 }
 
 function cssColor(color: readonly [number, number, number, number]): string {
@@ -52,7 +59,7 @@ function cssColor(color: readonly [number, number, number, number]): string {
  */
 export function HighlightPanel(): JSX.Element {
   const { file, docRevision } = viewerState.use();
-  const { mode, groups, hiddenKeys, monochrome, dimOthers } = highlightState.use();
+  const { mode, groups, hiddenKeys, monochrome, dimOthers, customFilters } = highlightState.use();
   const { theme } = themeState.use();
   const palette = getScenePalette(theme);
 
@@ -88,6 +95,7 @@ export function HighlightPanel(): JSX.Element {
         disabled: count === 0,
       };
     }),
+    { value: "custom", label: "Custom", hint: `${customFilters.filter((f) => f.enabled).length}` },
   ];
 
   return (
@@ -113,7 +121,8 @@ export function HighlightPanel(): JSX.Element {
         disabled={mode === "off"}
         tooltip="Fade everything outside the highlighted groups so the tints stand out"
       />
-      {mode !== "off" && groups.length === 0 && (
+      {mode === "custom" && <CustomHighlightEditor />}
+      {mode !== "off" && mode !== "custom" && groups.length === 0 && (
         <div className="text-slate-500 text-xs">No {MODE_LABELS[mode]} data in this document.</div>
       )}
       {groups.length > 0 && (

@@ -5,7 +5,7 @@ import type { DexpiDocument } from "./types.ts";
 // Types
 // -----------------------------------------------------------------------------
 
-export type HighlightMode = "off" | "heatTrace" | "signal" | "fluidCode" | "pipingClass";
+export type HighlightMode = "off" | "heatTrace" | "signal" | "fluidCode" | "pipingClass" | "custom";
 
 export type ClassificationGroup = Readonly<{
   key: string;
@@ -71,7 +71,9 @@ export function buildClassificationGroups(
   doc: DexpiDocument,
   mode: HighlightMode,
 ): readonly ClassificationGroup[] {
-  if (mode === "off") {
+  if (mode === "off" || mode === "custom") {
+    // Custom mode's groups come from the user's own filters (see
+    // customHighlightFilter.ts), not this fixed classification scheme.
     return [];
   }
 

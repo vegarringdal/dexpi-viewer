@@ -1128,6 +1128,50 @@ that grow, and record scope changes here.
   toggle-again-to-clear semantics unchanged since originId now always
   tracks the selection.
 
+- **2026-09-03** "Custom" highlight mode (director): a fifth Highlight-by
+  option for filters the four built-in classifications don't cover.
+  `src/lib/dexpi/customHighlightFilter.ts` defines `CustomHighlightFilter`
+  (label, colorHex, enabled, a `conditions` list AND'ed together for
+  simple mode, and an `expression` string for advanced mode — BOTH always
+  kept, not a strict discriminated union, so toggling the mode never
+  discards the other one's work) and `matchCustomFilters(nodes, filters)`,
+  which `useCanvasStage.ts` and `asViewedExport.ts` both feed into the
+  SAME `classification: Map<objectId, PaletteColor>` the built-in modes
+  already draw through — no new drawing path.
+  - Fields: `TYPE`, `ATTR('name')`, `ID`, `XPATH`, `PERSISTENT_ID`
+    (matches ANY of a node's persistent ids — one per Context). Operators:
+    Contains / Does not contain / Equals / Does not equal, case-insensitive;
+    Equals/Does not equal treat `*` as a `.*` wildcard (escaped-then-
+    anchored glob → RegExp). An object missing the field entirely never
+    matches, even under "does not…", so a negated condition only lights up
+    objects that actually carry the field. XPath gets "this object + all
+    children" for free from the wildcard, no special-casing needed:
+    positional xpaths are ancestor-prefixed strings
+    (`/Model/Object[2]/Components[1]/Object[4]`), and the trailing `]` on
+    every indexed segment rules out false prefix hits (`Object[1]*` does
+    not also match sibling `Object[11]`).
+  - Advanced mode: a hand-written recursive-descent parser
+    (`parseFilterExpression`) for `&`/`|`/parens over conditions like
+    `TYPE = 'x' & (ATTR('FluidCode') = 'A*' | ATTR('FluidCode') != 'B*')`.
+    A parse error surfaces inline under the filter instead of throwing —
+    the filter just matches nothing until fixed. Switching a filter to
+    advanced for the first time auto-fills the expression from its simple
+    conditions (`conditionsToExpression`), doubling as a live syntax
+    example. "Does not contain" has no dedicated advanced keyword: it's
+    `!=` with the value wrapped in `*…*`, which the glob evaluates
+    identically.
+  - Priority = list order: filters apply in order and a later one
+    overwrites an earlier color assignment for the same object (`Map.set`
+    last-wins), matching the up/down reorder controls in the editor
+    (`CustomHighlightFilterRow.tsx` / `CustomHighlightConditionRow.tsx` /
+    `CustomHighlightEditor.tsx`, all under `src/components/panels/`). An
+    inline banner warns when 2+ enabled filters match the same object.
+  - Save/Load as JSON (`exportCustomFilters`/`importCustomFilters`,
+    `downloadBlob` + a hidden file input — same mechanism as the
+    Shortcuts keymap export). The file format is versioned
+    (`FILTER_FILE_VERSION = 2`); a version mismatch or malformed shape
+    fails with a clear message rather than attempting to migrate.
+
 ### M10 — Model-driven validation (core landed 2026-08-22)
 
 Validate every object against the DEXPI class model itself instead of

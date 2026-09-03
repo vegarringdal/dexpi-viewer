@@ -1,5 +1,6 @@
 import { createStore } from "../../lib/createStore.ts";
 import type { ClassificationGroup, HighlightMode } from "../../lib/dexpi/classification.ts";
+import type { CustomHighlightFilter } from "../../lib/dexpi/customHighlightFilter.ts";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -15,6 +16,8 @@ export type HighlightState = Readonly<{
   monochrome: boolean;
   /** Fade everything OUTSIDE the highlighted groups so tints stand out. */
   dimOthers: boolean;
+  /** User-defined filters for "custom" mode, in priority order (last wins overlaps). */
+  customFilters: readonly CustomHighlightFilter[];
 }>;
 
 // -----------------------------------------------------------------------------
@@ -27,4 +30,5 @@ export const highlightState = createStore<HighlightState>({
   hiddenKeys: [],
   monochrome: false,
   dimOthers: false,
+  customFilters: [],
 });

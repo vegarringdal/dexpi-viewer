@@ -131,7 +131,13 @@ now titled **Explorer**.
 drawing by classification — heat-traced runs, signal/instrument
 lines, or piping service (fluid code / piping class, with ancestor
 inheritance) — each value in its own color with a legend of counts
-and per-value visibility toggles.
+and per-value visibility toggles. A **Custom** mode builds your own
+filters instead — by type, attribute, ID, XPath (a trailing `*`
+matches an object and all its children) or persistent ID, with
+contains/equals (and negated) wildcard matching, an optional advanced
+`&`/`|` expression syntax, per-filter color and priority ordering
+(lower filter wins overlaps), and JSON save/load for reusable filter
+sets.
 
 All milestones M0–M11 are complete; the open items are niche
 (Proteus-era edge tolerances, profile LabelTemplate overlays, culling
