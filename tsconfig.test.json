@@ -3,5 +3,9 @@
   "compilerOptions": {
     "types": ["vite/client", "node"]
   },
-  "include": ["src"]
+  "include": ["src"],
+  // tsconfig.app.json excludes *.test.ts so the app build ignores them; an
+  // inherited `exclude` is NOT cancelled by this file's `include`, so without
+  // clearing it here every test file goes unchecked.
+  "exclude": []
 }

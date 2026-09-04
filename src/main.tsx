@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App.tsx";
 import { registerAppHotkeys } from "./components/hotkeys.ts";
+import { applyStoredNodePositionSettings } from "./state/nodePositions/nodePositions.actions.ts";
 import { applyStoredRenderingSettings } from "./state/rendering/rendering.actions.ts";
 import { applyStoredTheme } from "./state/theme/theme.actions.ts";
 import { applyStoredValidationOverrides } from "./state/validation/validation.actions.ts";
@@ -16,6 +17,7 @@ if (new URLSearchParams(window.location.search).has("docs")) {
 applyStoredTheme();
 applyStoredRenderingSettings();
 applyStoredValidationOverrides();
+applyStoredNodePositionSettings();
 initTooltips();
 registerAppHotkeys();
 

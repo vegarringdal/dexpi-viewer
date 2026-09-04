@@ -22,9 +22,24 @@ export type ViewAppearance = Readonly<{
    * (classification tint first, then the trace overlays on top).
    */
   tints: ReadonlyMap<string, RgbColor>;
-  /** Fade everything that has no tint, so the tinted objects stand out. */
-  dimOthers: boolean;
+  /**
+   * Fade the drawing so the overlays stand out. On canvas the veil is painted
+   * BELOW every overlay pass, so a tinted object — repainted on top — keeps
+   * its full-strength tint, and the appended overlay nodes are untouched.
+   */
+  dimDrawing: boolean;
+  /** Overlay nodes appended verbatim — already colored, never recolored here. */
+  overlays: InspectionOverlays;
 }>;
+
+export type InspectionOverlays = Readonly<{
+  /** Under the drawing body but over the paper (Label Inspect at "back"). */
+  behind: readonly SceneNode[];
+  /** Over everything. */
+  front: readonly SceneNode[];
+}>;
+
+export const NO_OVERLAYS: InspectionOverlays = { behind: [], front: [] };
 
 /** The color decisions for one node, derived once and reused per primitive. */
 type ColorRules = Readonly<{
@@ -118,11 +133,18 @@ function isIdentity(rules: ColorRules): boolean {
   return !rules.monochrome && !rules.dimmed && rules.tint === null;
 }
 
+/** Annotation under the dim veil: faded, but never B/W-remapped or tinted. */
+const VEILED_ONLY: ColorRules = { monochrome: false, dimmed: true, tint: null };
+
+function dimNode(node: SceneNode): SceneNode {
+  return node.kind === "prim" ? { ...node, prim: recolorPrimitive(node.prim, VEILED_ONLY) } : node;
+}
+
 function rulesFor(objectId: string | null, appearance: ViewAppearance): ColorRules {
   const tint = (objectId !== null ? appearance.tints.get(objectId) : undefined) ?? null;
   return {
     monochrome: appearance.monochrome,
-    dimmed: appearance.dimOthers && tint === null,
+    dimmed: appearance.dimDrawing && tint === null,
     tint,
   };
 }
@@ -144,8 +166,15 @@ function rulesKey(rules: ColorRules): string {
  * Returns the input untouched when the view asks for no change at all.
  */
 export function sceneAsViewed(scene: SceneGraph, appearance: ViewAppearance): SceneGraph {
-  if (!appearance.monochrome && appearance.tints.size === 0) {
-    return scene;
+  const { front } = appearance.overlays;
+  // On canvas the "behind" overlay is painted before the drawing, so the dim
+  // veil covers it too — an "as viewed" export has to reproduce that, not
+  // improve on it.
+  const behind = appearance.dimDrawing ? appearance.overlays.behind.map(dimNode) : appearance.overlays.behind;
+  if (!appearance.monochrome && !appearance.dimDrawing && appearance.tints.size === 0) {
+    return behind.length === 0 && front.length === 0
+      ? scene
+      : { ...scene, nodes: [...behind, ...scene.nodes, ...front] };
   }
 
   const shapes = new Map<string, ShapeDef>();
@@ -177,5 +206,8 @@ export function sceneAsViewed(scene: SceneGraph, appearance: ViewAppearance): Sc
     return { ...node, shapeId: derivedId };
   });
 
-  return { ...scene, nodes, shapes };
+  // Overlays are annotation, appended after the recolor so no veil, tint or
+  // B/W remap can touch them — exactly as the canvas paints them over the
+  // finished passes.
+  return { ...scene, nodes: [...behind, ...nodes, ...front], shapes };
 }

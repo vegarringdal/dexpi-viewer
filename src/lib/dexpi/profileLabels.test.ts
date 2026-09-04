@@ -2,9 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseDiscProfile } from "./discProfile.ts";
 import { flattenScene } from "./flattenScene.ts";
 import { parseDexpiDocument } from "./parseDocument.ts";
-import type { Bounds, TextPrim } from "./types.ts";
-
-const EMPTY_BOUNDS: Bounds = { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+import type { TextPrim } from "./types.ts";
 
 // -----------------------------------------------------------------------------
 // Fixtures — synthetic, format reconstructed from the prior-art viewer
@@ -755,9 +753,11 @@ const BADGE_PROFILE = `<?xml version="1.0" encoding="UTF-8"?>
 function badgeCircle(xml: string): { x: number; y: number; radius: number } {
   const profile = parseDiscProfile(BADGE_PROFILE).data ?? null;
   const doc = parseDexpiDocument(xml, profile).data;
-  const circle = flattenScene(doc?.scene ?? { nodes: [], shapes: new Map(), bounds: EMPTY_BOUNDS }).find(
-    (prim) => prim.kind === "circle",
-  );
+  if (!doc) {
+    throw new Error("badge fixture did not parse");
+  }
+
+  const circle = flattenScene(doc.scene).find((prim) => prim.kind === "circle");
   if (circle?.kind !== "circle") {
     throw new Error("badge circle missing");
   }

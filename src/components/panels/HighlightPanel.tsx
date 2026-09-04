@@ -1,80 +1,23 @@
 import { PanelBody } from "@tredespace/ui/dockable";
-import { Checkbox, Select, type SelectOption } from "@tredespace/ui/widgets";
-import { type JSX, useMemo } from "react";
-import { classifyColor, getScenePalette } from "../../lib/canvas/scenePalette.ts";
-import { buildClassificationGroups, type HighlightMode } from "../../lib/dexpi/classification.ts";
-import {
-  setHighlightDimOthers,
-  setHighlightMode,
-  setHighlightMonochrome,
-  toggleHighlightGroup,
-} from "../../state/highlight/highlight.actions.ts";
-import { highlightState } from "../../state/highlight/highlight.state.ts";
-import { themeState } from "../../state/theme/theme.state.ts";
-import { getLoadedDocument } from "../../state/viewer/viewer.actions.ts";
+import { Collapsible } from "@tredespace/ui/widgets";
+import type { JSX } from "react";
 import { viewerState } from "../../state/viewer/viewer.state.ts";
-import { CustomHighlightEditor } from "./CustomHighlightEditor.tsx";
-
-// -----------------------------------------------------------------------------
-// Constants
-// -----------------------------------------------------------------------------
-
-type FixedHighlightMode = Exclude<HighlightMode, "off" | "custom">;
-
-const MODE_LABELS: Readonly<Record<FixedHighlightMode, string>> = {
-  heatTrace: "Heat traced",
-  signal: "Signal & instrument lines",
-  fluidCode: "Fluid code",
-  pipingClass: "Piping class",
-};
-
-const SELECTABLE_MODES = Object.keys(MODE_LABELS).filter(isFixedHighlightMode);
-
-// -----------------------------------------------------------------------------
-// Helper functions
-// -----------------------------------------------------------------------------
-
-function isFixedHighlightMode(value: string | null): value is FixedHighlightMode {
-  return value !== null && value in MODE_LABELS;
-}
-
-function isHighlightMode(value: string | null): value is HighlightMode {
-  return value === "off" || value === "custom" || isFixedHighlightMode(value);
-}
-
-function cssColor(color: readonly [number, number, number, number]): string {
-  const [r, g, b, a] = color;
-  return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
-}
+import { GeneralHighlightSection } from "./GeneralHighlightSection.tsx";
+import { LabelInspectSection } from "./LabelInspectSection.tsx";
+import { NodePositionSection } from "./NodePositionSection.tsx";
 
 // -----------------------------------------------------------------------------
 // Component
 // -----------------------------------------------------------------------------
 
 /**
- * Classification highlighting for the drawing: pick a classification and the
- * canvas tints every matching object; the legend lists each value with its
- * canvas color and a visibility toggle. Counts come from the loaded document
- * so data-less modes read as honestly empty instead of silently doing nothing.
+ * Three independent ways to mark up the drawing for inspection: tint objects
+ * by classification, show where the profile's label templates put their text,
+ * and mark the file's and the profile's connection points. They compose —
+ * each section adds its own overlay on top of whatever the others draw.
  */
 export function HighlightPanel(): JSX.Element {
-  const { file, docRevision } = viewerState.use();
-  const { mode, groups, hiddenKeys, monochrome, dimOthers, customFilters } = highlightState.use();
-  const { theme } = themeState.use();
-  const palette = getScenePalette(theme);
-
-  const modeCounts = useMemo<ReadonlyMap<HighlightMode, number>>(() => {
-    void docRevision;
-    const doc = getLoadedDocument();
-    const counts = new Map<HighlightMode, number>();
-    for (const m of SELECTABLE_MODES) {
-      const total = doc
-        ? buildClassificationGroups(doc, m).reduce((sum, g) => sum + g.objectIds.length, 0)
-        : 0;
-      counts.set(m, total);
-    }
-    return counts;
-  }, [docRevision]);
+  const { file } = viewerState.use();
 
   if (!file) {
     return (
@@ -84,71 +27,23 @@ export function HighlightPanel(): JSX.Element {
     );
   }
 
-  const options: SelectOption[] = [
-    { value: "off", label: "Off" },
-    ...SELECTABLE_MODES.map((m) => {
-      const count = modeCounts.get(m) ?? 0;
-      return {
-        value: m,
-        label: MODE_LABELS[m],
-        hint: `${count}`,
-        disabled: count === 0,
-      };
-    }),
-    { value: "custom", label: "Custom", hint: `${customFilters.filter((f) => f.enabled).length}` },
-  ];
-
   return (
-    <PanelBody className="flex h-full flex-col gap-3 overflow-auto p-3">
-      <div className="flex flex-col gap-1">
-        <span className="text-[10px] text-slate-500 uppercase tracking-wide">Highlight by</span>
-        <Select
-          value={mode}
-          options={options}
-          onChange={(value) => setHighlightMode(isHighlightMode(value) ? value : "off")}
-        />
-      </div>
-      <Checkbox
-        checked={monochrome}
-        onChange={setHighlightMonochrome}
-        label="Black & white drawing"
-        tooltip="Render all content in ink only, so highlight tints never mix with the file's own colors (also on the ribbon: View → B/W)"
-      />
-      <Checkbox
-        checked={dimOthers}
-        onChange={setHighlightDimOthers}
-        label="Dim others"
-        disabled={mode === "off"}
-        tooltip="Fade everything outside the highlighted groups so the tints stand out"
-      />
-      {mode === "custom" && <CustomHighlightEditor />}
-      {mode !== "off" && mode !== "custom" && groups.length === 0 && (
-        <div className="text-slate-500 text-xs">No {MODE_LABELS[mode]} data in this document.</div>
-      )}
-      {groups.length > 0 && (
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Values</span>
-          {groups.map((group, index) => (
-            <div key={group.key} className={hiddenKeys.includes(group.key) ? "opacity-50" : ""}>
-              <Checkbox
-                checked={!hiddenKeys.includes(group.key)}
-                onChange={() => toggleHighlightGroup(group.key)}
-                label={
-                  <span className="inline-flex items-center gap-2">
-                    <span
-                      className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: cssColor(classifyColor(palette, index)) }}
-                    />
-                    {group.label}
-                  </span>
-                }
-                hint={`${group.objectIds.length}`}
-                tooltip="Show/hide this value's tint on the drawing"
-              />
-            </div>
-          ))}
-        </div>
-      )}
+    <PanelBody className="flex h-full flex-col gap-2 overflow-auto p-2">
+      <Collapsible title="General Highlight" defaultOpen>
+        <GeneralHighlightSection />
+      </Collapsible>
+      <Collapsible
+        title="Label Inspect"
+        info="Renders each profile LabelTemplate at its declared position, rotation, size and alignment — including the ones the drawing's own labels normally suppress — so you can check where a generated file actually placed its text."
+      >
+        <LabelInspectSection />
+      </Collapsible>
+      <Collapsible
+        title="Node Positions"
+        info="Marks connection points: a circle for each node position in the DEXPI file, an X for each attachment point the profile symbol declares."
+      >
+        <NodePositionSection />
+      </Collapsible>
     </PanelBody>
   );
 }

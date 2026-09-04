@@ -42,7 +42,7 @@ too**: trace upstream (amber) / downstream (green) from any selection;
 export the drawing as spec-mapped **SVG** or vector **PDF** (embedded
 metric-compatible fonts) — either as authored, or **as viewed** (ribbon
 Export → As viewed), which bakes the current black & white mode, highlight
-tints, dim-others and trace overlays into the file and embeds the alignment
+tints, dim-drawing and trace overlays into the file and embeds the alignment
 underlay (always on white paper — the dark theme never reaches an export);
 and the validation findings as **CSV** or an
 **Excel** workbook (`.xlsx`, frozen header + auto-filter, written without a
@@ -138,6 +138,32 @@ contains/equals (and negated) wildcard matching, an optional advanced
 `&`/`|` expression syntax, per-filter color and priority ordering
 (lower filter wins overlaps), and JSON save/load for reusable filter
 sets.
+
+The Highlight panel splits into three collapsible sections, which
+compose freely. **General Highlight** is the classification tinting
+above. **Label Inspect** draws every profile `LabelTemplate` at the
+position, rotation, size and alignment the profile declares —
+*including* the placements the viewer normally suppresses because the
+drawing carries its own label — in a color and opacity you pick, in
+front of or behind the drawing, so you can check that a generated
+DEXPI file put its text where the profile says. **Node Positions**
+marks connection points: a hollow circle for each node position the
+file declares, a hollow triangle inscribed in that same circle for each
+attachment point the profile symbol declares — so a coinciding pair
+reads as a triangle inside its circle instead of one hiding the other.
+Kinds are listed per type with a count, its own color, size scale and
+outline width. Marker size is in drawing mm, so it keeps a fixed
+proportion to the symbol it annotates at every zoom; the per-type
+appearance is remembered between sessions, and **Reset scale** puts
+every size back to 1×.
+
+All three sections show the same **Dim drawing** toggle — it is one
+shared switch, so flipping it anywhere flips it everywhere. It fades the
+drawing and nothing else: the veil is painted below every overlay, so
+classification tints, label-template marks and node markers all stay at
+full strength on top of a faded sheet. Both inspection overlays are
+included in the **As viewed** PDF/SVG exports alongside the general
+highlighting.
 
 All milestones M0–M11 are complete; the open items are niche
 (Proteus-era edge tolerances, profile LabelTemplate overlays, culling

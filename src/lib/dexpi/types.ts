@@ -173,10 +173,33 @@ export type ShapeDef = Readonly<{
   primitives: readonly ScenePrimitive[];
 }>;
 
+/** Where a node-position marker was declared. */
+export type NodePositionSource = "file" | "profile";
+
+/**
+ * One connection point, in drawing coordinates, for the Node Positions
+ * inspection overlay. File markers come from the drawing's own *NodePosition
+ * objects; profile markers from a placed symbol's Profile/NodePosition
+ * declarations, transformed by the placement.
+ */
+export type NodePositionMarker = Readonly<{
+  source: NodePositionSource;
+  /** Bare type name — "PipingNodePosition" (file) or "Piping" (profile). */
+  kind: string;
+  point: Point;
+}>;
+
 export type SceneGraph = Readonly<{
   nodes: readonly SceneNode[];
   shapes: ReadonlyMap<string, ShapeDef>;
   bounds: Bounds;
+  /** Every profile LabelTemplate placement, INCLUDING the ones `nodes` omits
+   *  because the object carries an explicit diagram label — the Label Inspect
+   *  overlay draws exactly what the profile prescribes, for comparison. */
+  labelTemplateNodes: readonly SceneNode[];
+  /** Connection points from the file and the profile, for the Node Positions
+   *  overlay. Never part of `nodes` — nothing draws them by default. */
+  nodePositionMarkers: readonly NodePositionMarker[];
   /** Heat-traced object ids (incl. inherited descendants), computed alongside
    *  the overlay nodes — the eligibility rules live only in heatTracing.ts. */
   heatTracedIds: ReadonlySet<string>;

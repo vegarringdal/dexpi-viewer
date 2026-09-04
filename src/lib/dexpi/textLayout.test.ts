@@ -30,6 +30,10 @@ function sceneWith(prim: TextPrim): SceneGraph {
     nodes: [{ kind: "prim", prim, objectId: null, role: "label" }],
     shapes: new Map(),
     bounds: { minX: 0, minY: 0, maxX: 50, maxY: 50 },
+    labelTemplateNodes: [],
+    nodePositionMarkers: [],
+    heatTracedIds: new Set(),
+    heatTracingSafetyCriticalIds: new Set(),
   };
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { sceneAsViewed, type ViewAppearance } from "./sceneAsViewed.ts";
-import type { RgbColor, SceneGraph, SceneNode, ScenePrimitive, Stroke } from "./types.ts";
+import { NO_OVERLAYS, sceneAsViewed, type ViewAppearance } from "./sceneAsViewed.ts";
+import type { RgbColor, SceneGraph, SceneNode, ScenePrimitive, ShapeDef, Stroke } from "./types.ts";
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -14,6 +14,12 @@ const TINT: RgbColor = { r: 200, g: 40, b: 60 };
 const INK: RgbColor = { r: 30, g: 41, b: 59 };
 
 const STROKE: Stroke = { color: BLACK, width: 0.35, dash: [] };
+
+const VALVE_SHAPE: ShapeDef = {
+  id: "valve",
+  name: "valve",
+  primitives: [{ kind: "polyline", points: [], stroke: STROKE }],
+};
 
 function line(objectId: string | null): SceneNode {
   return {
@@ -59,19 +65,23 @@ function usage(objectId: string | null): SceneNode {
 function sceneWith(nodes: readonly SceneNode[]): SceneGraph {
   return {
     nodes,
-    shapes: new Map(
-      [{ id: "valve", name: "valve", primitives: [{ kind: "polyline", points: [], stroke: STROKE }] }].map(
-        (shape) => [shape.id, shape],
-      ),
-    ),
+    shapes: new Map([[VALVE_SHAPE.id, VALVE_SHAPE]]),
     bounds: { minX: 0, minY: 0, maxX: 10, maxY: 10 },
+    labelTemplateNodes: [],
+    nodePositionMarkers: [],
     heatTracedIds: new Set(),
     heatTracingSafetyCriticalIds: new Set(),
   };
 }
 
 function appearance(overrides: Partial<ViewAppearance> = {}): ViewAppearance {
-  return { monochrome: false, tints: new Map(), dimOthers: false, ...overrides };
+  return {
+    monochrome: false,
+    tints: new Map(),
+    dimDrawing: false,
+    overlays: NO_OVERLAYS,
+    ...overrides,
+  };
 }
 
 function strokeColorOf(node: SceneNode | undefined): RgbColor {
@@ -120,14 +130,65 @@ describe("sceneAsViewed", () => {
     expect(fillColorOf(out.nodes[0])).toEqual(WHITE);
   });
 
-  it("fades untinted content toward paper when dimming others", () => {
+  it("fades the drawing but keeps a tinted object at full strength", () => {
     const scene = sceneWith([line("A"), line("B")]);
 
-    const out = sceneAsViewed(scene, appearance({ tints: new Map([["A", TINT]]), dimOthers: true }));
+    const out = sceneAsViewed(scene, appearance({ tints: new Map([["A", TINT]]), dimDrawing: true }));
 
     expect(strokeColorOf(out.nodes[0])).toEqual(TINT);
     // 80% white over black, matching the canvas's dim veil.
     expect(strokeColorOf(out.nodes[1])).toEqual({ r: 204, g: 204, b: 204 });
+  });
+
+  it("never dims a front overlay — the veil sits below every overlay", () => {
+    const scene = sceneWith([line("A")]);
+    const front = line("overlay");
+
+    const out = sceneAsViewed(
+      scene,
+      appearance({ dimDrawing: true, overlays: { behind: [], front: [front] } }),
+    );
+
+    expect(out.nodes[1]).toBe(front);
+    expect(strokeColorOf(out.nodes[0])).toEqual({ r: 204, g: 204, b: 204 });
+  });
+
+  it("DOES dim a behind overlay, because the canvas veil covers it too", () => {
+    const scene = sceneWith([line("A")]);
+    const behind = line("overlay");
+
+    const out = sceneAsViewed(
+      scene,
+      appearance({ dimDrawing: true, overlays: { behind: [behind], front: [] } }),
+    );
+
+    expect(strokeColorOf(out.nodes[0])).toEqual({ r: 204, g: 204, b: 204 });
+  });
+
+  it("appends overlay nodes without recoloring them", () => {
+    const scene = sceneWith([line("A")]);
+    const front = line("overlay-front");
+    const behind = line("overlay-behind");
+
+    const out = sceneAsViewed(
+      scene,
+      appearance({ monochrome: true, overlays: { behind: [behind], front: [front] } }),
+    );
+
+    expect(out.nodes[0]).toBe(behind);
+    expect(out.nodes[2]).toBe(front);
+    // The drawing between them still took the B/W treatment.
+    expect(strokeColorOf(out.nodes[1])).toEqual(INK);
+  });
+
+  it("appends overlays even when no recoloring is needed at all", () => {
+    const scene = sceneWith([line("A")]);
+    const front = line("overlay");
+
+    const out = sceneAsViewed(scene, appearance({ overlays: { behind: [], front: [front] } }));
+
+    expect(out.nodes).toHaveLength(2);
+    expect(out.nodes[1]).toBe(front);
   });
 
   it("leaves a tinted object's fill showing through at the overlay's alpha", () => {
@@ -149,7 +210,7 @@ describe("sceneAsViewed", () => {
           ["A", TINT],
           ["B", TINT],
         ]),
-        dimOthers: true,
+        dimDrawing: true,
       }),
     );
 

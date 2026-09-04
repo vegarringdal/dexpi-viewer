@@ -1,4 +1,10 @@
-import { type DiscProfile, type ProfileLabelTemplate, pickVariant } from "./discProfile.ts";
+import {
+  type DiscProfile,
+  type ProfileLabelTemplate,
+  type ProfileNodePosition,
+  pickVariant,
+} from "./discProfile.ts";
+import { transformPoint } from "./flattenScene.ts";
 import {
   buildHeatTraceOverlays,
   buildHeatTraceSymbolOverlays,
@@ -14,6 +20,7 @@ import { layoutTextLines } from "./textLayout.ts";
 import type {
   Bounds,
   ElementRole,
+  NodePositionMarker,
   Point,
   SceneGraph,
   SceneNode,
@@ -79,6 +86,8 @@ type WalkContext = {
   readonly visited: Set<Element>;
   /** *NodePosition object id → point, for ConnectorLine endpoint stitching. */
   readonly nodePositions: ReadonlyMap<string, Point>;
+  /** Mutable: profile symbol placements append their attachment points. */
+  readonly nodePositionMarkers: NodePositionMarker[];
   /** Mutable: profile symbol variants register here as they get used. */
   readonly shapes: Map<string, ShapeDef>;
   readonly profile: DiscProfile | null;
@@ -88,25 +97,46 @@ type WalkContext = {
   readonly profileLabels: PendingProfileLabels[];
 };
 
+type FileNodePositions = Readonly<{
+  /** Only the identified ones — a connector can reference nothing else. */
+  byId: ReadonlyMap<string, Point>;
+  markers: readonly NodePositionMarker[];
+}>;
+
 /**
  * ConnectorLine endpoints reference PipingNodePosition / Instrumentation-
  * NodePosition / NodePosition objects; many connectors carry no inner points
- * at all, so without this map they would draw nothing.
+ * at all, so without this map they would draw nothing. The same scan yields
+ * the Node Positions overlay's file-side markers, id-less ones included —
+ * those are undrawable as endpoints but still real attachment points.
+ * Positions are already in drawing coordinates: NodePositions hang off
+ * RepresentationGroups, which carry no transform of their own.
  */
-function parseNodePositions(root: Element): Map<string, Point> {
-  const map = new Map<string, Point>();
-  for (const el of root.querySelectorAll("Object[id]")) {
-    if (!(el.getAttribute("type") ?? "").endsWith("NodePosition")) {
+function parseNodePositions(root: Element): FileNodePositions {
+  const byId = new Map<string, Point>();
+  const markers: NodePositionMarker[] = [];
+  for (const el of root.querySelectorAll("Object")) {
+    const type = el.getAttribute("type") ?? "";
+    if (!type.endsWith("NodePosition") || type.startsWith("Profile/")) {
+      continue;
+    }
+
+    const position = pointFromAggregate(aggregateFromData(el, "Position"));
+    if (!position) {
       continue;
     }
 
     const id = el.getAttribute("id");
-    const position = pointFromAggregate(aggregateFromData(el, "Position"));
-    if (id && position) {
-      map.set(id, position);
+    if (id) {
+      byId.set(id, position);
     }
+    markers.push({ source: "file", kind: bareTypeName(type), point: position });
   }
-  return map;
+  return { byId, markers };
+}
+
+function bareTypeName(type: string): string {
+  return type.split(/[./]/).pop() ?? type;
 }
 
 const USAGE_TYPES = new Set(["Core/Diagram.ShapeUsage", "Profile/SymbolUsage"]);
@@ -121,11 +151,12 @@ const USAGE_REF_PROPS = ["Shape", "Symbol"];
 type ResolvedShape = Readonly<{
   shapeId: string;
   labelTemplates: readonly ProfileLabelTemplate[];
+  nodePositions: readonly ProfileNodePosition[];
 }>;
 
 function resolveShapeId(ctx: WalkContext, ref: string, objectId: string | null): ResolvedShape | null {
   if (ctx.shapes.has(ref)) {
-    return { shapeId: ref, labelTemplates: [] };
+    return { shapeId: ref, labelTemplates: [], nodePositions: [] };
   }
 
   const symbol =
@@ -143,7 +174,11 @@ function resolveShapeId(ctx: WalkContext, ref: string, objectId: string | null):
       primitives: variant.primitives,
     });
   }
-  return { shapeId: variant.shapeId, labelTemplates: variant.labelTemplates };
+  return {
+    shapeId: variant.shapeId,
+    labelTemplates: variant.labelTemplates,
+    nodePositions: variant.nodePositions,
+  };
 }
 
 function pushUsage(ctx: WalkContext, el: Element, objectId: string | null, role: ElementRole): void {
@@ -161,6 +196,13 @@ function pushUsage(ctx: WalkContext, el: Element, objectId: string | null, role:
   ctx.nodes.push({ kind: "use", shapeId: resolved.shapeId, transform, objectId, role });
   if (resolved.labelTemplates.length > 0 && objectId) {
     ctx.profileLabels.push({ templates: resolved.labelTemplates, transform, objectId });
+  }
+  for (const np of resolved.nodePositions) {
+    ctx.nodePositionMarkers.push({
+      source: "profile",
+      kind: np.type,
+      point: transformPoint(transform, np.position),
+    });
   }
 }
 
@@ -450,6 +492,8 @@ export function computeObjectsBounds(scene: SceneGraph, objectIds: readonly stri
 // Entry point
 // -----------------------------------------------------------------------------
 
+const NO_SUPPRESSION: ReadonlySet<string> = new Set();
+
 /**
  * Builds the render-ready scene graph from a parsed DEXPI 2.0 XML document.
  * Prefers the Diagram object's declared Min/Max extent; falls back to the
@@ -466,10 +510,12 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
       objectsById.set(id, el);
     }
   }
+  const fileNodePositions = parseNodePositions(root);
   const ctx: WalkContext = {
     nodes: [],
     visited: new Set(),
-    nodePositions: parseNodePositions(root),
+    nodePositions: fileNodePositions.byId,
+    nodePositionMarkers: [...fileNodePositions.markers],
     shapes,
     profile,
     objectsById,
@@ -501,21 +547,24 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
   }
 
   let nodes = resolveTemplateTexts(root, ctx.nodes);
+  // Every template placement, resolved once. Explicit diagram labels are
+  // authoritative — objects that carry one never get profile LabelTemplate
+  // overlays on top — so the RENDERED set is this list minus those objects.
+  // Ownership comes from the XML representation tree
+  // (collectExplicitlyLabelledIds), not the emitted nodes, so sibling label
+  // groups whose Represents sits at a different level still suppress their
+  // object's templates. The unfiltered list stays on the scene for the Label
+  // Inspect overlay, which exists precisely to show the suppressed ones.
+  let labelTemplateNodes: readonly SceneNode[] = [];
   if (ctx.profileLabels.length > 0) {
-    // Explicit diagram labels are authoritative — objects that carry one
-    // never get profile LabelTemplate overlays on top. Ownership comes
-    // from the XML representation tree (collectExplicitlyLabelledIds),
-    // not the emitted nodes, so sibling label groups whose Represents sits
-    // at a different level still suppress their object's templates.
-    nodes = [
-      ...nodes,
-      ...buildProfileLabelOverlays(
-        buildLookupIndex(root),
-        ctx.profileLabels,
-        collectExplicitlyLabelledIds(root),
-        profile?.instances,
-      ),
-    ];
+    labelTemplateNodes = buildProfileLabelOverlays(
+      buildLookupIndex(root),
+      ctx.profileLabels,
+      NO_SUPPRESSION,
+      profile?.instances,
+    );
+    const labelled = collectExplicitlyLabelledIds(root);
+    nodes = [...nodes, ...labelTemplateNodes.filter((n) => n.objectId === null || !labelled.has(n.objectId))];
   }
   const tracedIds = collectHeatTracedIds(root);
   const safetyCriticalIds = collectHeatTracingSafetyCriticalIds(root, tracedIds);
@@ -536,6 +585,8 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
     nodes,
     shapes,
     bounds: bounds ?? computeSceneBounds(nodes, shapes),
+    labelTemplateNodes,
+    nodePositionMarkers: ctx.nodePositionMarkers,
     heatTracedIds: tracedIds,
     heatTracingSafetyCriticalIds: safetyCriticalIds,
   };

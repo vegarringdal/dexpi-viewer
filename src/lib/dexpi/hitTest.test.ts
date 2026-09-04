@@ -56,6 +56,10 @@ const SCENE: SceneGraph = {
   ],
   shapes: new Map([["S1", SHAPE]]),
   bounds: { minX: 0, minY: 0, maxX: 40, maxY: 10 },
+  labelTemplateNodes: [],
+  nodePositionMarkers: [],
+  heatTracedIds: new Set(),
+  heatTracingSafetyCriticalIds: new Set(),
 };
 
 describe("hitTestScene", () => {

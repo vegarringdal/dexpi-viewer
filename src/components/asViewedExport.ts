@@ -3,12 +3,20 @@ import { buildExportUnderlay, hasVisibleUnderlay } from "../lib/canvas/underlayE
 import { hexToColor4f } from "../lib/canvas/underlaySource.ts";
 import { matchCustomFilters } from "../lib/dexpi/customHighlightFilter.ts";
 import { sceneToSvg } from "../lib/dexpi/exportSvg.ts";
-import { sceneAsViewed, type ViewAppearance } from "../lib/dexpi/sceneAsViewed.ts";
-import type { Bounds, RgbColor, SceneGraph } from "../lib/dexpi/types.ts";
+import {
+  buildNodeMarkerPrims,
+  fadeToPaper,
+  hexToRgb,
+  recolorTextNodes,
+} from "../lib/dexpi/inspectOverlays.ts";
+import { type InspectionOverlays, sceneAsViewed, type ViewAppearance } from "../lib/dexpi/sceneAsViewed.ts";
+import type { Bounds, RgbColor, SceneGraph, SceneNode } from "../lib/dexpi/types.ts";
 import { downloadBlob } from "../lib/download.ts";
 import type { ExportImage } from "../lib/exportImage.ts";
 import { fail, ok, type Result } from "../lib/result.ts";
 import { highlightState } from "../state/highlight/highlight.state.ts";
+import { labelInspectState } from "../state/labelInspect/labelInspect.state.ts";
+import { nodeMarkerStyleFor } from "../state/nodePositions/nodePositions.actions.ts";
 import { traceState } from "../state/trace/trace.state.ts";
 import { getUnderlayBitmap } from "../state/underlay/underlay.actions.ts";
 import { underlayState } from "../state/underlay/underlay.state.ts";
@@ -20,9 +28,10 @@ import { baseName, requireDocument } from "./exportShared.ts";
 // "As viewed" exports
 //
 // PDF/SVG of the drawing the way the viewer currently shows it: black & white,
-// highlight tints, dim-others, trace overlays and the underlay. The transient
-// bits of the view — selection halo and hover — are deliberately left out: they
-// are where the pointer happens to be, not a property of the drawing.
+// highlight tints, dim-others, trace overlays, the underlay, and the Label
+// Inspect / Node Positions overlays. The transient bits of the view —
+// selection halo and hover — are deliberately left out: they are where the
+// pointer happens to be, not a property of the drawing.
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
@@ -42,12 +51,42 @@ const AS_VIEWED_SUFFIX = "-as-viewed";
 // -----------------------------------------------------------------------------
 
 /**
+ * The Label Inspect and Node Positions overlays as scene nodes, built from the
+ * SAME state and geometry builders the canvas uses. Marker sizes are in
+ * drawing mm, so they need no viewport; the label overlay's opacity is
+ * flattened onto paper because a file has no compositing stage.
+ */
+function inspectionOverlays(scene: SceneGraph): InspectionOverlays {
+  const labelInspect = labelInspectState.get();
+  const labels: readonly SceneNode[] =
+    labelInspect.enabled && scene.labelTemplateNodes.length > 0
+      ? recolorTextNodes(
+          scene.labelTemplateNodes,
+          fadeToPaper(hexToRgb(labelInspect.colorHex), labelInspect.opacityPercent),
+        )
+      : [];
+  const markers = buildNodeMarkerPrims(scene.nodePositionMarkers, nodeMarkerStyleFor);
+  const markerNodes: readonly SceneNode[] = markers.map((prim) => ({
+    kind: "prim",
+    prim,
+    objectId: null,
+    role: "symbol",
+  }));
+  const behind = labelInspect.placement === "back" ? labels : [];
+
+  return {
+    behind,
+    front: [...(behind.length === 0 ? labels : []), ...markerNodes],
+  };
+}
+
+/**
  * The overlay colors the canvas is currently painting, resolved in the same
  * order it paints them (classification first, then the trace overlays on top).
  * Colors come from the LIGHT palette because an export lands on white paper
  * whatever theme the app is in.
  */
-function viewAppearance(): ViewAppearance {
+function viewAppearance(scene: SceneGraph): ViewAppearance {
   const highlight = highlightState.get();
   const trace = traceState.get();
   const palette = getScenePalette("light");
@@ -91,12 +130,15 @@ function viewAppearance(): ViewAppearance {
     tints.set(id, paletteColorToRgb(palette.traceDown));
   }
 
+  const overlays = inspectionOverlays(scene);
+
   return {
     monochrome: highlight.monochrome,
     tints,
-    // Matches the canvas: the veil only makes sense with classification groups
-    // to make stand out.
-    dimOthers: highlight.dimOthers && classifiedCount > 0,
+    // Matches the canvas: the veil only makes sense with something overlaid
+    // on top of the faded drawing.
+    dimDrawing: highlight.dimDrawing && (classifiedCount > 0 || overlays.front.length > 0),
+    overlays,
   };
 }
 
@@ -125,7 +167,7 @@ async function buildSheet(): Promise<Result<AsViewedSheet>> {
   }
 
   return ok({
-    scene: sceneAsViewed(doc.scene, viewAppearance()),
+    scene: sceneAsViewed(doc.scene, viewAppearance(doc.scene)),
     underlay: underlay.data ?? null,
     name: `${baseName()}${AS_VIEWED_SUFFIX}`,
   });

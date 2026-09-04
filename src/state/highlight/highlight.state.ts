@@ -14,8 +14,12 @@ export type HighlightState = Readonly<{
   hiddenKeys: readonly string[];
   /** Draw the whole scene in ink/paper so tints never collide with file colors. */
   monochrome: boolean;
-  /** Fade everything OUTSIDE the highlighted groups so tints stand out. */
-  dimOthers: boolean;
+  /**
+   * Fade the drawing so every overlay stands out. Shared by all three
+   * Highlight-panel sections — the veil is painted BELOW the classification,
+   * label-inspect and node-position marks, so it never dims another overlay.
+   */
+  dimDrawing: boolean;
   /** User-defined filters for "custom" mode, in priority order (last wins overlaps). */
   customFilters: readonly CustomHighlightFilter[];
 }>;
@@ -29,6 +33,6 @@ export const highlightState = createStore<HighlightState>({
   groups: [],
   hiddenKeys: [],
   monochrome: false,
-  dimOthers: false,
+  dimDrawing: false,
   customFilters: [],
 });

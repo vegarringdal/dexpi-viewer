@@ -1,6 +1,9 @@
 import type { CanvasKit, Canvas as CkCanvas, Image as CkImage, SkPicture, Surface } from "canvaskit-wasm";
 import { type RefObject, useEffect, useRef } from "react";
 import { highlightState } from "../../state/highlight/highlight.state.ts";
+import { labelInspectState } from "../../state/labelInspect/labelInspect.state.ts";
+import { nodeMarkerStyleFor } from "../../state/nodePositions/nodePositions.actions.ts";
+import { nodePositionsState } from "../../state/nodePositions/nodePositions.state.ts";
 import { renderingState } from "../../state/rendering/rendering.state.ts";
 import { selectionState } from "../../state/selection/selection.state.ts";
 import { themeState } from "../../state/theme/theme.state.ts";
@@ -15,8 +18,12 @@ import {
 } from "../../state/viewer/viewer.actions.ts";
 import { type ViewCommand, viewerState } from "../../state/viewer/viewer.state.ts";
 import { matchCustomFilters } from "../dexpi/customHighlightFilter.ts";
+import { buildNodeMarkerPrims } from "../dexpi/inspectOverlays.ts";
 import { computeObjectsBounds } from "../dexpi/sceneGraph.ts";
 import {
+  drawAnnotationPrims,
+  drawOverlayNodes,
+  drawPaper,
   drawSceneContent,
   drawSceneHighlights,
   type SceneDrawOptions,
@@ -63,6 +70,15 @@ export type StageRuntime = {
 
 const FIT_MARGIN_PX = 24;
 const MAX_OBJECT_ZOOM_PERCENT = 400;
+
+// -----------------------------------------------------------------------------
+// Helper functions
+// -----------------------------------------------------------------------------
+
+function overlayColor(hex: string, opacityPercent: number): PaletteColor {
+  const [r, g, b] = hexToColor4f(hex);
+  return [r, g, b, Math.min(100, Math.max(0, opacityPercent)) / 100];
+}
 
 // -----------------------------------------------------------------------------
 // Hook
@@ -160,13 +176,38 @@ export function useCanvasStage(): CanvasStageHandles {
         underlay.placement === "under" &&
         underlay.opacityPercent > 0;
       const scale = Math.max(viewport.scale, 1e-9);
+      const labelInspect = labelInspectState.get();
+      // "Behind the drawing" means behind its geometry but still ON the sheet,
+      // so the paper rect leaves the recorded picture and is drawn here first.
+      const labelsBehind = labelInspect.enabled && labelInspect.placement === "back";
+      const markerPrims = buildNodeMarkerPrims(doc.scene.nodePositionMarkers, nodeMarkerStyleFor);
+      // One shared "dim drawing" for all three sections, and never fade the
+      // sheet for an overlay that would draw nothing — an unexplained
+      // washed-out drawing is worse than no dimming.
+      const hasOverlay =
+        classification.size > 0 ||
+        markerPrims.length > 0 ||
+        (labelInspect.enabled && doc.scene.labelTemplateNodes.length > 0);
       const options: SceneDrawOptions = {
         minWidthMm: rendering.minStrokePx / scale,
         mmPerPx: 1 / scale,
         widthScale: rendering.strokeWidthScale,
-        hidePaper,
+        hidePaper: hidePaper || labelsBehind,
         monochrome: highlight.monochrome,
         selectionTextRect: rendering.selectionTextRect,
+      };
+      /** The profile's LabelTemplate placements, recolored as inspection marks. */
+      const paintLabelInspect = (): void => {
+        drawOverlayNodes(
+          ck,
+          canvas,
+          doc.scene,
+          palette,
+          rt.fonts,
+          options,
+          doc.scene.labelTemplateNodes,
+          overlayColor(labelInspect.colorHex, labelInspect.opacityPercent),
+        );
       };
       const picture = scenePicture(rt, doc.scene, palette, options);
       canvas.clear(ck.Color4f(...palette.background));
@@ -174,6 +215,12 @@ export function useCanvasStage(): CanvasStageHandles {
       canvas.concat(viewportMatrix(viewport, dpr));
       if (underlay.placement === "under") {
         drawUnderlay(rt, canvas, doc.scene.bounds);
+      }
+      if (labelsBehind) {
+        if (!hidePaper) {
+          drawPaper(ck, canvas, palette, doc.scene.bounds);
+        }
+        paintLabelInspect();
       }
       if (picture) {
         canvas.drawPicture(picture);
@@ -186,11 +233,15 @@ export function useCanvasStage(): CanvasStageHandles {
         upstreamIds: new Set(trace.upstreamIds),
         downstreamIds: new Set(trace.downstreamIds),
         classification,
-        dimOthers: highlight.dimOthers,
+        dimDrawing: highlight.dimDrawing && hasOverlay,
       });
       if (underlay.placement === "over") {
         drawUnderlay(rt, canvas, doc.scene.bounds);
       }
+      if (labelInspect.enabled && !labelsBehind) {
+        paintLabelInspect();
+      }
+      drawAnnotationPrims(ck, canvas, palette, rt.fonts, options, markerPrims);
       canvas.restore();
     });
   }
@@ -375,6 +426,8 @@ export function useCanvasStage(): CanvasStageHandles {
     const unsubRendering = renderingState.subscribe(() => redraw());
     const unsubTrace = traceState.subscribe(() => redraw());
     const unsubHighlight = highlightState.subscribe(() => redraw());
+    const unsubLabelInspect = labelInspectState.subscribe(() => redraw());
+    const unsubNodePositions = nodePositionsState.subscribe(() => redraw());
     const unsubUnderlay = underlayState.subscribe(() => redraw());
     const unsubViewer = viewerState.subscribe(() => {
       const { docRevision, viewCmdSeq, viewCmd } = viewerState.get();
@@ -440,6 +493,8 @@ export function useCanvasStage(): CanvasStageHandles {
       unsubRendering();
       unsubTrace();
       unsubHighlight();
+      unsubLabelInspect();
+      unsubNodePositions();
       unsubUnderlay();
       unsubViewer();
       unsubSelection();

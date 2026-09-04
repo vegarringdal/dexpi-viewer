@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { ProfileLineStroke } from "./discProfile.ts";
 import { parseDexpiDocument } from "./parseDocument.ts";
 import { setPreferBuiltinSignalStyle, signalLineStyle } from "./signalLines.ts";
-import type { CirclePrim, PolylinePrim, SceneNode } from "./types.ts";
+import type { CirclePrim, PolyLinePrim, SceneNode } from "./types.ts";
 
 // -----------------------------------------------------------------------------
 // Semantic signal-line styling — the official DISC renderings override the
@@ -101,7 +101,7 @@ function nodesFor(objectId: string): SceneNode[] {
   return (doc?.scene.nodes ?? []).filter((n) => n.kind === "prim" && n.objectId === objectId);
 }
 
-function linesOf(nodes: SceneNode[]): PolylinePrim[] {
+function linesOf(nodes: SceneNode[]): PolyLinePrim[] {
   return nodes.flatMap((n) => (n.kind === "prim" && n.prim.kind === "polyline" ? [n.prim] : []));
 }
 

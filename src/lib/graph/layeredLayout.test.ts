@@ -114,9 +114,12 @@ describe("layoutGraph (real fixtures)", () => {
       byLayer.set(node.layer, [...(byLayer.get(node.layer) ?? []), { y: node.y, height: node.height }]);
     }
     for (const column of byLayer.values()) {
-      const sorted = [...column].sort((a, b) => a.y - b.y);
-      for (let i = 1; i < sorted.length; i++) {
-        expect(sorted[i].y).toBeGreaterThanOrEqual(sorted[i - 1].y + sorted[i - 1].height);
+      // Walk the column top-down: each box must start at or below the bottom
+      // edge of the one before it, i.e. no two boxes in a layer overlap.
+      let bottom = Number.NEGATIVE_INFINITY;
+      for (const box of [...column].sort((a, b) => a.y - b.y)) {
+        expect(box.y).toBeGreaterThanOrEqual(bottom);
+        bottom = box.y + box.height;
       }
     }
   });

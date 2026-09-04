@@ -50,8 +50,8 @@ export function setHighlightMonochrome(monochrome: boolean): void {
 }
 
 /** Fade non-highlighted content while a highlight mode is active. */
-export function setHighlightDimOthers(dimOthers: boolean): void {
-  highlightState.set({ dimOthers });
+export function setHighlightDimDrawing(dimDrawing: boolean): void {
+  highlightState.set({ dimDrawing });
 }
 
 // -----------------------------------------------------------------------------

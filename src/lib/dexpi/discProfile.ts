@@ -51,12 +51,25 @@ export type ProfileLabelTemplate = Readonly<{
   vAlign: TextAlignV;
 }>;
 
+/**
+ * A Profile/NodePosition: a symbol's declared attachment point, in the
+ * symbol's own coordinate system. `type` is the bare
+ * Profile/NodePositionType literal — Piping, Instrumentation, Auxiliary or
+ * Label in the 0.6.3 catalogue, but read as an open string so a future
+ * profile's new literal shows up rather than being dropped.
+ */
+export type ProfileNodePosition = Readonly<{
+  position: Point;
+  type: string;
+}>;
+
 export type ProfileSymbolVariant = Readonly<{
   /** Registered ShapeDef id, e.g. "DiscProfile/ND0012#v1". */
   shapeId: string;
   condition: VariantCondition | null;
   primitives: readonly ScenePrimitive[];
   labelTemplates: readonly ProfileLabelTemplate[];
+  nodePositions: readonly ProfileNodePosition[];
 }>;
 
 export type ProfileSymbol = Readonly<{
@@ -151,6 +164,15 @@ function parseLabelTemplate(lt: Element): ProfileLabelTemplate {
     color: colorFromAggregate(aggregateFromData(lt, "Color")) ?? BLACK,
     hAlign: h,
     vAlign: v,
+  };
+}
+
+const UNTYPED_NODE_POSITION = "Untyped";
+
+function parseNodePosition(np: Element): ProfileNodePosition {
+  return {
+    position: pointFromAggregate(aggregateFromData(np, "Position")) ?? { x: 0, y: 0 },
+    type: refLocalName(dataValue(getData(np, "Type"))) || UNTYPED_NODE_POSITION,
   };
 }
 
@@ -316,6 +338,7 @@ export function parseDiscProfile(xmlText: string): Result<DiscProfile> {
           .map((p) => parsePrimitive(p))
           .filter((p): p is ScenePrimitive => p !== null),
         labelTemplates: componentObjects(variant, "LabelTemplates").map(parseLabelTemplate),
+        nodePositions: componentObjects(variant, "NodePositions").map(parseNodePosition),
       }),
     );
     if (variants.length === 0) {

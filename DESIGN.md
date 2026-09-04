@@ -2185,3 +2185,157 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   wrapped as a single-element array. Effect: selecting far-apart items
   (multi-select, or a group with scattered children) frames a bounding
   box containing all of them, instead of the zoom action being a no-op.
+- **2026-09-04** Highlight panel becomes three composable sections
+  (director): the existing classification UI moves unchanged into a
+  **General Highlight** `Collapsible` (`GeneralHighlightSection.tsx`), joined
+  by **Label Inspect** and **Node Positions**. `HighlightPanel.tsx` is now
+  just the shell + the no-document empty state. The three overlays compose —
+  each paints on top of whatever the others drew.
+  **Label Inspect** (`src/state/labelInspect/`) draws every profile
+  LabelTemplate at the template's own position/rotation/size/alignment, in a
+  chosen color, opacity and depth, so a generated file's actual label
+  placement can be compared against what the profile prescribes. The
+  placements worth checking are exactly the ones the viewer SUPPRESSES (the
+  2026-08-20 rule: an explicit diagram label beats a template), so the
+  overlay needs the unfiltered set. Rather than resolve templates twice,
+  `buildSceneGraph` now calls `buildProfileLabelOverlays` ONCE with an empty
+  suppression set and keeps the result as `scene.labelTemplateNodes`; the
+  rendered set is that list filtered by `collectExplicitlyLabelledIds`.
+  Equivalent because suppression is per-placement and every emitted node
+  carries its placement's objectId, and because `roleCounters` is per-entry
+  so skipping an entry never shifted another's counters. Cost: templates on
+  explicitly-labelled objects are now resolved at parse time instead of
+  skipped — bounded by the profile-symbol placement count, worth measuring
+  alongside the open M3 performance pass.
+  "Behind drawing" means behind the geometry but still ON the sheet, so
+  `drawPaper` split out of `drawSceneContent` and the recorded picture is
+  taken with `hidePaper` in that mode (the picture cache key already tracks
+  `hidePaper`, so toggling re-records once).
+  **Node Positions** (`src/state/nodePositions/`) marks connection points:
+  a circle per file node position, an X per profile attachment point.
+  `Profile/NodePosition` was never parsed — `discProfile.ts` now reads it per
+  SymbolVariant (`Position` + the bare `Profile/NodePositionType` literal,
+  read as an open string so a future profile's new literal surfaces instead
+  of being dropped; 0.6.3 publishes Piping/Instrumentation/Auxiliary/Label),
+  and each placement transforms its points by the use-transform.
+  `parseNodePositions` gained the file side: same single scan that feeds
+  connector stitching now also emits markers, id-less ones included (they
+  cannot be connector endpoints but are still real attachment points), and
+  skips `Profile/`-prefixed types so an embedded catalogue cannot leak in.
+  Both land in `scene.nodePositionMarkers`; rows come from
+  `collectNodePositionKinds` over the loaded drawing, so the panel never
+  hardcodes a type list. Per-kind color/scale live in a store keyed
+  `"<source>:<kind>"` with defaults by source (file blue, profile orange) —
+  untouched kinds stay absent from the store rather than being pre-seeded.
+  Marker size was screen-constant on the first cut and is now in drawing mm —
+  see the correction below.
+  Not wired into the "As viewed" exports — these are inspection aids, not a
+  property of the drawing; say so if that should change.
+- **2026-09-04** Node-position marker sizing corrected to drawing mm
+  (director, from screenshots). Screen-constant markers were chosen up front
+  on the reasoning that a mm size would vanish at fit zoom; on real drawings
+  that backfired in BOTH directions, because a fixed screen size means the
+  size RELATIVE to the annotated symbol swings with zoom. At fit zoom 9 px
+  blobs swamped an A1 sheet whose symbols are a few px across; zoomed right
+  in they shrank to specks beside a symbol filling the viewport. Markers are
+  now `MARKER_BASE_MM = 1.2` × the row's scale, so the proportion to the
+  symbol is fixed at every zoom. 1.2 mm is measured, not guessed: symbol
+  placements in DISC_EXAMPLE-14-13 have a median bounding size of 12 mm, and
+  the size the director picked is about a tenth of the symbol. The STROKE
+  stays screen-constant (`MARKER_STROKE_PX = 1.4`) — it is an annotation
+  line, not drawing content. General lesson for overlays: pick screen-constant
+  only for things sized against the POINTER or the viewport (the selection
+  halo's 3 px pad); anything read against the drawing belongs in mm.
+  Scale and color now persist to `localStorage` (`dexpi.nodePositions`,
+  same idiom as `dexpi.rendering`, restored in `main.tsx`), because a tuned
+  size is worth keeping. `enabled` deliberately does NOT persist: an overlay
+  that switched itself back on at startup would read as the drawing having
+  changed. `NODE_MARKER_SCALE_MIN/MAX/STEP` are exported from the actions
+  module so the stepper and the stored-value validator cannot drift apart.
+  A **Reset scale** button puts every scale back to 1× — including kinds
+  stored from other drawings, so it reads the whole store rather than the
+  visible rows.
+- **2026-09-04** Inspection overlays, second pass (four director asks off a
+  screenshot of the panel).
+  (1) **Triangle, not X.** The profile marker's X hid a coinciding circle;
+  it is now an unfilled triangle INSCRIBED in the circle of the same radius,
+  so a matching pair reads as a triangle inside its circle — which is the
+  whole point of putting both on screen. Both glyphs are outlines
+  (`Fill.style = "Transparent"`).
+  (2) **Per-kind outline width** in mm (`widthMm`, default 0.15), alongside
+  color and scale.
+  (3) **"Dim drawing"** in both sections — superseded the same day, see the
+  linked-dim entry below.
+  (4) **Both overlays now reach the "As viewed" PDF/SVG.** The mm sizing from
+  the entry above is what made this cheap: marker geometry no longer depends
+  on the viewport, so ONE builder (`lib/dexpi/inspectOverlays.ts`,
+  `buildNodeMarkerPrims`) produces the primitives for the canvas and the
+  exporters alike and they cannot drift. `ViewAppearance` gained `dimAll`
+  (the inspection veil, applied after the tint in both `inkColor` and
+  `areaColor`, and part of `rulesKey` so shape cloning still dedupes) and
+  `overlays: {behind, front}`, appended AFTER the recolor so no veil, tint or
+  B/W remap can touch annotation — matching the canvas, which paints them
+  over the finished passes. Label Inspect's opacity is flattened onto white
+  (`fadeToPaper`) because a file has no compositing stage, the same trick
+  sceneAsViewed already uses for the highlight passes.
+  Markers are now ordinary `ScenePrimitive`s drawn through `drawPrimitive`
+  rather than bespoke Skia calls, so they inherit the min-px width clamp for
+  free and `drawNodeMarkers.ts` is gone. `DrawContext` gained `rawColors`:
+  annotation carries its own colors, so the theme/monochrome remap that
+  exists to make FILE colors readable is skipped for overlays — without it,
+  B/W mode would flatten the markers to ink.
+- **2026-09-04** Test files are NOT typechecked, and have drifted
+  (found while adding the above). `tsconfig.test.json` extends
+  `tsconfig.app.json`, which carries `"exclude": ["src/**/*.test.ts"]`; an
+  `include` in the child does not cancel an inherited `exclude`, so
+  `npm run typecheck`'s second command checks nothing — a deliberate type
+  error in a `.test.ts` file is reported clean. Nine real errors are hiding
+  behind it, most of them SceneGraph literals in test helpers that have been
+  missing `heatTracedIds`/`heatTracingSafetyCriticalIds` since M9, plus a
+  `PolylinePrim`/`PolyLinePrim` typo and three possibly-undefined indexes.
+  FIXED the same day (director): `tsconfig.test.json` now sets
+  `"exclude": []` with a comment saying why, and the nine errors are gone —
+  four SceneGraph literals completed, the `PolylinePrim` typo corrected, and
+  the layer-overlap assertion rewritten to walk a running bottom edge instead
+  of indexing `sorted[i - 1]` (clearer, and no unchecked index access). Two
+  of the four were `doc?.scene ?? {empty scene}` fallbacks whose only purpose
+  was satisfying the type; they now throw if the fixture fails to parse,
+  because silently exporting an empty sheet is a worse failure than a loud
+  one. Verified the check really bites by planting a deliberate type error in
+  a test file and watching `npm run typecheck` fail. This also means the
+  drift cannot recur: the next required field added to `SceneGraph` breaks
+  the build at every fixture instead of rotting silently.
+- **2026-09-04** One shared "Dim drawing", painted below every overlay
+  (director: "Dim buttons in all sections should be linked… since dim should
+  not dim other highlight"). The three sections had three independent dim
+  flags, and the inspection one veiled the sheet AFTER the classification and
+  trace passes — so turning it on faded the very highlights it was meant to
+  make readable. Both halves of that are wrong, and fixing them collapses a
+  lot of machinery rather than adding any:
+  - `highlightState.dimOthers` becomes `highlightState.dimDrawing`, the single
+    shared flag; `labelInspectState.dimDrawing` and
+    `nodePositionsState.dimDrawing` are gone. All three checkboxes read and
+    write the one store, so toggling any one moves the others. They share a
+    label ("Dim drawing") and tooltip too — two names for one switch would be
+    a lie. None of them is disabled: it is a shared setting, and disabling a
+    shared control from one section's local state reads worse than a toggle
+    that is briefly a no-op.
+  - The veil goes back to its original position, first inside
+    `drawSceneHighlights`, so classification, trace, label-inspect and node
+    markers all repaint at full strength on top of a faded drawing.
+    `drawInspectDimVeil` is deleted. The old gate
+    (`dimOthers && classification.size > 0`) moves to the caller as
+    `dimDrawing && hasOverlay`, where `hasOverlay` now also counts label
+    templates and node markers — so dim works with highlight mode Off, while
+    still never fading the sheet for an overlay that would draw nothing.
+  - Export follows: `ViewAppearance.dimAll` and the `dimAll()` colour step are
+    gone, `dimOthers` → `dimDrawing`, and `inkColor`/`areaColor` return to
+    their pre-change form. The existing per-node rule
+    (`dimmed = dimDrawing && tint === null`) already expresses "fade the
+    drawing, keep the overlays", and appended overlay nodes are never
+    recolored at all.
+  - One asymmetry is deliberate: a "behind"-placed Label Inspect overlay IS
+    dimmed, because on canvas it is painted before the drawing and the veil
+    covers it. `sceneAsViewed` reproduces that with `dimNode` rather than
+    quietly improving on it — "as viewed" means as viewed. Behind + dim
+    therefore still gains no contrast; use "in front" with dim.

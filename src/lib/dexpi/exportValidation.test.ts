@@ -5,6 +5,7 @@ import { parseDiscProfile } from "./discProfile.ts";
 import { sceneToSvg } from "./exportSvg.ts";
 import { flattenScene } from "./flattenScene.ts";
 import { parseDexpiDocument } from "./parseDocument.ts";
+import type { DexpiDocument, SceneGraph } from "./types.ts";
 
 const BROKEN_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <Model name="Broken">
@@ -86,14 +87,21 @@ describe("validateDocument", () => {
   });
 });
 
+/** The fixture always parses; failing loudly beats exporting an empty sheet. */
+function sceneOf(doc: DexpiDocument | undefined): SceneGraph {
+  if (!doc) {
+    throw new Error("the reference P&ID fixture did not parse");
+  }
+
+  return doc.scene;
+}
+
 describe("exporters", () => {
   const xml = readFileSync(join(__dirname, "../../../refrences/reference_pid.xml"), "utf-8");
   const doc = parseDexpiDocument(xml).data;
 
   it("sceneToSvg emits a complete standalone SVG", () => {
-    const svg = sceneToSvg(
-      doc?.scene ?? { nodes: [], shapes: new Map(), bounds: { minX: 0, minY: 0, maxX: 1, maxY: 1 } },
-    );
+    const svg = sceneToSvg(sceneOf(doc));
     expect(svg.startsWith("<svg")).toBe(true);
     expect(svg).toContain("<polyline");
     expect(svg).toContain("<text");

@@ -46,6 +46,11 @@ type DrawContext = Readonly<{
   glyphColor: PaletteColor | null;
   /** Halo pass: text draws as a filled backdrop rect instead of glyphs. */
   textBackdrop: boolean;
+  /**
+   * Inspection overlays carry their own annotation colors — skip the theme
+   * and monochrome remapping, which exists to make FILE colors readable.
+   */
+  rawColors: boolean;
 }>;
 
 export type SceneHighlight = Readonly<{
@@ -56,8 +61,12 @@ export type SceneHighlight = Readonly<{
   downstreamIds: ReadonlySet<string>;
   /** Classification tint per object id — drawn below trace/hover/selection. */
   classification: ReadonlyMap<string, PaletteColor>;
-  /** Veil the non-highlighted content so the classification tints pop. */
-  dimOthers?: boolean;
+  /**
+   * Fade the drawing so the overlays pop. Painted FIRST, below every
+   * highlight and inspection pass, so it never dims another overlay — the
+   * caller decides whether anything is actually being overlaid.
+   */
+  dimDrawing?: boolean;
 }>;
 
 // -----------------------------------------------------------------------------
@@ -72,6 +81,10 @@ export type SceneHighlight = Readonly<{
  */
 function adaptColor(ctx: DrawContext, color: RgbColor): readonly [number, number, number, number] {
   const { r, g, b } = color;
+  if (ctx.rawColors) {
+    return [r / 255, g / 255, b / 255, 1];
+  }
+
   if (ctx.monochrome) {
     // Near-white stays paper — white masking fills must keep masking.
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
@@ -492,6 +505,7 @@ function makeContext(
     darkTheme: palette.isDark,
     monochrome: options.monochrome === true,
     textBackdrop: false,
+    rawColors: false,
     strokeDivisor: 1,
     extraWidthMm: 0,
     overrideColor: null,
@@ -513,25 +527,88 @@ export function drawSceneContent(
   options: SceneDrawOptions,
 ): void {
   const ctx = makeContext(ck, canvas, palette, fonts, options);
-  const b = scene.bounds;
   if (!options.hidePaper) {
-    const paper = new ck.Paint();
-    paper.setColor(ck.Color4f(...palette.paper));
-    paper.setAntiAlias(true);
-    canvas.drawRect(
-      ck.LTRBRect(
-        b.minX - PAPER_MARGIN_MM,
-        b.minY - PAPER_MARGIN_MM,
-        b.maxX + PAPER_MARGIN_MM,
-        b.maxY + PAPER_MARGIN_MM,
-      ),
-      paper,
-    );
-    paper.delete();
+    drawPaper(ck, canvas, palette, scene.bounds);
   }
 
   for (const node of scene.nodes) {
     drawNode(ctx, scene, node);
+  }
+}
+
+/** The opaque sheet the drawing sits on, one margin wider than its bounds. */
+export function drawPaper(
+  ck: CanvasKit,
+  canvas: Canvas,
+  palette: ScenePalette,
+  bounds: SceneGraph["bounds"],
+): void {
+  const paint = new ck.Paint();
+  paint.setColor(ck.Color4f(...palette.paper));
+  paint.setAntiAlias(true);
+  canvas.drawRect(
+    ck.LTRBRect(
+      bounds.minX - PAPER_MARGIN_MM,
+      bounds.minY - PAPER_MARGIN_MM,
+      bounds.maxX + PAPER_MARGIN_MM,
+      bounds.maxY + PAPER_MARGIN_MM,
+    ),
+    paint,
+  );
+  paint.delete();
+}
+
+/**
+ * An extra pass of scene nodes that are NOT part of the drawing body — the
+ * Label Inspect overlay's profile LabelTemplate placements — recolored whole
+ * so they read as annotation rather than content. `color`'s alpha carries the
+ * overlay's opacity.
+ */
+export function drawOverlayNodes(
+  ck: CanvasKit,
+  canvas: Canvas,
+  scene: SceneGraph,
+  palette: ScenePalette,
+  fonts: SceneFonts | null,
+  options: SceneDrawOptions,
+  nodes: readonly SceneNode[],
+  color: PaletteColor,
+): void {
+  if (nodes.length === 0) {
+    return;
+  }
+
+  const ctx: DrawContext = {
+    ...makeContext(ck, canvas, palette, fonts, options),
+    overrideColor: color,
+    rawColors: true,
+  };
+  for (const node of nodes) {
+    drawNode(ctx, scene, node);
+  }
+}
+
+/**
+ * Annotation primitives that carry their own colors — the node-position
+ * markers. They are geometry, not drawing content, so the theme/monochrome
+ * remapping is skipped; the usual min-px width clamp still applies so a
+ * hairline outline survives being zoomed out.
+ */
+export function drawAnnotationPrims(
+  ck: CanvasKit,
+  canvas: Canvas,
+  palette: ScenePalette,
+  fonts: SceneFonts | null,
+  options: SceneDrawOptions,
+  prims: readonly ScenePrimitive[],
+): void {
+  if (prims.length === 0) {
+    return;
+  }
+
+  const ctx: DrawContext = { ...makeContext(ck, canvas, palette, fonts, options), rawColors: true };
+  for (const prim of prims) {
+    drawPrimitive(ctx, prim);
   }
 }
 
@@ -546,7 +623,7 @@ export function drawSceneHighlights(
   highlight: SceneHighlight,
 ): void {
   const ctx = makeContext(ck, canvas, palette, fonts, options);
-  if (highlight.dimOthers === true && highlight.classification.size > 0) {
+  if (highlight.dimDrawing === true) {
     drawDimVeil(ctx, scene);
   }
   drawClassificationPass(ctx, scene, highlight.classification);
