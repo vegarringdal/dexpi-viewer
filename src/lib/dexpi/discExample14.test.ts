@@ -25,7 +25,7 @@ describe("DISC_EXAMPLE-14 sweep (official profile)", () => {
     "every sheet parses cleanly; warnings only, all explained",
     () => {
       const profileXml = readFileSync(
-        join(__dirname, "../../../refrences/discdexpi-2026pack/Profile/xml/DiscProfile.xml"),
+        join(__dirname, "../../../public/profiles/DiscProfile-0.6.3.xml"),
         "utf-8",
       );
       const profile = parseDiscProfile(profileXml).data;

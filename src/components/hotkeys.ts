@@ -1,13 +1,14 @@
 import { type HotkeyDef, hotkeysActions } from "@tredespace/ui/hotkeys";
+import { LATEST_BUNDLED_PROFILE } from "../lib/dexpi/profileVersion.ts";
 import type { Result } from "../lib/result.ts";
 import { setHighlightMonochrome } from "../state/highlight/highlight.actions.ts";
 import { highlightState } from "../state/highlight/highlight.state.ts";
 import { toggleTheme } from "../state/theme/theme.actions.ts";
 import { resetDockLayout, toggleDockPanel } from "../state/ui/ui.actions.ts";
 import {
-  openBundledProfile,
   openExampleDocument,
   requestViewCommand,
+  selectBundledProfile,
   setViewerError,
 } from "../state/viewer/viewer.actions.ts";
 import { exportPdfAsViewed, exportSvgAsViewed } from "./asViewedExport.ts";
@@ -68,13 +69,13 @@ const APP_HOTKEYS: HotkeyDef[] = [
     },
   },
   {
-    id: "file.profile063",
+    id: "file.profileLatest",
     category: "File",
-    label: "Use 0.6.3 profile",
-    description: "Load the bundled official DISC Profile 0.6.3 catalogue.",
+    label: "Use latest profile",
+    description: `Load the bundled official DISC Profile ${LATEST_BUNDLED_PROFILE} catalogue.`,
     defaultKeys: "CTRL&SHIFT&L",
     run: () => {
-      void openBundledProfile();
+      void selectBundledProfile(LATEST_BUNDLED_PROFILE);
     },
   },
   {

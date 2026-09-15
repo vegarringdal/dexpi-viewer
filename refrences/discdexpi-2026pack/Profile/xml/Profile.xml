@@ -1,4 +1,4 @@
-<Model name="Profile" uri="http://www.dexpi.org/specification/Temp/Profile">
+<Model name="Profile" uri="http://www.dexpi.org/specification/Temp/Profile/0.6.4">
   <Import prefix="Core" source="https://data.dexpi.org/models/2.0.0/Core.xml"/>
   <Import prefix="MetaData" source="https://data.dexpi.org/models/2.0.0/MetaData.xml"/>
   <ConcreteClass name="AggregatedStroke" superTypes="/Stroke">
@@ -297,15 +297,15 @@ A typical application of LateralOffset could be to define an :sp:Element:`~Profi
     <Data property="Conditions">
       <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
 ?symbol Profile:Symbol.Variants ?symbolVariant.  
-?symbolVariant Profile:SymbolVariant.RotationAllowed false.
-?symbolUsage Profile:SymbolUsage.Rotation ?rotation.
-@notEqual(?rotation 0)</String>
+?symbolVariant Profile:SymbolVariant.ResizingYAllowed false.
+?symbolUsage Profile:SymbolUsage.ScaleY ?scaleY.
+@notEqual(?scaleY 1)</String>
     </Data>
     <Data property="MessageTemplate">
-      <String>{?symbol} does not allow rotation, but the {?symbolUsage} has Rotation={?rotation}.</String>
+      <String>{?symbol} does not allow scaling in y-direction, but the {?symbolUsage} has ScaleY={?scaleY}.</String>
     </Data>
     <Data property="Name">
-      <String>invalid rotation</String>
+      <String>invalid scaling in y-direction</String>
     </Data>
     <Data property="Target">
       <String>?symbolUsage</String>
@@ -313,22 +313,23 @@ A typical application of LateralOffset could be to define an :sp:Element:`~Profi
   </Object>
   <Object type="/Rule">
     <Data property="ApplyForEach">
-      <String>?mlf</String>
+      <String>?symbolUsage</String>
     </Data>
     <Data property="Conditions">
-      <String>?mlf meta:type Plant:Instrumentation.MeasuringLineFunction;
-    Plant:Instrumentation.SignalConveyingFunction.Source ?src.
-?src meta:type ?srcType.
-@noValue(?src meta:type Plant:Instrumentation.ProcessSignalGeneratingFunction).</String>
+      <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
+?symbol Profile:Symbol.Variants ?symbolVariant.  
+?symbolVariant Profile:SymbolVariant.ResizingXAllowed false.
+?symbolUsage Profile:SymbolUsage.ScaleX ?scaleX.
+@notEqual(?scaleX 1)</String>
     </Data>
     <Data property="MessageTemplate">
-      <String>A MeasuringLineFunction must not have a {?srcType} as its Source. (It must start at a ProcessSignalGeneratingFunction.)</String>
+      <String>{?symbol} does not allow scaling in x-direction, but the {?symbolUsage} has ScaleX={?scaleX}.</String>
     </Data>
     <Data property="Name">
-      <String>invalid MeasuringLineFunction source</String>
+      <String>invalid scaling in x-direction</String>
     </Data>
     <Data property="Target">
-      <String>?mlf</String>
+      <String>?symbolUsage</String>
     </Data>
   </Object>
   <Object type="/Rule">
@@ -368,15 +369,15 @@ A typical application of LateralOffset could be to define an :sp:Element:`~Profi
     <Data property="Conditions">
       <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
 ?symbol Profile:Symbol.Variants ?symbolVariant.  
-?symbolVariant Profile:SymbolVariant.ResizingYAllowed false.
-?symbolUsage Profile:SymbolUsage.ScaleY ?scaleY.
-@notEqual(?scaleY 1)</String>
+?symbolVariant Profile:SymbolVariant.RotationAllowed false.
+?symbolUsage Profile:SymbolUsage.Rotation ?rotation.
+@notEqual(?rotation 0)</String>
     </Data>
     <Data property="MessageTemplate">
-      <String>{?symbol} does not allow scaling in y-direction, but the {?symbolUsage} has ScaleY={?scaleY}.</String>
+      <String>{?symbol} does not allow rotation, but the {?symbolUsage} has Rotation={?rotation}.</String>
     </Data>
     <Data property="Name">
-      <String>invalid scaling in y-direction</String>
+      <String>invalid rotation</String>
     </Data>
     <Data property="Target">
       <String>?symbolUsage</String>
@@ -400,46 +401,6 @@ A typical application of LateralOffset could be to define an :sp:Element:`~Profi
     </Data>
     <Data property="Target">
       <String>?symbolUsage</String>
-    </Data>
-  </Object>
-  <Object type="/Rule">
-    <Data property="ApplyForEach">
-      <String>?symbolUsage</String>
-    </Data>
-    <Data property="Conditions">
-      <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
-?symbol Profile:Symbol.Variants ?symbolVariant.  
-?symbolVariant Profile:SymbolVariant.ResizingXAllowed false.
-?symbolUsage Profile:SymbolUsage.ScaleX ?scaleX.
-@notEqual(?scaleX 1)</String>
-    </Data>
-    <Data property="MessageTemplate">
-      <String>{?symbol} does not allow scaling in x-direction, but the {?symbolUsage} has ScaleX={?scaleX}.</String>
-    </Data>
-    <Data property="Name">
-      <String>invalid scaling in x-direction</String>
-    </Data>
-    <Data property="Target">
-      <String>?symbolUsage</String>
-    </Data>
-  </Object>
-  <Object type="/Rule">
-    <Data property="ApplyForEach">
-      <String>?scf</String>
-    </Data>
-    <Data property="Conditions">
-      <String>?scf meta:type Plant:Instrumentation.SignalConveyingFunction;
-    Plant:Instrumentation.SignalConveyingFunction.Source ?src.
-?src meta:type Plant:Instrumentation.ProcessSignalGeneratingFunction.</String>
-    </Data>
-    <Data property="MessageTemplate">
-      <String>A SignalConveyingFunction must not have a ProcessSignalGeneratingFunction as its Source. (Only a MeasuringLineFunction may start at a ProcessSignalGeneratingFunction.)</String>
-    </Data>
-    <Data property="Name">
-      <String>invalid SignalConveyingFunction source</String>
-    </Data>
-    <Data property="Target">
-      <String>?scf</String>
     </Data>
   </Object>
 </Model>

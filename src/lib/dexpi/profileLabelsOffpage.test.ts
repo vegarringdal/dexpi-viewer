@@ -14,14 +14,16 @@ import type { DexpiDocument } from "./types.ts";
 // -----------------------------------------------------------------------------
 
 const BASE = join(__dirname, "../../../refrences/discdexpi-2026pack");
+// The DISC_EXAMPLE-14 sheets import the unversioned DiscProfile URI, so they
+// render against 0.6.3 — the release they were authored with.
+const PROFILE = join(__dirname, "../../../public/profiles/DiscProfile-0.6.3.xml");
 const FIXTURE_TIMEOUT_MS = 60_000;
 
 // One parse of the 30 MB official catalogue for the whole file.
 let profileCache: DiscProfile | null = null;
 
 function officialProfile(): DiscProfile | null {
-  profileCache ??=
-    parseDiscProfile(readFileSync(join(BASE, "Profile/xml/DiscProfile.xml"), "utf-8")).data ?? null;
+  profileCache ??= parseDiscProfile(readFileSync(PROFILE, "utf-8")).data ?? null;
   return profileCache;
 }
 

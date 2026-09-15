@@ -1,6 +1,6 @@
 # Validation rule reference
 
-Generated from the app's rule tables by `npm run generate:docs` — 23 rules.
+Generated from the app's rule tables by `npm run generate:docs` — 24 rules.
 Default severities can be overridden per rule (including *Ignore*) in the Validation panel's severity configuration; overrides persist across sessions.
 
 ## Schema
@@ -50,5 +50,6 @@ Default severities can be overridden per rule (including *Ignore*) in the Valida
 | Rule | Title | Default severity | What it means |
 | --- | --- | --- | --- |
 | `META-002` | Invalid template attribute references | error | An AttributeRepresentation names an attribute that does not resolve on (or near) its object — the template fragment renders blank. |
+| `META-003` | Profile version mismatch | warning | The loaded DISC catalogue is a different release from the one the document's DiscProfile Import declares — symbols, label fields and classes the two releases do not share will not resolve. |
 
 The `MDL-*` family is model-driven: every base-model object is checked against the DEXPI information model the document declares via its `data.dexpi.org` Import URIs (see [metamodel.md](metamodel.md)).

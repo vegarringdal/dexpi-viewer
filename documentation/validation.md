@@ -12,7 +12,7 @@ Rules are grouped in five categories — see the full [rule reference](rules.md)
 - **Graphics (GFX)** — drawing topology: unresolvable catalogue shapes, undrawable connectors, missing extent.
 - **Connectivity (CON)** — engineering topology: unconnected flow items/nodes/nozzles, nominal-diameter mismatches at connection points, piping-class changes without a PropertyBreak.
 - **Model (MDL)** — model-driven: every object checked against the DEXPI information model (unknown classes/properties, missing required properties, illegal enumeration literals, reference cardinality and target classes). The model version is taken from the document's `data.dexpi.org` Import URIs; profile extension classes are honoured through their declared supertypes.
-- **Meta data (META)** — template attribute references that resolve to nothing.
+- **Meta data (META)** — template attribute references that resolve to nothing, and a loaded DISC catalogue whose release is not the one the document's `DiscProfile` Import declares.
 
 ## Working with findings
 

@@ -146,7 +146,7 @@ describe("V02 profile-symbol references (DISC_EXAMPLE-14-13)", () => {
 
   it("with the official 0.6.3 profile: every symbol reference resolves", () => {
     const profileXml = readFileSync(
-      join(__dirname, "../../../refrences/discdexpi-2026pack/Profile/xml/DiscProfile.xml"),
+      join(__dirname, "../../../public/profiles/DiscProfile-0.6.3.xml"),
       "utf-8",
     );
     const profile = parseDiscProfile(profileXml).data;

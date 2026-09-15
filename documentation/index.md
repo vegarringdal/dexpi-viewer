@@ -17,4 +17,4 @@ A fast, browser-local viewer and verificator for **DEXPI 2.0 XML** P&ID files. E
 
 - [Validation rule reference](rules.md) — all rules with defaults and meaning *(generated)*
 - [DEXPI 2.0 information model](metamodel.md) — the classes validation checks against *(generated)*
-- [DiscProfile 0.6.3 symbol catalogue](symbols.md) — every profile symbol rendered *(generated)*
+- [DiscProfile 0.6.4 symbol catalogue](symbols.md) — every profile symbol rendered *(generated)*

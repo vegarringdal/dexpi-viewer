@@ -5,6 +5,7 @@ import { ExportSection } from "./ribbon/ExportSection.tsx";
 import { FileSection } from "./ribbon/FileSection.tsx";
 import { HelpSection } from "./ribbon/HelpSection.tsx";
 import { PanelsSection } from "./ribbon/PanelsSection.tsx";
+import { ProfileSection } from "./ribbon/ProfileSection.tsx";
 import { ValidationExportSection } from "./ribbon/ValidationExportSection.tsx";
 import { ViewSection } from "./ribbon/ViewSection.tsx";
 
@@ -13,6 +14,7 @@ export function RibbonBar(): JSX.Element {
   return (
     <Ribbon>
       <FileSection />
+      <ProfileSection />
       <ViewSection />
       <ExportSection />
       <AsViewedExportSection />

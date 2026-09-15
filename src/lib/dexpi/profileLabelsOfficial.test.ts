@@ -25,7 +25,7 @@ import type { DexpiDocument } from "./types.ts";
 // -----------------------------------------------------------------------------
 
 const DIR = join(__dirname, "../../../refrences/discdexpi-2026pack/Blueprint/DISC_EXAMPLE-14");
-const PROFILE = join(__dirname, "../../../refrences/discdexpi-2026pack/Profile/xml/DiscProfile.xml");
+const PROFILE = join(__dirname, "../../../public/profiles/DiscProfile-0.6.3.xml");
 const TOLERANCE = 5;
 const SWEEP_TIMEOUT_MS = 60_000;
 /** Comparable labels that must land on their official position. The 12

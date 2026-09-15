@@ -6,7 +6,13 @@
 
 - **Open** (ribbon → File) or drag-and-drop a DEXPI 2.0 XML file anywhere onto the app.
 - **Example** loads a bundled official DISC example sheet.
-- **Profile 0.6.3** loads the bundled official DISC profile so `Profile/SymbolUsage` references resolve; **Custom profile** loads your own `DiscProfile.xml`. The loaded profile survives document changes and is shown in the status bar.
+- **Profile** (ribbon) picks the DISC catalogue that resolves `Profile/SymbolUsage` references: **0.6.4** or **0.6.3** loads that bundled official release, **Custom profile** loads your own `DiscProfile.xml`, and **Auto** follows whatever the open document declares. The loaded profile survives document changes and is shown in the status bar.
+
+### Which profile version?
+
+DiscProfile 0.6.4 is the first release to stamp its version, both in the catalogue itself and in the `<Import prefix="DiscProfile" …>` URI a drawing written against it carries. Turn on **Settings → Profile → Auto-load the declared profile** and opening a drawing loads the release it names; a drawing importing the older unversioned URI loads 0.6.3. Picking a version in the ribbon pins it — press **Auto** to hand the choice back to the document.
+
+The status bar turns amber when the loaded catalogue is not the release the document declares, and Validation reports the same thing as [META-003](rules.md). The releases are not interchangeable: 0.6.4 adds eight symbols, removes two classes, relinks two symbols, and adds a `ShutoffCapability` field to 38 valve labels.
 
 Only the DEXPI 2.0 XML serialization is supported (Proteus 4.x files from the DEXPI 1.x era are out of scope).
 

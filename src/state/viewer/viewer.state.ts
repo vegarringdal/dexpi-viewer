@@ -31,8 +31,6 @@ export type ViewerState = Readonly<{
   /** Bumped whenever a new document loads; the canvas re-fits on change. */
   docRevision: number;
   objectCount: number;
-  /** Loaded DISC profile file name (DEXPI 2.1), or null. */
-  profileName: string | null;
   zoomPercent: number;
   cursor: CursorPosition | null;
   viewCmd: ViewCommand | null;
@@ -45,7 +43,6 @@ export const viewerState = createStore<ViewerState>({
   file: null,
   docRevision: 0,
   objectCount: 0,
-  profileName: null,
   zoomPercent: 100,
   cursor: null,
   viewCmd: null,

@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./App.tsx";
 import { registerAppHotkeys } from "./components/hotkeys.ts";
 import { applyStoredNodePositionSettings } from "./state/nodePositions/nodePositions.actions.ts";
+import { applyStoredProfileSettings } from "./state/profile/profile.actions.ts";
 import { applyStoredRenderingSettings } from "./state/rendering/rendering.actions.ts";
 import { applyStoredTheme } from "./state/theme/theme.actions.ts";
 import { applyStoredValidationOverrides } from "./state/validation/validation.actions.ts";
@@ -18,6 +19,7 @@ applyStoredTheme();
 applyStoredRenderingSettings();
 applyStoredValidationOverrides();
 applyStoredNodePositionSettings();
+applyStoredProfileSettings();
 initTooltips();
 registerAppHotkeys();
 

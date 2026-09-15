@@ -7,11 +7,12 @@ import { type InspectLayout, layoutObjectDiagram } from "../../../lib/graph/obje
 import { requestDiagramReveal } from "../../../state/diagramReveal/diagramReveal.actions.ts";
 import { clearInspectReveal } from "../../../state/inspectReveal/inspectReveal.actions.ts";
 import { inspectRevealState } from "../../../state/inspectReveal/inspectReveal.state.ts";
+import { getLoadedProfile } from "../../../state/profile/profile.actions.ts";
 import { setSelectedObject } from "../../../state/selection/selection.actions.ts";
 import { selectionState } from "../../../state/selection/selection.state.ts";
 import { getEffectiveIssues } from "../../../state/validation/validation.actions.ts";
 import { validationConfigState } from "../../../state/validation/validation.state.ts";
-import { getLoadedDocument, getLoadedProfile } from "../../../state/viewer/viewer.actions.ts";
+import { getLoadedDocument } from "../../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../../state/viewer/viewer.state.ts";
 
 // -----------------------------------------------------------------------------

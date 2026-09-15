@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { DiscProfile } from "./discProfile.ts";
 import {
   applySeverityOverrides,
   categoryOfRule,
@@ -190,6 +191,44 @@ describe("piping class change (CON-005)", () => {
       rootOf(TWO_SEGMENTS('<Object id="PB1" type="Plant/Piping.PropertyBreak"/>')),
     );
     expect(rulesOf(issues).has("CON-005")).toBe(false);
+  });
+});
+
+describe("profile version mismatch (META-003)", () => {
+  const DOCUMENT_0_6_4 = `<Model name="M">
+        <Import prefix="DiscProfile" source="http://www.to.define/DiscProfile/0.6.4"/>
+        <Object id="A" type="Plant/Piping.Pipe"/>
+      </Model>`;
+
+  function profileOfVersion(version: string | null): DiscProfile {
+    return {
+      version,
+      symbols: new Map(),
+      heatTraceStroke: null,
+      signalStrokes: new Map(),
+      instances: new Map(),
+      classSupers: new Map(),
+    };
+  }
+
+  it("flags a catalogue older than the version the document imports", () => {
+    const issues = validateDocument(rootOf(DOCUMENT_0_6_4), profileOfVersion(null));
+    const mismatch = issues.filter((i) => i.ruleId === "META-003");
+    expect(mismatch.length).toBe(1);
+    expect(mismatch[0]?.severity).toBe("warning");
+    expect(mismatch[0]?.message).toContain("imports DiscProfile 0.6.4");
+    expect(mismatch[0]?.message).toContain("catalogue is 0.6.3");
+  });
+
+  it("stays quiet when the versions agree", () => {
+    const issues = validateDocument(rootOf(DOCUMENT_0_6_4), profileOfVersion("0.6.4"));
+    expect(rulesOf(issues).has("META-003")).toBe(false);
+  });
+
+  it("stays quiet with no catalogue loaded, and when no profile is imported", () => {
+    expect(rulesOf(validateDocument(rootOf(DOCUMENT_0_6_4))).has("META-003")).toBe(false);
+    const noImport = rootOf(`<Model name="M"><Object id="A" type="Plant/Piping.Pipe"/></Model>`);
+    expect(rulesOf(validateDocument(noImport, profileOfVersion("0.6.4"))).has("META-003")).toBe(false);
   });
 });
 

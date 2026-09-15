@@ -67,7 +67,7 @@ describe("buildObjectDiagram", () => {
     ).toBe(true);
     expect(outgoing.some((n) => n.relation === "child" && n.card.id === "SCF1")).toBe(true);
     const stub = outgoing.find((n) => n.relation === "profile");
-    expect(stub?.card.navigable).toBe(false);
+    expect(stub?.card.navigable).toBe(true);
     expect(stub?.card.broken).toBe(false);
     expect(stub?.card.rows).toEqual([{ name: "Abbreviation", value: "MCC", tone: "normal" }]);
   });

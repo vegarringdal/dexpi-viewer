@@ -122,7 +122,7 @@ in `refrences/` when in doubt.
 | `refrences/DEXPIViewer/` | The prior-art viewer (JS + SVG); its `src/dexpiParser.js` documents the 2.0 XML shapes in practice |
 | `refrences/spec-model-Core-Diagram.py` | The spec's own Core.Diagram model source (from gitlab dexpi/Specification `src/model/Core/Diagram/Diagram.py`) — authoritative for graphics semantics: SVG mapping, DashStyle table, FillStyle, EllipseArc geometry |
 | `refrences/discdexpi-disc-profile/` | DISC Profile spec from [ToniaPedersen/DISCDEXPI](https://github.com/ToniaPedersen/DISCDEXPI): 0.4/0.5 zips (html + xml) + schema; 0.5 XML extracted (`DISC-Profile-0.5-xml/xml/` — Builtin/Core/Plant/DiscProfile model XML incl. FL0/FL10 variants). The 97 MB html extraction is deliberately NOT committed — unzip on demand |
-| `refrences/discdexpi-2026pack/` | [ToniaPedersen/DISCDEXPI_2026Pack](https://github.com/ToniaPedersen/DISCDEXPI_2026Pack): DISC Profile **0.6.x** (xml + html.zip + schema; changes doc 0.6.0→0.6.3 — newer than the 0.5 copy above), PID Validation Method (docx/drawio/pptx), and `Blueprint/DISC_EXAMPLE-14/` — real DEXPI XML files WITH official SVG renderings (verification fixtures like C01). The 99 MB html extraction is deliberately NOT committed — unzip on demand |
+| `refrences/discdexpi-2026pack/` | [ToniaPedersen/DISCDEXPI_2026Pack](https://github.com/ToniaPedersen/DISCDEXPI_2026Pack): DISC Profile **0.6.x** — `Profile/xml/` holds the CURRENT release (0.6.4), upstream's `0.6.3xml.zip`/`0.6.4xml.zip`/`0.6.4html.zip` and the schema sit beside it, with changes docs 0.6.0→0.6.3 and 0.6.3→0.6.4; plus PID Validation Method (docx/drawio/pptx) and `Blueprint/DISC_EXAMPLE-14/` — real DEXPI XML files WITH official SVG renderings (verification fixtures like C01). The html extraction is deliberately NOT committed — unzip on demand. The catalogues the APP ships (and every test parses) live in `public/profiles/`, not here, so the same 6.4 MB file is not stored twice per release |
 | `external/tredespace-ui-0.0.56.tgz` | UI library (`@tredespace/ui`); README inside covers setup |
 | `external/tredespace-client.ts` | tredespace embed API reference (not used yet) |
 
@@ -509,10 +509,11 @@ that grow, and record scope changes here.
   (getting-started, viewing incl. underlay, validation, inspect,
   topology, exports) plus GENERATED content — `npm run generate:docs`
   (scripts/generateDocs.mjs, node importing the .ts sources directly
-  with jsdom supplying DOMParser) rebuilds rules.md (all 23 rules with
+  with jsdom supplying DOMParser) rebuilds rules.md (all 24 rules with
   curated prose), metamodel.md (484 classes/89 enums summarized per
-  package) and symbols.md + symbols/*.svg (every DiscProfile 0.6.3
-  symbol rendered through the app's own sceneToSvg — 281 thumbnails);
+  package) and symbols.md + symbols/*.svg (every symbol of the NEWEST
+  bundled DiscProfile — 0.6.4 — rendered through the app's own
+  sceneToSvg: 292 symbols, 289 thumbnails);
   scripts/generateDocScreenshots.mjs re-captures the manual's PNGs by
   driving the real app (requires playwright + dev server; images are
   committed). `npm run build` now runs scripts/buildDocsSite.mjs first:
@@ -2339,3 +2340,68 @@ Scope note: covers per-object SHAPE only — cross-object semantics
     covers it. `sceneAsViewed` reproduces that with `dimNode` rather than
     quietly improving on it — "as viewed" means as viewed. Behind + dim
     therefore still gains no contrast; use "in front" with dim.
+
+- **2026-09-15** DiscProfile 0.6.4 vendored, both releases bundled, and
+  the catalogue follows the document's version (director, off the pack's
+  `DiscProfile_Changes_0.6.3_to_0.6.4.md`). 0.6.4 is the first release
+  to stamp a version — `MetaData/version` on the model plus a
+  version-qualified `Model/@uri` — and drawings written against it
+  import `http://www.to.define/DiscProfile/0.6.4` instead of the bare
+  `http://www.to.define`. That stamp is what makes multi-version support
+  possible at all, so the app now ships BOTH catalogues and can pick
+  between them:
+  - `public/profiles/` holds `DiscProfile-0.6.3.xml` and
+    `DiscProfile-0.6.4.xml`; the refrences mirror tracks upstream's
+    current release only (0.6.3 survives there as upstream's own
+    `0.6.3xml.zip`). Every test now parses the bundled files, so the
+    same 6.4 MB catalogue is not stored twice per release.
+  - `profileVersion.ts` owns the version vocabulary: the bundled
+    registry, `PRE_STAMP_VERSION` (an unversioned import means 0.6.3,
+    not "unknown"), the URI parser, and TWO readings of a document's
+    declaration — `detectDeclaredProfile(root)` for validation, and
+    `detectDeclaredProfileFromText` for the loader, which must choose a
+    catalogue BEFORE the document is parsed against it and will not
+    DOM-parse a multi-megabyte drawing twice for one URI (it scans the
+    prologue, the text before the first `<Object>`).
+  - Profile state moves out of `viewer.state` into its own
+    `src/state/profile/` domain: `ActiveProfile` is a discriminated
+    union (none / bundled+version / custom+fileName+version), plus
+    `isPinned`, the persisted `autoLoad` opt-in, and the open document's
+    `declaredVersion`. `profile.actions.ts` owns the parsed-catalogue
+    handle and knows nothing about documents; `viewer.actions.ts`
+    composes the two (`selectBundledProfile`, `followDeclaredProfile`,
+    `openProfileFile`, `setProfileAutoLoad`), keeping the dependency
+    one-directional instead of a cycle.
+  - Autoload is OFF by default (director's call): the ribbon's own
+    Profile section is the primary control — Auto / 0.6.4 / 0.6.3 minis
+    plus Custom profile — and Settings → Profile carries the opt-in
+    together with a live "declares X / active Y" readout. A hand-picked
+    version PINS, so autoload never overrules it; Auto releases the pin.
+    Loading a version we do not bundle is never substituted for: the new
+    **META-003** rule reports the mismatch (warning) instead, and the
+    status bar turns amber.
+  - One real bug fell out of the diff. 0.6.3 shipped the alarm templates
+    MALFORMED — `H=' & SignalConveyingFunction:<AlarmValue>`, missing the
+    opening quote — and `profileLabels.ts` compensated with a blunt
+    `replace(/'\s*&\s*/g, "")`. 0.6.4 corrects them to `'H=' & …` and
+    adds `'SP = ' & <SetPoint>` / `'Min: ' & <LowerLimitEndToEndLength>`,
+    against which that strip leaves a stray leading quote — which also
+    defeats `extractPortStatusHint`'s `^(HHH|HH|H|…)=` anchor, so alarm
+    placeholders would silently fall back to POSITIONAL child matching
+    and render the wrong alarm's value. `labelExpression.ts` replaces it
+    with a real reading of the VB-style form (single-quoted literals,
+    `''` escape, `&` concatenation with its surrounding whitespace
+    dropped) and repairs the 0.6.3 spelling on the way in: an odd quote
+    count means the first quote closes a literal that was never opened.
+    Both spellings now normalize to the same text, which
+    `discProfileOfficial.test.ts` asserts against the real catalogues.
+  - Everything else in the report is data-driven and needed no code:
+    the new class/attributes (extension names are out of base-model
+    validation scope by design), the 8 new symbols, the relinked
+    ND0035/ND0129, and the withdrawn `MeasuringLineFunction` rule (the
+    Profile.xml rule set was never implemented here).
+  - `discProfileOfficial.test.ts` is now parameterized over both
+    releases (284/320/210 for 0.6.3, 292/328/215 for 0.6.4) with a
+    dedicated diff block tracking §3–§4 of the report; the
+    DISC_EXAMPLE-14 sheet regressions stay on 0.6.3, the release those
+    sheets declare.

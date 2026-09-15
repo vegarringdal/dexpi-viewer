@@ -50,19 +50,26 @@ spreadsheet dependency), each row carrying the source XML line number and an
 XPath locator of the offending element itself — the `<References>`/`<Data>`
 element a finding is about, not just the object that owns it — alongside the
 rule/severity/message;
-twenty-three validation rules in five categories — Schema (SCH), Graphics
+twenty-four validation rules in five categories — Schema (SCH), Graphics
 (GFX), Connectivity (CON, incl. unconnected nozzles and nominal-diameter
 mismatches at connection points), **Model (MDL)** — every object checked
 against the DEXPI information model generated from the official XMI:
 unknown classes/properties, missing required properties, illegal enum
 literals, reference cardinality and target-class rules (profile
 extension classes chased through their declared supertypes),
-version-aware via the document's Import URIs — and Meta data (META) —
+version-aware via the document's Import URIs — and Meta data (META,
+incl. a profile-version mismatch between the document and the loaded
+catalogue) —
 feed the Validation
 panel (count in the tab, severity + category filters, click to jump to
 the object, per-rule severity overrides incl. Ignore, persisted); and a
-**DISC profile** (DiscProfile.xml, DEXPI 2.1) can be loaded to resolve
-Profile/SymbolUsage references with per-instance variant conditions.
+**DISC profile** (DiscProfile.xml, DEXPI 2.1) resolves
+Profile/SymbolUsage references with per-instance variant conditions —
+both official releases **0.6.3** and **0.6.4** ship with the app, a
+custom `DiscProfile.xml` can be loaded instead, and Settings → Profile
+can **auto-load the release the document's `DiscProfile` Import
+declares** (0.6.4 is the first to carry a version stamp; unversioned
+imports mean 0.6.3).
 Clicking the drawing reveals the object in the searchable tree
 (expand/collapse-all included).
 

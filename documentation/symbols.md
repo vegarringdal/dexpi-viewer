@@ -1,6 +1,6 @@
-# DiscProfile 0.6.3 symbol catalogue
+# DiscProfile 0.6.4 symbol catalogue
 
-Generated from the official `DiscProfile.xml` by `npm run generate:docs`, rendered with the app's own SVG emitter — 284 symbols.
+Generated from the official `DiscProfile.xml` by `npm run generate:docs`, rendered with the app's own SVG emitter — 292 symbols.
 Conditional variants render their default variant; label-template placeholders are listed per symbol.
 
 | Symbol | Preview | Variants | Label templates |
@@ -9,17 +9,17 @@ Conditional variants render their default variant; label-template placeholders a
 | `ND0001` | ![ND0001](symbols/ND0001.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0002` | ![ND0002](symbols/ND0002.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0003` | ![ND0003](symbols/ND0003.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;NonSasFunction&gt; |
-| `ND0004` | ![ND0004](symbols/ND0004.svg) | 3 (ValvePosition=NormallyClose; ValvePosition=OneNormallyCloseAngle) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0005` | ![ND0005](symbols/ND0005.svg) | 3 (ValvePosition=NormallyClose; ValvePosition=OneNormallyCloseAngle) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0006` | ![ND0006](symbols/ND0006.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;SetPoint&gt;<br>H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>L=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
+| `ND0004` | ![ND0004](symbols/ND0004.svg) | 3 (ValvePosition=NormallyClose; ValvePosition=OneNormallyCloseAngle) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0005` | ![ND0005](symbols/ND0005.svg) | 3 (ValvePosition=NormallyClose; ValvePosition=OneNormallyCloseAngle) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0006` | ![ND0006](symbols/ND0006.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
 | `ND0007` | ![ND0007](symbols/ND0007.svg) | 1 | &lt;BreakValue1&gt;<br>&lt;BreakValue2&gt; |
 | `ND0008A` | ![ND0008A](symbols/ND0008A.svg) | 1 | &lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt; |
 | `ND0008B` | ![ND0008B](symbols/ND0008B.svg) | 1 | &lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt; |
 | `ND0009A` | ![ND0009A](symbols/ND0009A.svg) | 1 | &lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt; |
 | `ND0009B` | ![ND0009B](symbols/ND0009B.svg) | 1 | &lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt; |
 | `ND0010` | ![ND0010](symbols/ND0010.svg) | 1 | — |
-| `ND0012` | ![ND0012](symbols/ND0012.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0012A` | ![ND0012A](symbols/ND0012A.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
+| `ND0012` | ![ND0012](symbols/ND0012.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0012A` | ![ND0012A](symbols/ND0012A.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
 | `ND0013` | ![ND0013](symbols/ND0013.svg) | 1 | — |
 | `ND0014` | ![ND0014](symbols/ND0014.svg) | 1 | — |
 | `ND0015` | ![ND0015](symbols/ND0015.svg) | 1 | &lt;ObjectDisplayName&gt; |
@@ -36,10 +36,10 @@ Conditional variants render their default variant; label-template placeholders a
 | `ND0026` | ![ND0026](symbols/ND0026.svg) | 2 (PlugState=Open) | — |
 | `ND0027` | ![ND0027](symbols/ND0027.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0028` | ![ND0028](symbols/ND0028.svg) | 1 | &lt;ObjectDisplayName&gt; |
-| `ND0029` | ![ND0029](symbols/ND0029.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0029A` | ![ND0029A](symbols/ND0029A.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0030` | ![ND0030](symbols/ND0030.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0030A` | ![ND0030A](symbols/ND0030A.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
+| `ND0029` | ![ND0029](symbols/ND0029.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0029A` | ![ND0029A](symbols/ND0029A.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0030` | ![ND0030](symbols/ND0030.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0030A` | ![ND0030A](symbols/ND0030A.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
 | `ND0031` | ![ND0031](symbols/ND0031.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0032` | ![ND0032](symbols/ND0032.svg) | 1 | — |
 | `ND0033` | ![ND0033](symbols/ND0033.svg) | 1 | &lt;ObjectDisplayName&gt; |
@@ -54,21 +54,21 @@ Conditional variants render their default variant; label-template placeholders a
 | `ND0039` | ![ND0039](symbols/ND0039.svg) | 1 | — |
 | `ND0040` | *(label-only)* | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0041` | *(label-only)* | 1 | EL: &lt;Elevation&gt; |
-| `ND0042A` | ![ND0042A](symbols/ND0042A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0042B` | ![ND0042B](symbols/ND0042B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
+| `ND0042A` | ![ND0042A](symbols/ND0042A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0042B` | ![ND0042B](symbols/ND0042B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
 | `ND0043` | ![ND0043](symbols/ND0043.svg) | 1 | &lt;TieInPointIdentifier&gt; ⏎ &lt;CommissioningPackage&gt;<br>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt; |
 | `ND0044` | ![ND0044](symbols/ND0044.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0045` | ![ND0045](symbols/ND0045.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;JointConnectionSize&gt; |
 | `ND0046` | ![ND0046](symbols/ND0046.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0048` | ![ND0048](symbols/ND0048.svg) | 1 | &lt;SpecialItemNumber&gt; |
-| `ND0049` | ![ND0049](symbols/ND0049.svg) | 1 | &lt;TypeCode&gt;<br>&lt;FailAction&gt; |
+| `ND0049` | ![ND0049](symbols/ND0049.svg) | 1 | &lt;TypeCode&gt;<br>&lt;FailActionRepresentation&gt; |
 | `ND0050` | ![ND0050](symbols/ND0050.svg) | 1 | &lt;TypeCode&gt; |
 | `ND0051` | ![ND0051](symbols/ND0051.svg) | 1 | — |
 | `ND0052` | ![ND0052](symbols/ND0052.svg) | 1 | — |
 | `ND0053` | ![ND0053](symbols/ND0053.svg) | 1 | — |
-| `ND0054` | ![ND0054](symbols/ND0054.svg) | 1 | &lt;FailAction&gt; |
-| `ND0055` | ![ND0055](symbols/ND0055.svg) | 1 | &lt;FailAction&gt; |
-| `ND0056` | ![ND0056](symbols/ND0056.svg) | 1 | &lt;FailAction&gt; |
+| `ND0054` | ![ND0054](symbols/ND0054.svg) | 1 | &lt;FailActionRepresentation&gt; |
+| `ND0055` | ![ND0055](symbols/ND0055.svg) | 1 | &lt;FailActionRepresentation&gt; |
+| `ND0056` | ![ND0056](symbols/ND0056.svg) | 1 | &lt;FailActionRepresentation&gt; |
 | `ND0057` | ![ND0057](symbols/ND0057.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0058` | ![ND0058](symbols/ND0058.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0059` | ![ND0059](symbols/ND0059.svg) | 1 | &lt;ObjectDisplayName&gt; |
@@ -192,34 +192,34 @@ Conditional variants render their default variant; label-template placeholders a
 | `ND0177` | ![ND0177](symbols/ND0177.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0178` | ![ND0178](symbols/ND0178.svg) | 1 | — |
 | `ND0179` | ![ND0179](symbols/ND0179.svg) | 1 | — |
-| `ND0180A` | ![ND0180A](symbols/ND0180A.svg) | 3 (ValvePosition=OneNormallyCloseStraight; ValvePosition=OneNormallyCloseAngle) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0180B` | ![ND0180B](symbols/ND0180B.svg) | 3 (ValvePosition=OneNormallyCloseStraight; ValvePosition=OneNormallyCloseAngle) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0181A` | ![ND0181A](symbols/ND0181A.svg) | 4 (ValvePosition=OneNormallyClose; ValvePosition=TwoNormallyCloseStraight; ValvePosition=TwoNormallyCloseAngle) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0181B` | ![ND0181B](symbols/ND0181B.svg) | 4 (ValvePosition=OneNormallyClose; ValvePosition=TwoNormallyCloseStraight; ValvePosition=TwoNormallyCloseAngle) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0182A` | ![ND0182A](symbols/ND0182A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0182B` | ![ND0182B](symbols/ND0182B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0183A` | ![ND0183A](symbols/ND0183A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0183B` | ![ND0183B](symbols/ND0183B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0184A` | ![ND0184A](symbols/ND0184A.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0184B` | ![ND0184B](symbols/ND0184B.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0185` | ![ND0185](symbols/ND0185.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0186` | ![ND0186](symbols/ND0186.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0187` | ![ND0187](symbols/ND0187.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0188` | ![ND0188](symbols/ND0188.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0189A` | ![ND0189A](symbols/ND0189A.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0189B` | ![ND0189B](symbols/ND0189B.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0190A` | ![ND0190A](symbols/ND0190A.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0190B` | ![ND0190B](symbols/ND0190B.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0191A` | ![ND0191A](symbols/ND0191A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0191B` | ![ND0191B](symbols/ND0191B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0192A` | ![ND0192A](symbols/ND0192A.svg) | 2 (ValvePosition=NormallyOpen) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0192B` | ![ND0192B](symbols/ND0192B.svg) | 2 (ValvePosition=NormallyOpen) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0193A` | ![ND0193A](symbols/ND0193A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0193B` | ![ND0193B](symbols/ND0193B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0194` | ![ND0194](symbols/ND0194.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0195` | ![ND0195](symbols/ND0195.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0196A` | ![ND0196A](symbols/ND0196A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
-| `ND0196B` | ![ND0196B](symbols/ND0196B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
+| `ND0180A` | ![ND0180A](symbols/ND0180A.svg) | 3 (ValvePosition=OneNormallyCloseStraight; ValvePosition=OneNormallyCloseAngle) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0180B` | ![ND0180B](symbols/ND0180B.svg) | 3 (ValvePosition=OneNormallyCloseStraight; ValvePosition=OneNormallyCloseAngle) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0181A` | ![ND0181A](symbols/ND0181A.svg) | 4 (ValvePosition=OneNormallyClose; ValvePosition=TwoNormallyCloseStraight; ValvePosition=TwoNormallyCloseAngle) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0181B` | ![ND0181B](symbols/ND0181B.svg) | 4 (ValvePosition=OneNormallyClose; ValvePosition=TwoNormallyCloseStraight; ValvePosition=TwoNormallyCloseAngle) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0182A` | ![ND0182A](symbols/ND0182A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0182B` | ![ND0182B](symbols/ND0182B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0183A` | ![ND0183A](symbols/ND0183A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0183B` | ![ND0183B](symbols/ND0183B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0184A` | ![ND0184A](symbols/ND0184A.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0184B` | ![ND0184B](symbols/ND0184B.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0185` | ![ND0185](symbols/ND0185.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0186` | ![ND0186](symbols/ND0186.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0187` | ![ND0187](symbols/ND0187.svg) | 1 | — |
+| `ND0188` | ![ND0188](symbols/ND0188.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0189A` | ![ND0189A](symbols/ND0189A.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0189B` | ![ND0189B](symbols/ND0189B.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0190A` | ![ND0190A](symbols/ND0190A.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0190B` | ![ND0190B](symbols/ND0190B.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0191A` | ![ND0191A](symbols/ND0191A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0191B` | ![ND0191B](symbols/ND0191B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0192A` | ![ND0192A](symbols/ND0192A.svg) | 2 (ValvePosition=NormallyOpen) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0192B` | ![ND0192B](symbols/ND0192B.svg) | 2 (ValvePosition=NormallyOpen) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0193A` | ![ND0193A](symbols/ND0193A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0193B` | ![ND0193B](symbols/ND0193B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0194` | ![ND0194](symbols/ND0194.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0195` | ![ND0195](symbols/ND0195.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0196A` | ![ND0196A](symbols/ND0196A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0196B` | ![ND0196B](symbols/ND0196B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
 | `ND0197` | ![ND0197](symbols/ND0197.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0198` | ![ND0198](symbols/ND0198.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0199` | ![ND0199](symbols/ND0199.svg) | 1 | — |
@@ -247,18 +247,18 @@ Conditional variants render their default variant; label-template placeholders a
 | `ND0221` | ![ND0221](symbols/ND0221.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0222` | ![ND0222](symbols/ND0222.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0223` | ![ND0223](symbols/ND0223.svg) | 1 | &lt;ObjectDisplayName&gt; |
-| `ND0224` | ![ND0224](symbols/ND0224.svg) | 1 | — |
+| `ND0224` | ![ND0224](symbols/ND0224.svg) | 1 | &lt;PipeSlopeRatio&gt; |
 | `ND0225A` | ![ND0225A](symbols/ND0225A.svg) | 1 | &lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;<br>&lt;ReferencedDrawingMainTag&gt; |
 | `ND0225B` | ![ND0225B](symbols/ND0225B.svg) | 1 | &lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt;<br>&lt;ReferencedDrawingMainTag&gt; |
 | `ND0226` | ![ND0226](symbols/ND0226.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0227` | ![ND0227](symbols/ND0227.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0228` | ![ND0228](symbols/ND0228.svg) | 1 | — |
 | `ND0236` | ![ND0236](symbols/ND0236.svg) | 1 | — |
-| `ND0237` | ![ND0237](symbols/ND0237.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; |
+| `ND0237` | ![ND0237](symbols/ND0237.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
 | `ND0238` | ![ND0238](symbols/ND0238.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0239` | ![ND0239](symbols/ND0239.svg) | 1 | — |
 | `ND0240` | ![ND0240](symbols/ND0240.svg) | 1 | — |
-| `ND0241` | ![ND0241](symbols/ND0241.svg) | 1 | &lt;FailAction&gt; |
+| `ND0241` | ![ND0241](symbols/ND0241.svg) | 1 | &lt;FailActionRepresentation&gt; |
 | `ND0242` | ![ND0242](symbols/ND0242.svg) | 1 | &lt;BreakValue1&gt;<br>&lt;BreakValue2&gt; |
 | `ND0243` | ![ND0243](symbols/ND0243.svg) | 1 | — |
 | `ND0244A` | ![ND0244A](symbols/ND0244A.svg) | 1 | &lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt; |
@@ -268,7 +268,7 @@ Conditional variants render their default variant; label-template placeholders a
 | `ND0246` | ![ND0246](symbols/ND0246.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0247` | ![ND0247](symbols/ND0247.svg) | 1 | &lt;ObjectDisplayName&gt; |
 | `ND0248A` | ![ND0248A](symbols/ND0248A.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt; |
-| `ND0248B` | ![ND0248B](symbols/ND0248B.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;Sequence&gt;&lt;TagSuffix&gt;<br>&lt;TypicalReference&gt;<br>&lt;SetPoint&gt; |
+| `ND0248B` | ![ND0248B](symbols/ND0248B.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;Sequence&gt;&lt;TagSuffix&gt;<br>&lt;TypicalReference&gt;<br>'SP = ' &amp; &lt;SetPoint&gt; |
 | `ND0249A` | ![ND0249A](symbols/ND0249A.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;TypeCode&gt;<br>&lt;ProcessPlantIdentificationCode&gt; |
 | `ND0249B` | ![ND0249B](symbols/ND0249B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;ProcessPlantIdentificationCode&gt; |
 | `ND0249C` | ![ND0249C](symbols/ND0249C.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;TypeCode&gt;<br>&lt;ProcessPlantIdentificationCode&gt; |
@@ -289,3 +289,11 @@ Conditional variants render their default variant; label-template placeholders a
 | `ND0265` | ![ND0265](symbols/ND0265.svg) | 1 | — |
 | `ND0266` | ![ND0266](symbols/ND0266.svg) | 1 | — |
 | `ND0267` | ![ND0267](symbols/ND0267.svg) | 1 | — |
+| `ND0268` | ![ND0268](symbols/ND0268.svg) | 1 | — |
+| `ND0269` | ![ND0269](symbols/ND0269.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
+| `ND0270` | ![ND0270](symbols/ND0270.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
+| `ND0271` | ![ND0271](symbols/ND0271.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
+| `ND0272` | ![ND0272](symbols/ND0272.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;NonSasFunction&gt; |
+| `ND0273` | ![ND0273](symbols/ND0273.svg) | 1 | 'Min: ' &amp; &lt;LowerLimitEndToEndLength&gt; |
+| `ND0274` | ![ND0274](symbols/ND0274.svg) | 1 | — |
+| `ND0275` | ![ND0275](symbols/ND0275.svg) | 1 | — |

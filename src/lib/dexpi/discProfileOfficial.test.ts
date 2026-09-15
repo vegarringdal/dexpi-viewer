@@ -2,19 +2,20 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { type DiscProfile, parseDiscProfile, pickVariant } from "./discProfile.ts";
+import { normalizeLabelTemplateText } from "./labelExpression.ts";
 
 // -----------------------------------------------------------------------------
-// The official DISC Profile 0.6.3 catalogue from the DISC DEXPI 2026 Pack —
-// the first real, published profile data (earlier support was reconstructed
-// from the prior-art viewer). These are regression anchors: the counts match
-// the pack's own 0.6.0→0.6.3 comparison report (284 symbols in v0.6.3).
+// The official DISC Profile catalogues from the DISC DEXPI 2026 Pack — the
+// first real, published profile data (earlier support was reconstructed from
+// the prior-art viewer). Both bundled releases are regression anchors: the
+// counts match the pack's own comparison reports (284 symbols in v0.6.3, 292
+// in v0.6.4), and §4.2 of the 0.6.3→0.6.4 report drives the diff assertions.
 // -----------------------------------------------------------------------------
 
-function loadOfficialProfile(): DiscProfile {
-  const xml = readFileSync(
-    join(__dirname, "../../../refrences/discdexpi-2026pack/Profile/xml/DiscProfile.xml"),
-    "utf-8",
-  );
+const BUNDLED_DIR = join(__dirname, "../../../public/profiles");
+
+function loadBundledProfile(version: string): DiscProfile {
+  const xml = readFileSync(join(BUNDLED_DIR, `DiscProfile-${version}.xml`), "utf-8");
   const result = parseDiscProfile(xml);
   if (!result.data) {
     throw new Error(result.error?.msg ?? "profile parse failed");
@@ -36,68 +37,161 @@ function makeInstance(attribute: string, value: string): Element {
   return el;
 }
 
-describe("official DiscProfile 0.6.3 (DISC DEXPI 2026 Pack)", () => {
-  const profile = loadOfficialProfile();
-  const names = [...profile.symbols.keys()].filter((k) => !k.startsWith("DiscProfile/"));
+/** Every LabelTemplate text a symbol carries, across all its variants. */
+function templateTexts(profile: DiscProfile, symbolName: string): readonly string[] {
+  return (profile.symbols.get(symbolName)?.variants ?? []).flatMap((v) =>
+    v.labelTemplates.map((t) => t.text),
+  );
+}
 
-  it("parses the full catalogue: 284 symbols, all with variants", () => {
-    expect(names.length).toBe(284);
-    const totalVariants = names.reduce((sum, n) => sum + (profile.symbols.get(n)?.variants.length ?? 0), 0);
-    expect(totalVariants).toBe(320);
-    // Every symbol is reachable under both its bare and DiscProfile/-prefixed key.
-    for (const name of names) {
-      expect(profile.symbols.get(`DiscProfile/${name}`)).toBe(profile.symbols.get(name));
+// -----------------------------------------------------------------------------
+// Catalogue shape, per bundled release
+// -----------------------------------------------------------------------------
+
+type CatalogueShape = Readonly<{
+  version: string;
+  /** The version the catalogue stamps on itself — 0.6.4 is the first to do so. */
+  stamp: string | null;
+  symbols: number;
+  variants: number;
+  withTemplates: number;
+}>;
+
+const CATALOGUES: readonly CatalogueShape[] = [
+  { version: "0.6.3", stamp: null, symbols: 284, variants: 320, withTemplates: 210 },
+  { version: "0.6.4", stamp: "0.6.4", symbols: 292, variants: 328, withTemplates: 215 },
+];
+
+for (const shape of CATALOGUES) {
+  describe(`official DiscProfile ${shape.version} (DISC DEXPI 2026 Pack)`, () => {
+    const profile = loadBundledProfile(shape.version);
+    const names = [...profile.symbols.keys()].filter((k) => !k.startsWith("DiscProfile/"));
+
+    it("reports the version it was stamped with", () => {
+      expect(profile.version).toBe(shape.stamp);
+    });
+
+    it(`parses the full catalogue: ${String(shape.symbols)} symbols, all with variants`, () => {
+      expect(names.length).toBe(shape.symbols);
+      const totalVariants = names.reduce((sum, n) => sum + (profile.symbols.get(n)?.variants.length ?? 0), 0);
+      expect(totalVariants).toBe(shape.variants);
+      // Every symbol is reachable under both its bare and DiscProfile/-prefixed key.
+      for (const name of names) {
+        expect(profile.symbols.get(`DiscProfile/${name}`)).toBe(profile.symbols.get(name));
+      }
+    });
+
+    it("only the label-/node-only symbols have primitive-less variants", () => {
+      const emptyPrim = names.filter((n) =>
+        profile.symbols.get(n)?.variants.some((v) => v.primitives.length === 0),
+      );
+      expect(emptyPrim.sort()).toEqual(["ND0000", "ND0040", "ND0041"]);
+    });
+
+    it("label templates parse for the majority of symbols", () => {
+      const withTemplates = names.filter((n) =>
+        profile.symbols.get(n)?.variants.some((v) => v.labelTemplates.length > 0),
+      );
+      expect(withTemplates.length).toBe(shape.withTemplates);
+      const sample = profile.symbols
+        .get(withTemplates[0] ?? "")
+        ?.variants.flatMap((v) => v.labelTemplates)[0];
+      expect(sample?.text.length).toBeGreaterThan(0);
+      expect(Number.isFinite(sample?.size)).toBe(true);
+    });
+
+    it("variant conditions parse and pickVariant honours them", () => {
+      const conditioned = names
+        .map((n) => profile.symbols.get(n))
+        .find((sym) => sym?.variants.some((v) => v.condition !== null));
+      if (!conditioned) {
+        throw new Error("catalogue has no conditioned symbol");
+      }
+
+      const variant = conditioned.variants.find((v) => v.condition !== null);
+      const condition = variant?.condition;
+      if (!variant || !condition) {
+        throw new Error("no condition found");
+      }
+
+      const matching = makeInstance(condition.attributeName, condition.literalValue);
+      expect(pickVariant(conditioned, matching)).toBe(variant);
+      expect(pickVariant(conditioned, null)).not.toBe(variant);
+    });
+
+    it("carries no heat-trace LineStroke instance (catalogue defines classes, not runs)", () => {
+      expect(profile.heatTraceStroke).toBeNull();
+    });
+
+    it("collects the published TypeCode catalogue instances with their abbreviations", () => {
+      const mcc = profile.instances.get(
+        "DiscProfile/InformationModel.ProcessInstrumentationFunctionTypeCodes.MotorControlCenter",
+      );
+      expect(mcc?.get("Abbreviation")).toBe("MCC");
+      expect(
+        profile.instances.get("InformationModel.ControlledActuatorTypeCodes.Motor")?.get("Abbreviation"),
+      ).toBe("M");
+    });
+  });
+}
+
+// -----------------------------------------------------------------------------
+// 0.6.3 → 0.6.4 diff (DiscProfile_Changes_0.6.3_to_0.6.4.md §3, §4)
+// -----------------------------------------------------------------------------
+
+describe("what 0.6.4 changed against 0.6.3", () => {
+  const v3 = loadBundledProfile("0.6.3");
+  const v4 = loadBundledProfile("0.6.4");
+
+  it("adds ND0268–ND0275 and removes none (§4.1, §4.3)", () => {
+    const added = ["ND0268", "ND0269", "ND0270", "ND0271", "ND0272", "ND0273", "ND0274", "ND0275"];
+    for (const name of added) {
+      expect(v3.symbols.has(name)).toBe(false);
+      expect(v4.symbols.has(name)).toBe(true);
+    }
+
+    const removed = [...v3.symbols.keys()].filter((k) => !v4.symbols.has(k));
+    expect(removed).toEqual([]);
+  });
+
+  it("adds the class the new FlangeSpadeSpacer symbol draws, drops two others (§3.1, §3.2)", () => {
+    expect(v4.classSupers.has("DiscProfile/InformationModel.FlangeSpadeSpacer")).toBe(true);
+    expect(v3.classSupers.has("DiscProfile/InformationModel.FlangeSpadeSpacer")).toBe(false);
+    for (const gone of ["LevelMeasuringInstrumentNuclear", "PipingInstrInterface"]) {
+      expect(v3.classSupers.has(`DiscProfile/InformationModel.${gone}`)).toBe(true);
+      expect(v4.classSupers.has(`DiscProfile/InformationModel.${gone}`)).toBe(false);
     }
   });
 
-  it("only the label-/node-only symbols have primitive-less variants", () => {
-    const emptyPrim = names.filter((n) =>
-      profile.symbols.get(n)?.variants.some((v) => v.primitives.length === 0),
-    );
-    expect(emptyPrim.sort()).toEqual(["ND0000", "ND0040", "ND0041"]);
+  it("appends <ShutoffCapability> to the valve label template (§4.2.1)", () => {
+    expect(templateTexts(v3, "ND0012").join("\n")).not.toContain("<ShutoffCapability>");
+    expect(templateTexts(v4, "ND0012").join("\n")).toContain("<LockMechanism> <ShutoffCapability>");
   });
 
-  it("label templates parse for the majority of symbols", () => {
-    const withTemplates = names.filter((n) =>
-      profile.symbols.get(n)?.variants.some((v) => v.labelTemplates.length > 0),
-    );
-    expect(withTemplates.length).toBe(210);
-    const sample = profile.symbols.get(withTemplates[0] ?? "")?.variants.flatMap((v) => v.labelTemplates)[0];
-    expect(sample?.text.length).toBeGreaterThan(0);
-    expect(Number.isFinite(sample?.size)).toBe(true);
+  it("switches the actuator label to <FailActionRepresentation> (§4.2.2)", () => {
+    expect(templateTexts(v3, "ND0049")).toContain("<FailAction>");
+    expect(templateTexts(v4, "ND0049")).toContain("<FailActionRepresentation>");
   });
 
-  it("variant conditions parse and pickVariant honours them", () => {
-    const conditioned = names
-      .map((n) => profile.symbols.get(n))
-      .find((sym) => sym?.variants.some((v) => v.condition !== null));
-    if (!conditioned) {
-      throw new Error("catalogue has no conditioned symbol");
-    }
-
-    const variant = conditioned.variants.find((v) => v.condition !== null);
-    const condition = variant?.condition;
-    if (!variant || !condition) {
-      throw new Error("no condition found");
-    }
-
-    const matching = makeInstance(condition.attributeName, condition.literalValue);
-    expect(pickVariant(conditioned, matching)).toBe(variant);
-    expect(pickVariant(conditioned, null)).not.toBe(variant);
+  it("strips the valve label template off ND0187 and adds one to ND0224 (§4.2.5)", () => {
+    expect(templateTexts(v3, "ND0187").length).toBeGreaterThan(0);
+    expect(templateTexts(v4, "ND0187")).toEqual([]);
+    expect(templateTexts(v3, "ND0224")).toEqual([]);
+    expect(templateTexts(v4, "ND0224")).toContain("<PipeSlopeRatio>");
   });
 
-  it("carries no heat-trace LineStroke instance (catalogue defines classes, not runs)", () => {
-    expect(profile.heatTraceStroke).toBeNull();
-  });
+  it("prefixes the set point and repairs the alarm literals (§4.2.3)", () => {
+    // 0.6.3 wrote the alarm templates without their opening quote; both
+    // spellings must normalize to the same plain template text.
+    const alarms3 = templateTexts(v3, "ND0006").filter((t) => t.includes("AlarmValue"));
+    const alarms4 = templateTexts(v4, "ND0006").filter((t) => t.includes("AlarmValue"));
+    expect(alarms3).toContain("H=' & SignalConveyingFunction:<AlarmValue>");
+    expect(alarms4).toContain("'H=' & SignalConveyingFunction:<AlarmValue>");
+    expect(alarms3.map(normalizeLabelTemplateText)).toEqual(alarms4.map(normalizeLabelTemplateText));
 
-  it("collects the published TypeCode catalogue instances with their abbreviations", () => {
-    const mcc = profile.instances.get(
-      "DiscProfile/InformationModel.ProcessInstrumentationFunctionTypeCodes.MotorControlCenter",
-    );
-    expect(mcc?.get("Abbreviation")).toBe("MCC");
-    expect(
-      profile.instances.get("InformationModel.ControlledActuatorTypeCodes.Motor")?.get("Abbreviation"),
-    ).toBe("M");
+    expect(templateTexts(v3, "ND0248B")).toContain("<SetPoint>");
+    expect(templateTexts(v4, "ND0248B")).toContain("'SP = ' & <SetPoint>");
+    expect(normalizeLabelTemplateText("'SP = ' & <SetPoint>")).toBe("SP = <SetPoint>");
   });
 });
 
@@ -108,9 +202,14 @@ describe("official DiscProfile 0.6.3 (DISC DEXPI 2026 Pack)", () => {
 // relative), left stack right-aligned, right stack left-aligned, lines
 // growing UPWARD from the anchor. (The official tool uses 1.0× line spacing;
 // ours is the global 1.4×, so the top line sits 1.3mm higher — accepted.)
+//
+// The DISC_EXAMPLE-14 sheets import the unversioned DiscProfile URI, so they
+// are rendered against 0.6.3 — the release they were authored with.
 // -----------------------------------------------------------------------------
 
 describe("property-break labels on the real sheet 08", () => {
+  const sheetProfile = (): DiscProfile => loadBundledProfile("0.6.3");
+
   it("emits one bottom-anchored block per side, matching the official anchors", async () => {
     const { parseDexpiDocument } = await import("./parseDocument.ts");
     const { sceneToSvg } = await import("./exportSvg.ts");
@@ -121,7 +220,7 @@ describe("property-break labels on the real sheet 08", () => {
       ),
       "utf-8",
     );
-    const doc = parseDexpiDocument(sheetXml, loadOfficialProfile()).data;
+    const doc = parseDexpiDocument(sheetXml, sheetProfile()).data;
     if (!doc) {
       throw new Error("sheet parse failed");
     }
@@ -156,7 +255,7 @@ describe("property-break labels on the real sheet 08", () => {
       ),
       "utf-8",
     );
-    const doc = parseDexpiDocument(sheetXml, loadOfficialProfile()).data;
+    const doc = parseDexpiDocument(sheetXml, sheetProfile()).data;
     if (!doc) {
       throw new Error("sheet parse failed");
     }
@@ -201,7 +300,7 @@ describe("property-break labels on the real sheet 08", () => {
       ),
       "utf-8",
     );
-    const doc = parseDexpiDocument(sheetXml, loadOfficialProfile()).data;
+    const doc = parseDexpiDocument(sheetXml, sheetProfile()).data;
     if (!doc) {
       throw new Error("sheet parse failed");
     }

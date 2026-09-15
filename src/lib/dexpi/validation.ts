@@ -1,6 +1,7 @@
 import { isFlowReferenceProperty } from "./connectivity.ts";
 import type { DiscProfile } from "./discProfile.ts";
 import { validateAgainstModel } from "./modelValidation.ts";
+import { detectDeclaredProfile, PRE_STAMP_VERSION } from "./profileVersion.ts";
 import { buildLookupIndex, lookupAttribute } from "./resolveTemplates.ts";
 import {
   componentObjects,
@@ -73,6 +74,7 @@ export const RULE_TITLES: Readonly<Record<string, string>> = {
   "MDL-008": "Unknown component property",
   "MDL-009": "Abstract class instantiated",
   "META-002": "Invalid template attribute references",
+  "META-003": "Profile version mismatch",
 };
 
 export const CATEGORY_LABELS: Readonly<Record<ValidationCategory, string>> = {
@@ -647,6 +649,34 @@ function checkTemplateAttributeReferences(root: Element, issues: ValidationIssue
   }
 }
 
+/**
+ * META-003 — the loaded catalogue must be the one the document imports.
+ * A document authored against DiscProfile 0.6.4 and drawn with 0.6.3 (or the
+ * other way round) silently loses the symbols, label fields and classes the
+ * two releases do not share, which surfaces downstream as unrelated GFX-001
+ * noise. Says nothing when no catalogue is loaded (GFX-001 already covers
+ * that) or when the document imports no profile at all.
+ */
+function checkProfileVersion(root: Element, profile: DiscProfile | null, issues: ValidationIssue[]): void {
+  const declared = detectDeclaredProfile(root);
+  if (!profile || !declared.isImported || declared.version === null) {
+    return;
+  }
+
+  const loaded = profile.version ?? PRE_STAMP_VERSION;
+  if (loaded === declared.version) {
+    return;
+  }
+
+  issues.push({
+    ruleId: "META-003",
+    severity: "warning",
+    message: `This document imports DiscProfile ${declared.version}, but the loaded catalogue is ${loaded}. Symbols, label fields and classes the two releases do not share will not resolve.`,
+    objectId: null,
+    suggestion: `Load the DiscProfile ${declared.version} catalogue (ribbon → Profile), or enable Settings → Profile → "Auto-load the declared profile".`,
+  });
+}
+
 // -----------------------------------------------------------------------------
 // Helpers & entry point
 // -----------------------------------------------------------------------------
@@ -720,5 +750,6 @@ export function validateDocument(root: Element, profile: DiscProfile | null = nu
   checkPipingClassChange(root, byId, issues);
   issues.push(...validateAgainstModel(root, profile?.classSupers));
   checkTemplateAttributeReferences(root, issues);
+  checkProfileVersion(root, profile, issues);
   return sortBySeverity(issues);
 }

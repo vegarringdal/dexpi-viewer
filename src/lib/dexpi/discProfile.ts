@@ -1,5 +1,6 @@
 import { fail, ok, type Result } from "../result.ts";
 import { parseAlignment, parsePrimitive } from "./primitives.ts";
+import { detectProfileFileVersion } from "./profileVersion.ts";
 import type { Point, RgbColor, ScenePrimitive, StrokeRounding, TextAlignH, TextAlignV } from "./types.ts";
 import {
   aggregateFromData,
@@ -98,6 +99,12 @@ export type ProfileLineStroke = Readonly<{
 export type ProfileInstanceData = ReadonlyMap<string, string>;
 
 export type DiscProfile = Readonly<{
+  /**
+   * The catalogue's own version ("0.6.4"), from its MetaData/version stamp or
+   * its versioned Model/@uri. Null for a pre-0.6.4 catalogue, which carries
+   * neither (see profileVersion.ts).
+   */
+  version: string | null;
   /** Keyed by "DiscProfile/<name>" AND the bare symbol name. */
   symbols: ReadonlyMap<string, ProfileSymbol>;
   /** The profile's heat-trace stroke (non-zero LateralOffset), if any. */
@@ -354,6 +361,10 @@ export function parseDiscProfile(xmlText: string): Result<DiscProfile> {
   }
 
   return ok({
+    version: detectProfileFileVersion(
+      dom.documentElement,
+      stringFromData(dom.documentElement, "MetaData/version"),
+    ),
     symbols,
     heatTraceStroke: findHeatTraceStroke(dom),
     signalStrokes: collectSignalStrokes(dom),

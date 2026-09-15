@@ -36,7 +36,25 @@
       "Bash(find /tmp -iname \"*.png\" -newer /workspace/DESIGN.md -mmin -30 2>/dev/null | grep -v node_modules *)",
       "Read(//tmp/**)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/manual/images/xml-trees-overview.png)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/manual/xml-trees.html)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/manual/xml-trees.html)",
+      "Bash(grep -rn \"RibbonSlot\\\\|Select\" --include=*.tsx src/components/ribbon | head -20 && echo \"=== select widget ===\" && ls node_modules/@tredespace/ui/widgets/select && sed -n '1,60p' node_modules/@tredespace/ui/widgets/select/*.d.ts | head -70)",
+      "Bash(cp temp/DISCDEXPI_2026Pack/Profile/xml/*.xml refrences/discdexpi-2026pack/Profile/xml/)",
+      "Bash(git rm *)",
+      "Bash(npm test *)",
+      "Bash(git stash *)",
+      "Bash(node -e \"require\\('jsdom'\\)\")",
+      "Bash(command -v python3)",
+      "Bash(python3 -)",
+      "Bash(node -e \"const wt=require\\('node:worker_threads'\\); console.log\\(typeof wt.markAsUncloneable\\)\")",
+      "Bash(sed -i \"s#^const { markAsUncloneable } = require\\('node:worker_threads'\\)#const { markAsUncloneable = \\(\\) => {} } = require\\('node:worker_threads'\\)#\" node_modules/undici/lib/web/webidl/index.js)",
+      "Bash(node -e \"const {JSDOM}=require\\('jsdom'\\); console.log\\('jsdom ok:', new JSDOM\\('<p>x</p>'\\).window.document.querySelector\\('p'\\).textContent\\)\")",
+      "Bash(npx vitest *)",
+      "Bash(npx esbuild *)",
+      "Bash(node scripts/.gen-docs.tmp.mjs)",
+      "Bash(grep -c \"^| \\\\`\" documentation/rules.md)"
+    ],
+    "additionalDirectories": [
+      "/workspace/node_modules/@tredespace/ui/widgets/select"
     ]
   }
 }

@@ -1,8 +1,8 @@
 // Regenerates the DERIVED documentation content in documentation/:
 //   rules.md      — validation rule reference, from the live rule tables
 //   metamodel.md  — DEXPI 2.0 information-model summary, from metaModel-2.0
-//   symbols.md    — DiscProfile 0.6.3 symbol catalogue + symbols/*.svg,
-//                   rendered with the app's own SVG emitter
+//   symbols.md    — the newest bundled DiscProfile symbol catalogue +
+//                   symbols/*.svg, rendered with the app's own SVG emitter
 // Run: npm run generate:docs   (node imports the .ts sources directly)
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -19,6 +19,7 @@ globalThis.DOMParser = dom.window.DOMParser;
 const { RULE_TITLES, CATEGORY_LABELS, categoryOfRule } = await import("../src/lib/dexpi/validation.ts");
 const { META_MODEL_2_0 } = await import("../src/lib/generated/metaModel-2.0.ts");
 const { parseDiscProfile } = await import("../src/lib/dexpi/discProfile.ts");
+const { LATEST_BUNDLED_PROFILE } = await import("../src/lib/dexpi/profileVersion.ts");
 const { sceneToSvg } = await import("../src/lib/dexpi/exportSvg.ts");
 const { signalLineStyle, buildSignalMarkPrims } = await import("../src/lib/dexpi/signalLines.ts");
 
@@ -95,6 +96,7 @@ const RULE_DOCS = {
   "MDL-008": ["warning", "A Components property is not defined for the object's class."],
   "MDL-009": ["error", "An abstract model class is instantiated — the spec requires a concrete subclass."],
   "META-002": ["error", "An AttributeRepresentation names an attribute that does not resolve on (or near) its object — the template fragment renders blank."],
+  "META-003": ["warning", "The loaded DISC catalogue is a different release from the one the document's DiscProfile Import declares — symbols, label fields and classes the two releases do not share will not resolve."],
 };
 
 {
@@ -190,7 +192,7 @@ function primitiveBounds(prims) {
 
 {
   const profileXml = readFileSync(
-    new URL("../refrences/discdexpi-2026pack/Profile/xml/DiscProfile.xml", import.meta.url),
+    new URL(`../public/profiles/DiscProfile-${LATEST_BUNDLED_PROFILE}.xml`, import.meta.url),
     "utf-8",
   );
   const profile = parseDiscProfile(profileXml).data;
@@ -199,7 +201,7 @@ function primitiveBounds(prims) {
   }
 
   const names = [...profile.symbols.keys()].filter((k) => !k.includes("/")).sort();
-  let md = `# DiscProfile 0.6.3 symbol catalogue
+  let md = `# DiscProfile ${profile.version ?? LATEST_BUNDLED_PROFILE} symbol catalogue
 
 Generated from the official \`DiscProfile.xml\` by \`npm run generate:docs\`, rendered with the app's own SVG emitter — ${names.length} symbols.
 Conditional variants render their default variant; label-template placeholders are listed per symbol.

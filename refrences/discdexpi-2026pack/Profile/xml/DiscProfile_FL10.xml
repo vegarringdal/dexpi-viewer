@@ -1,5 +1,6 @@
-<Model name="DiscProfile_FL10" uri="http://www.to.define_fl10">
-  <Import prefix="Profile" source="http://www.dexpi.org/specification/Temp/Profile"/>
+<Model name="DiscProfile_FL10" uri="http://www.to.define/DiscProfile_FL10/0.6.4">
+  <Import prefix="MetaData" source="https://data.dexpi.org/models/2.0.0/MetaData.xml"/>
+  <Import prefix="Profile" source="http://www.dexpi.org/specification/Temp/Profile/0.6.4"/>
   <Object type="Profile/PropertyConstraint">
     <Data property="ConstrainedType">
       <String>DiscProfile/InformationModel.Plug</String>
@@ -13,17 +14,6 @@
   </Object>
   <Object type="Profile/PropertyConstraint">
     <Data property="ConstrainedType">
-      <String>Plant/Piping.OperatedValve</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.OperatedValveExtension.ValvePosition</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
       <String>DiscProfile/InformationModel.SpectacleBlind</String>
     </Data>
     <Data property="Lower">
@@ -33,4 +23,18 @@
       <String>DiscProfile/InformationModel.SpectacleBlind.BlindPosition</String>
     </Data>
   </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Piping.OperatedValve</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.OperatedValveExtension.ValvePosition</String>
+    </Data>
+  </Object>
+  <Data property="MetaData/version">
+    <String>0.6.4</String>
+  </Data>
 </Model>

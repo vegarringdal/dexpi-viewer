@@ -46,11 +46,11 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <a href="conventions.html">Conventions beyond the spec</a>
 <a href="rules.html" class="active">Validation rule reference</a>
 <a href="metamodel.html">DEXPI 2.0 information model</a>
-<a href="symbols.html">DiscProfile 0.6.3 symbol catalogue</a>
+<a href="symbols.html">DiscProfile 0.6.4 symbol catalogue</a>
 <a href="xml-trees.html">Conceptual Model Tree & Diagram Tree</a>
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
 <main><h1>Validation rule reference</h1>
-<p>Generated from the app&#39;s rule tables by <code>npm run generate:docs</code> — 23 rules.
+<p>Generated from the app&#39;s rule tables by <code>npm run generate:docs</code> — 24 rules.
 Default severities can be overridden per rule (including <em>Ignore</em>) in the Validation panel&#39;s severity configuration; overrides persist across sessions.</p>
 <h2>Schema</h2>
 <table>
@@ -243,6 +243,12 @@ Default severities can be overridden per rule (including <em>Ignore</em>) in the
 <td>Invalid template attribute references</td>
 <td>error</td>
 <td>An AttributeRepresentation names an attribute that does not resolve on (or near) its object — the template fragment renders blank.</td>
+</tr>
+<tr>
+<td><code>META-003</code></td>
+<td>Profile version mismatch</td>
+<td>warning</td>
+<td>The loaded DISC catalogue is a different release from the one the document&#39;s DiscProfile Import declares — symbols, label fields and classes the two releases do not share will not resolve.</td>
 </tr>
 </tbody></table>
 <p>The <code>MDL-*</code> family is model-driven: every base-model object is checked against the DEXPI information model the document declares via its <code>data.dexpi.org</code> Import URIs (see <a href="metamodel.html">metamodel.md</a>).</p>

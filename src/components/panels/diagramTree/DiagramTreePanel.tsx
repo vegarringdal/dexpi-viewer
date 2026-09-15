@@ -11,9 +11,10 @@ import {
 import { clearDiagramReveal } from "../../../state/diagramReveal/diagramReveal.actions.ts";
 import { diagramRevealState } from "../../../state/diagramReveal/diagramReveal.state.ts";
 import { requestInspectReveal } from "../../../state/inspectReveal/inspectReveal.actions.ts";
+import { getLoadedProfile } from "../../../state/profile/profile.actions.ts";
 import { setSelectedObject } from "../../../state/selection/selection.actions.ts";
 import { selectionState } from "../../../state/selection/selection.state.ts";
-import { getLoadedDocument, getLoadedProfile } from "../../../state/viewer/viewer.actions.ts";
+import { getLoadedDocument } from "../../../state/viewer/viewer.actions.ts";
 import { viewerState } from "../../../state/viewer/viewer.state.ts";
 import { ObjectDataView } from "../objectDataView/ObjectDataView.tsx";
 import { type FilteredNode, PlantTree, type RevealRequest } from "../PlantTree.tsx";

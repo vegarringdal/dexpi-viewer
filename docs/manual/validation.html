@@ -46,7 +46,7 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <a href="conventions.html">Conventions beyond the spec</a>
 <a href="rules.html">Validation rule reference</a>
 <a href="metamodel.html">DEXPI 2.0 information model</a>
-<a href="symbols.html">DiscProfile 0.6.3 symbol catalogue</a>
+<a href="symbols.html">DiscProfile 0.6.4 symbol catalogue</a>
 <a href="xml-trees.html">Conceptual Model Tree & Diagram Tree</a>
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
 <main><h1>Validation</h1>
@@ -59,7 +59,7 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <li><strong>Graphics (GFX)</strong> — drawing topology: unresolvable catalogue shapes, undrawable connectors, missing extent.</li>
 <li><strong>Connectivity (CON)</strong> — engineering topology: unconnected flow items/nodes/nozzles, nominal-diameter mismatches at connection points, piping-class changes without a PropertyBreak.</li>
 <li><strong>Model (MDL)</strong> — model-driven: every object checked against the DEXPI information model (unknown classes/properties, missing required properties, illegal enumeration literals, reference cardinality and target classes). The model version is taken from the document&#39;s <code>data.dexpi.org</code> Import URIs; profile extension classes are honoured through their declared supertypes.</li>
-<li><strong>Meta data (META)</strong> — template attribute references that resolve to nothing.</li>
+<li><strong>Meta data (META)</strong> — template attribute references that resolve to nothing, and a loaded DISC catalogue whose release is not the one the document&#39;s <code>DiscProfile</code> Import declares.</li>
 </ul>
 <h2>Working with findings</h2>
 <ul>

@@ -46,7 +46,7 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <a href="conventions.html">Conventions beyond the spec</a>
 <a href="rules.html">Validation rule reference</a>
 <a href="metamodel.html">DEXPI 2.0 information model</a>
-<a href="symbols.html">DiscProfile 0.6.3 symbol catalogue</a>
+<a href="symbols.html">DiscProfile 0.6.4 symbol catalogue</a>
 <a href="xml-trees.html">Conceptual Model Tree & Diagram Tree</a>
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
 <main><h1>Getting started</h1>
@@ -55,8 +55,11 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 <ul>
 <li><strong>Open</strong> (ribbon → File) or drag-and-drop a DEXPI 2.0 XML file anywhere onto the app.</li>
 <li><strong>Example</strong> loads a bundled official DISC example sheet.</li>
-<li><strong>Profile 0.6.3</strong> loads the bundled official DISC profile so <code>Profile/SymbolUsage</code> references resolve; <strong>Custom profile</strong> loads your own <code>DiscProfile.xml</code>. The loaded profile survives document changes and is shown in the status bar.</li>
+<li><strong>Profile</strong> (ribbon) picks the DISC catalogue that resolves <code>Profile/SymbolUsage</code> references: <strong>0.6.4</strong> or <strong>0.6.3</strong> loads that bundled official release, <strong>Custom profile</strong> loads your own <code>DiscProfile.xml</code>, and <strong>Auto</strong> follows whatever the open document declares. The loaded profile survives document changes and is shown in the status bar.</li>
 </ul>
+<h3>Which profile version?</h3>
+<p>DiscProfile 0.6.4 is the first release to stamp its version, both in the catalogue itself and in the <code>&lt;Import prefix=&quot;DiscProfile&quot; …&gt;</code> URI a drawing written against it carries. Turn on <strong>Settings → Profile → Auto-load the declared profile</strong> and opening a drawing loads the release it names; a drawing importing the older unversioned URI loads 0.6.3. Picking a version in the ribbon pins it — press <strong>Auto</strong> to hand the choice back to the document.</p>
+<p>The status bar turns amber when the loaded catalogue is not the release the document declares, and Validation reports the same thing as <a href="rules.html">META-003</a>. The releases are not interchangeable: 0.6.4 adds eight symbols, removes two classes, relinks two symbols, and adds a <code>ShutoffCapability</code> field to 38 valve labels.</p>
 <p>Only the DEXPI 2.0 XML serialization is supported (Proteus 4.x files from the DEXPI 1.x era are out of scope).</p>
 <h2>The workbench</h2>
 <p><img src="images/panels-ribbon.png" alt="The highlighted Panels section toggles panels; Reset restores the default layout"></p>

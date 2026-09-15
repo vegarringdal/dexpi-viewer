@@ -1,5 +1,6 @@
 import type { ProfileInstanceData, ProfileLabelTemplate } from "./discProfile.ts";
 import { transformPrimitive } from "./flattenScene.ts";
+import { normalizeLabelTemplateText } from "./labelExpression.ts";
 import { isRenderableLabelValue } from "./labelPolicy.ts";
 import { formatForRepresentation, type LookupIndex, lookupDisplayAttribute } from "./resolveTemplates.ts";
 import { isOffPageConnectorType, isPropertyBreakType } from "./typeNames.ts";
@@ -158,8 +159,10 @@ function instanceValueFromReferences(
 
 /**
  * Resolves one LabelTemplate text for an instance; null suppresses the
- * template (an alarm role-path with no matching child). The "' & " VB-style
- * concatenation syntax some templates embed is stripped first.
+ * template (an alarm role-path with no matching child). The VB-style
+ * concatenation syntax some templates embed collapses to plain template text
+ * first (see labelExpression.ts), so the alarm prefix an H=/HH=/L=/LL=
+ * template carries is visible to the port-status hint either way.
  */
 export function resolveProfileLabelText(
   rawText: string,
@@ -168,7 +171,7 @@ export function resolveProfileLabelText(
   roleCounters: Map<string, number>,
   instances: ReadonlyMap<string, ProfileInstanceData> = NO_INSTANCES,
 ): string | null {
-  const text = rawText.replace(/'\s*&\s*/g, "");
+  const text = normalizeLabelTemplateText(rawText);
   if (!/[<>]/.test(text)) {
     return text;
   }
