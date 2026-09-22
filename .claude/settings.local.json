@@ -51,10 +51,12 @@
       "Bash(npx vitest *)",
       "Bash(npx esbuild *)",
       "Bash(node scripts/.gen-docs.tmp.mjs)",
-      "Bash(grep -c \"^| \\\\`\" documentation/rules.md)"
+      "Bash(grep -c \"^| \\\\`\" documentation/rules.md)",
+      "Bash(rm /workspace/src/lib/dexpi/__verify_temp.test.ts && cd /workspace && git status --short)"
     ],
     "additionalDirectories": [
-      "/workspace/node_modules/@tredespace/ui/widgets/select"
+      "/workspace/node_modules/@tredespace/ui/widgets/select",
+      "/workspace/src/lib/dexpi"
     ]
   }
 }

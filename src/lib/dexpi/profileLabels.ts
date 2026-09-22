@@ -44,9 +44,46 @@ const PORT_STATUS_HINTS: Readonly<Record<string, string>> = {
 
 const PLACEHOLDER = /(?:([A-Za-z][A-Za-z0-9_]*):)?<([^<>]+)>/g;
 
+/** The symbol-intrinsic type-code abbreviation placeholder (e.g. "M" for Motor). */
+const TYPE_CODE_ATTRIBUTE = "TypeCode";
+
+/** Per-object record of what an object's authored diagram labels cover. */
+export type ExplicitLabelInfo = Readonly<{
+  /** Bare attribute names an authored text explicitly names (e.g. "TypeCode"). */
+  attributes: ReadonlySet<string>;
+}>;
+
 function extractPortStatusHint(text: string): string | null {
   const match = /^\s*(HHH|HH|H|LLL|LL|L)\s*=/.exec(text);
   return match ? (PORT_STATUS_HINTS[match[1] ?? ""] ?? null) : null;
+}
+
+/** Bare attribute names a LabelTemplate's raw text references, via `<Attr>` or `Role:<Attr>`. */
+function templateAttributeBareNames(text: string): string[] {
+  return [...text.matchAll(PLACEHOLDER)].flatMap((match) => {
+    const attr = match[2];
+    return attr ? [attr.split("/").pop() ?? attr] : [];
+  });
+}
+
+/**
+ * Whether an object's authored diagram label already covers a LabelTemplate's
+ * output, so the profile-generated overlay must not ALSO render (never
+ * both). Every placeholder keeps the coarse director's rule — any authored
+ * text on the object covers it — EXCEPT TypeCode/Abbreviation: it's
+ * symbol-intrinsic (the DISC profile schema positions it on the symbol's own
+ * geometry, e.g. centered inside a flow-meter circle, independent of
+ * whatever separate tag-number bubble a CAD tool bakes in nearby), so it is
+ * covered only when an authored text specifically names TypeCode.
+ */
+export function isLabelTemplateCovered(text: string, info: ExplicitLabelInfo | undefined): boolean {
+  if (!info) {
+    return false;
+  }
+
+  const attrs = templateAttributeBareNames(text);
+  const isTypeCodeOnly = attrs.length > 0 && attrs.every((attr) => attr === TYPE_CODE_ATTRIBUTE);
+  return isTypeCodeOnly ? info.attributes.has(TYPE_CODE_ATTRIBUTE) : true;
 }
 
 function typeSuffix(el: Element): string {
@@ -244,24 +281,24 @@ function placeLabelText(
  * drawn on top as ordinary label primitives (canvas and exports alike).
  *
  * Director's rendering rules: the enhanced file's explicit diagram labels
- * are authoritative — a placement whose represented object already has
- * explicit label text renders NO template overlays (never both). A
- * multi-line value stays ONE text primitive so layoutTextLines block-aligns
- * it per the template's vAlign — bottom-anchored labels (the break values)
- * grow UPWARD from the anchor like the official renderings, never down into
- * the symbol.
+ * are authoritative — a LabelTemplate whose placeholder attribute is already
+ * covered by the represented object's authored label renders NO overlay
+ * (never both); see isLabelTemplateCovered for per-attribute matching (most
+ * notably: TypeCode/Abbreviation never falls to the coarse "any authored
+ * text" rule). A multi-line value stays ONE text primitive so
+ * layoutTextLines block-aligns it per the template's vAlign — bottom-
+ * anchored labels (the break values) grow UPWARD from the anchor like the
+ * official renderings, never down into the symbol.
  */
 export function buildProfileLabelOverlays(
   index: LookupIndex,
   pending: readonly PendingProfileLabels[],
-  objectIdsWithExplicitLabels: ReadonlySet<string>,
+  explicitLabels: ReadonlyMap<string, ExplicitLabelInfo>,
   instances: ReadonlyMap<string, ProfileInstanceData> = NO_INSTANCES,
 ): SceneNode[] {
   const nodes: SceneNode[] = [];
   for (const entry of pending) {
-    if (objectIdsWithExplicitLabels.has(entry.objectId)) {
-      continue;
-    }
+    const explicitInfo = explicitLabels.get(entry.objectId);
 
     // A label's ANCHOR follows the placement's true rotation — the same
     // transform the symbol's own artwork gets — so a rotated symbol's label
@@ -279,6 +316,10 @@ export function buildProfileLabelOverlays(
     const glyphRotation = isSheetSpaceLabel ? 0 : normalizeLabelRotation(entry.transform.rotation);
     const roleCounters = new Map<string, number>();
     for (const template of entry.templates) {
+      if (isLabelTemplateCovered(template.text, explicitInfo)) {
+        continue;
+      }
+
       const value = resolveProfileLabelText(template.text, entry.objectId, index, roleCounters, instances);
       if (!value || value.trim().length === 0) {
         continue;

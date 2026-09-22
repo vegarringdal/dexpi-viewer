@@ -13,7 +13,11 @@ import {
   resolveHeatTraceStyle,
 } from "./heatTracing.ts";
 import { parseConnectorPolyline, parsePrimitive } from "./primitives.ts";
-import { buildProfileLabelOverlays, type PendingProfileLabels } from "./profileLabels.ts";
+import {
+  buildProfileLabelOverlays,
+  type ExplicitLabelInfo,
+  type PendingProfileLabels,
+} from "./profileLabels.ts";
 import { buildLookupIndex, resolveTemplateTexts } from "./resolveTemplates.ts";
 import { buildSignalMarkPrims, signalLineStyle } from "./signalLines.ts";
 import { layoutTextLines } from "./textLayout.ts";
@@ -292,31 +296,65 @@ function hasAuthoredText(el: Element): boolean {
 }
 
 /**
- * Ids of every object with explicit, non-empty AUTHORED diagram label text
- * anywhere in its representation — the set that suppresses profile
- * LabelTemplate overlays. Computed on the XML group tree, not the emitted
- * scene nodes, so the association survives layouts where the label group
- * and the symbol group are siblings and the Represents reference sits at a
- * different nesting level: a label text with no Represents on its own
- * chain is attributed to the nearest enclosing subtree that represents
- * exactly ONE object. A subtree representing several objects never
- * guesses, and ownership uses authored literals only — template
- * resolution can never move an object in or out of this set.
+ * Bare attribute names (e.g. "Sequence", "TypeCode") an authored Text names
+ * via its Template/Fragments AttributeRepresentation children. Empty when the
+ * text carries no such linkage (a plain authored literal).
  */
-export function collectExplicitlyLabelledIds(root: Element): Set<string> {
-  const labelled = new Set<string>();
+function authoredAttributeNames(el: Element): ReadonlySet<string> {
+  const names = new Set<string>();
+  for (const template of componentObjects(el, "Template")) {
+    for (const fragment of componentObjects(template, "Fragments")) {
+      const name = stringFromData(fragment, "AttributeName");
+      if (name) {
+        names.add(name.split("/").pop() ?? name);
+      }
+    }
+  }
+  return names;
+}
+
+/**
+ * Per object, what its explicit AUTHORED diagram label text covers — the
+ * source of truth profile LabelTemplate overlays check before rendering.
+ * Computed on the XML group tree, not the emitted scene nodes, so the
+ * association survives layouts where the label group and the symbol group
+ * are siblings and the Represents reference sits at a different nesting
+ * level: a label text with no Represents on its own chain is attributed to
+ * the nearest enclosing subtree that represents exactly ONE object. A
+ * subtree representing several objects never guesses, and ownership uses
+ * authored literals only — template resolution can never move an object in
+ * or out of this map.
+ *
+ * Any object present in this map has SOME authored label, which covers
+ * every LabelTemplate placeholder except TypeCode/Abbreviation: that one is
+ * symbol-intrinsic (positioned on the symbol's own geometry, per the DISC
+ * profile schema) and covered only when an authored text specifically names
+ * TypeCode — see isLabelTemplateCovered in profileLabels.ts, which reads the
+ * `attributes` set for that check.
+ */
+export function collectExplicitlyLabelledIds(root: Element): ReadonlyMap<string, ExplicitLabelInfo> {
+  const info = new Map<string, { attributes: Set<string> }>();
   const visited = new Set<Element>();
 
+  const record = (objectId: string, attributes: ReadonlySet<string>): void => {
+    const entry = info.get(objectId) ?? { attributes: new Set<string>() };
+    for (const name of attributes) {
+      entry.attributes.add(name);
+    }
+    info.set(objectId, entry);
+  };
+
+  type AuthoredText = Readonly<{ attributes: ReadonlySet<string> }>;
   type SubtreeInfo = Readonly<{
     /** Distinct Represents targets in the subtree. */
     repIds: ReadonlySet<string>;
     /** Authored label texts still lacking an object association. */
-    unowned: number;
+    unowned: readonly AuthoredText[];
   }>;
 
   const walk = (node: Element, inheritedId: string | null, inheritedLabel: boolean): SubtreeInfo => {
     if (visited.has(node)) {
-      return { repIds: new Set(), unowned: 0 };
+      return { repIds: new Set(), unowned: [] };
     }
 
     visited.add(node);
@@ -326,22 +364,23 @@ export function collectExplicitlyLabelledIds(root: Element): Set<string> {
     const objectId = ownRep ?? inheritedId;
 
     const repIds = new Set<string>(ownRep ? [ownRep] : []);
-    let unowned = 0;
+    let unowned: AuthoredText[] = [];
     const merge = (child: SubtreeInfo): void => {
       for (const id of child.repIds) {
         repIds.add(id);
       }
-      unowned += child.unowned;
+      unowned = unowned.concat(child.unowned);
     };
 
     for (const el of componentObjects(node, "Elements")) {
       const elType = el.getAttribute("type") ?? "";
       if (TEXT_TYPES.has(elType)) {
         if (isLabelContext && hasAuthoredText(el)) {
+          const attributes = authoredAttributeNames(el);
           if (objectId) {
-            labelled.add(objectId);
+            record(objectId, attributes);
           } else {
-            unowned += 1;
+            unowned.push({ attributes });
           }
         }
         continue;
@@ -358,11 +397,13 @@ export function collectExplicitlyLabelledIds(root: Element): Set<string> {
       merge(walk(group, objectId, isLabelContext));
     }
 
-    if (unowned > 0 && repIds.size === 1) {
+    if (unowned.length > 0 && repIds.size === 1) {
       for (const id of repIds) {
-        labelled.add(id);
+        for (const text of unowned) {
+          record(id, text.attributes);
+        }
       }
-      unowned = 0;
+      unowned = [];
     }
 
     return { repIds, unowned };
@@ -376,7 +417,7 @@ export function collectExplicitlyLabelledIds(root: Element): Set<string> {
   for (const groupRoot of roots) {
     walk(groupRoot, null, false);
   }
-  return labelled;
+  return info;
 }
 
 // -----------------------------------------------------------------------------
@@ -492,7 +533,7 @@ export function computeObjectsBounds(scene: SceneGraph, objectIds: readonly stri
 // Entry point
 // -----------------------------------------------------------------------------
 
-const NO_SUPPRESSION: ReadonlySet<string> = new Set();
+const NO_SUPPRESSION: ReadonlyMap<string, ExplicitLabelInfo> = new Map();
 
 /**
  * Builds the render-ready scene graph from a parsed DEXPI 2.0 XML document.
@@ -547,24 +588,29 @@ export function buildSceneGraph(root: Element, profile: DiscProfile | null = nul
   }
 
   let nodes = resolveTemplateTexts(root, ctx.nodes);
-  // Every template placement, resolved once. Explicit diagram labels are
-  // authoritative — objects that carry one never get profile LabelTemplate
-  // overlays on top — so the RENDERED set is this list minus those objects.
-  // Ownership comes from the XML representation tree
-  // (collectExplicitlyLabelledIds), not the emitted nodes, so sibling label
-  // groups whose Represents sits at a different level still suppress their
-  // object's templates. The unfiltered list stays on the scene for the Label
-  // Inspect overlay, which exists precisely to show the suppressed ones.
+  // Every template placement, resolved once, unfiltered — this stays on the
+  // scene for the Label Inspect overlay, which exists precisely to show the
+  // ones the RENDERED set below suppresses. Ownership comes from the XML
+  // representation tree (collectExplicitlyLabelledIds), not the emitted
+  // nodes, so sibling label groups whose Represents sits at a different
+  // level still attribute correctly to their object. Suppression itself is
+  // per LabelTemplate attribute, not per object (see isLabelTemplateCovered)
+  // — an object's authored label only suppresses the overlays whose
+  // attribute it actually covers.
   let labelTemplateNodes: readonly SceneNode[] = [];
   if (ctx.profileLabels.length > 0) {
+    const lookupIndex = buildLookupIndex(root);
     labelTemplateNodes = buildProfileLabelOverlays(
-      buildLookupIndex(root),
+      lookupIndex,
       ctx.profileLabels,
       NO_SUPPRESSION,
       profile?.instances,
     );
-    const labelled = collectExplicitlyLabelledIds(root);
-    nodes = [...nodes, ...labelTemplateNodes.filter((n) => n.objectId === null || !labelled.has(n.objectId))];
+    const explicitLabels = collectExplicitlyLabelledIds(root);
+    nodes = [
+      ...nodes,
+      ...buildProfileLabelOverlays(lookupIndex, ctx.profileLabels, explicitLabels, profile?.instances),
+    ];
   }
   const tracedIds = collectHeatTracedIds(root);
   const safetyCriticalIds = collectHeatTracingSafetyCriticalIds(root, tracedIds);

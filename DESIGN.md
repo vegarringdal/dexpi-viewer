@@ -279,7 +279,8 @@ that grow, and record scope changes here.
   SymbolUsage Rotation/IsMirrored transform the symbol geometry only —
   explicit text keeps its own position/rotation. (3) profile
   LabelTemplate output renders ONLY when the object has no explicit
-  diagram label (enforced in buildSceneGraph); template line breaks are
+  diagram label covering that template's attribute — see the 2026-09-22
+  addendum for the per-attribute refinement; template line breaks are
   real formatting — one text per line (LINE_SPACING 1.4×size). (4)
   heat tracing is MAIN-file data: HeatTracingType(+Representation) on
   piping objects; classified runs get a dashed overlay beside the
@@ -2405,3 +2406,30 @@ Scope note: covers per-object SHAPE only — cross-object semantics
     dedicated diff block tracking §3–§4 of the report; the
     DISC_EXAMPLE-14 sheet regressions stay on 0.6.3, the release those
     sheets declare.
+
+- **2026-09-22** TypeCode/Abbreviation is exempt from the 2026-08-20 label-
+  suppression rule (director, from a real enhanced DEXPI+DiscProfile file: a
+  MagneticFlowMeter's inline symbol carries TWO overlaid Profile/Symbols
+  representing the SAME InlineMeasuringElement — ND0124's own `<TypeCode>`
+  template drawing the abbreviation ON the symbol geometry, ND0248B's five
+  templates drawing the tag/setpoint bubble around it. The file's authored
+  diagram label only covers Sequence/TagSuffix, yet the old ownership-based
+  rule (any authored text on the object suppresses EVERY LabelTemplate)
+  killed ND0124's TypeCode overlay too, so the DISC-spec-mandated "M" never
+  rendered). `collectExplicitlyLabelledIds` (sceneGraph.ts) now records, per
+  object, the bare attribute names ITS authored Text elements actually name
+  (read from `Core/Diagram.Text`'s `Template`/`Fragments`/`AttributeName`
+  children) — not just membership. `isLabelTemplateCovered`
+  (profileLabels.ts) applies that ONLY to a template whose sole placeholder
+  is TypeCode: it is covered — and its overlay suppressed — solely when an
+  authored text specifically names TypeCode. Every other placeholder keeps
+  the original, coarser rule unchanged: any authored text on the object
+  covers it, full stop (a first attempt matched attribute names generally,
+  which under-suppressed ND0248B's SetPoint/TagType/Sequence templates
+  whenever their exact attribute name didn't line up with what the authored
+  text named — director: "you render too much junk now" — so the rule stays
+  intentionally narrow to TypeCode only). `buildProfileLabelOverlays` moved
+  the check from a whole-object gate to per-template inside the render loop;
+  `buildSceneGraph` now calls it twice — once with an empty map for the
+  unfiltered Label Inspect overlay (unchanged), once with the real
+  ownership map for the rendered set.
