@@ -5,7 +5,7 @@ import type { DiscProfile } from "./discProfile.ts";
 import { parseDiscProfile } from "./discProfile.ts";
 import { flattenScene } from "./flattenScene.ts";
 import { parseDexpiDocument } from "./parseDocument.ts";
-import type { DexpiDocument } from "./types.ts";
+import type { DexpiDocument, TextPrim } from "./types.ts";
 
 // -----------------------------------------------------------------------------
 // Label placement against the OFFICIAL renderings
@@ -153,6 +153,34 @@ describe("label placement vs the official DISC_EXAMPLE-14 renderings", () => {
       expect(badge.position.x).toBeCloseTo(281.5);
       expect(badge.position.y).toBeCloseTo(160);
       expect(badge.rotation).toBe(270);
+    },
+    SWEEP_TIMEOUT_MS,
+  );
+
+  it(
+    "keeps a label at its authored size and offset on a scaled placement",
+    () => {
+      // DISC_EXAMPLE-14-13 places ND0044 at (126,195) scale 4 and ND0087 at
+      // (252,222) scale (1.25,1.5). Both symbols' LabelTemplates are size
+      // 3.3 at local offsets (0,-0.5) and (0,17). The official SVG draws
+      // "D-20XX001" at (126,194.5) and "D-20HA001" at (252,240.65) — both
+      // font-size 3.3px, both at the UNSCALED offset (194.5 = 195 - 0.5, not
+      // 193; 239 = 222 + 17, not 247.5, the SVG's extra 1.65 being the
+      // CenterCenter baseline shift). LabelTemplate Position and Size are
+      // sheet units; the placement's scale applies to geometry only.
+      const texts = flattenScene(officialSheet("DISC_EXAMPLE-14-13.xml").scene).filter(
+        (prim): prim is TextPrim => prim.kind === "text",
+      );
+      const packageLabel = texts.find((prim) => prim.value === "D-20XX001");
+      expect(packageLabel?.size).toBeCloseTo(3.3);
+      expect(packageLabel?.position.x).toBeCloseTo(126);
+      expect(packageLabel?.position.y).toBeCloseTo(194.5);
+
+      const vesselLabel = texts.find(
+        (prim) => prim.value === "D-20HA001" && Math.abs(prim.position.x - 252) < TOLERANCE,
+      );
+      expect(vesselLabel?.size).toBeCloseTo(3.3);
+      expect(vesselLabel?.position.y).toBeCloseTo(239);
     },
     SWEEP_TIMEOUT_MS,
   );

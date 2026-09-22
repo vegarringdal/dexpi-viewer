@@ -149,7 +149,8 @@ sets.
 The Highlight panel splits into three collapsible sections, which
 compose freely. **General Highlight** is the classification tinting
 above. **Label Inspect** draws every profile `LabelTemplate` at the
-position, rotation, size and alignment the profile declares —
+position, rotation, size and alignment the profile declares (sheet
+units — a stretched symbol placement never stretches its labels) —
 *including* the placements the viewer normally suppresses because the
 drawing carries its own label — in a color and opacity you pick, in
 front of or behind the drawing, so you can check that a generated

@@ -244,11 +244,25 @@ export function resolveProfileLabelText(
 }
 
 /**
+ * A placement's transform with its SCALE removed (mirroring and rotation
+ * kept). A LabelTemplate's Position and Size are sheet units, not symbol
+ * units: the official renderings draw ND0044 placed at scale 4 with its
+ * label 0.5 units above the origin at size 3.3 — not 2 units above at size
+ * 13.2 — and ND0087 placed at (1.25, 1.5) likewise at its authored offset
+ * (see profileLabelsOfficial.test.ts). Stretched symbols (a custom
+ * equipment package scaled 32x in Y to cover a sheet region) would
+ * otherwise render page-high glyphs.
+ */
+function unscaled(transform: UseTransform, rotation: number): UseTransform {
+  return { ...transform, rotation, scaleX: 1, scaleY: 1 };
+}
+
+/**
  * One template text in world space: ANCHORED with `anchorRotation` (the
  * placement's own rotation, so the label sits on the geometry it annotates)
  * but DRAWN at `glyphRotation` (normalized, so it never reads upside-down).
- * Both paths go through `transformPrimitive`, keeping mirroring and scaling
- * in one place — only the two angles differ.
+ * Both paths go through `transformPrimitive`, keeping mirroring in one
+ * place — only the two angles differ.
  */
 function placeLabelText(
   transform: UseTransform,
@@ -268,8 +282,8 @@ function placeLabelText(
     hAlign: template.hAlign,
     vAlign: template.vAlign,
   };
-  const anchored = transformPrimitive({ ...transform, rotation: anchorRotation }, local);
-  const oriented = transformPrimitive({ ...transform, rotation: glyphRotation }, local);
+  const anchored = transformPrimitive(unscaled(transform, anchorRotation), local);
+  const oriented = transformPrimitive(unscaled(transform, glyphRotation), local);
   return anchored.kind === "text" && oriented.kind === "text"
     ? { ...anchored, rotation: oriented.rotation }
     : anchored;

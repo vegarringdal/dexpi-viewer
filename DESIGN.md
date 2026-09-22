@@ -2433,3 +2433,28 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   `buildSceneGraph` now calls it twice — once with an empty map for the
   unfiltered Label Inspect overlay (unchanged), once with the real
   ownership map for the rendered set.
+
+- **2026-09-22** LabelTemplate Position and Size are SHEET units — a
+  placement's ScaleX/ScaleY applies to symbol geometry only, never to its
+  profile labels (reported from a real enhanced file: a
+  CustomEquipmentPackage drawn with ND0044 stretched ~4.5x in X and ~32x
+  in Y to cover a sheet region rendered its 3.3 mm tag ~107 mm high, a
+  third of the sheet). Recovered from the
+  official renderings, not assumed: DISC_EXAMPLE-14-13 places ND0044 at
+  (126,195) scale 4 — template offset (0,-0.5), size 3.3 — and the
+  official SVG draws "D-20XX001" at (126,194.5) `font-size="3.3px"`,
+  i.e. BOTH the offset and the glyph height unscaled (a scaled offset
+  would land at 193, a scaled size at 13.2px); ND0087 at (252,222) scale
+  (1.25,1.5) with offset (0,17) confirms it on a non-uniform scale
+  (official y 240.65 = 222+17 plus the CenterCenter baseline shift, not
+  222+25.5). The prior-art viewer counter-scales only the glyphs ("
+  LabelTemplates and TextTemplate should not scale"), which still
+  mispositions the anchor; we drop the scale from both. `placeLabelText`
+  (profileLabels.ts) now transforms the template through the placement's
+  position/rotation/mirror with scale forced to 1 — mirroring still flips
+  the anchor, since that follows the geometry the label annotates.
+  Pinned by profileLabelsOfficial.test.ts ("keeps a label at its authored
+  size and offset on a scaled placement"). Text primitives baked into a
+  symbol's own catalogue geometry still scale with the placement — the
+  prior art exempts only TextTemplate-driven ones, and no official
+  fixture places such a symbol at a non-unit scale, so that stays as is.
