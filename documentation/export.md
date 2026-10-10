@@ -1,33 +1,44 @@
 # Exports
 
-![The highlighted Export section of the ribbon](images/export-ribbon.png)
+![The three export sections of the ribbon](images/ribbon-export.png)
 
-The ribbon carries three export sections.
+1. **Export: PDF / SVG** — the drawing exactly as the file authors it, in its own colours (<kbd>E</kbd> then <kbd>P</kbd> / <kbd>S</kbd>).
+2. **As viewed: PDF / SVG** — what is on your screen right now (<kbd>E</kbd> then <kbd>Shift</kbd>+<kbd>P</kbd> / <kbd>Shift</kbd>+<kbd>S</kbd>).
+3. **Validation: Excel / CSV** — the findings as a report (<kbd>E</kbd> then <kbd>X</kbd> / <kbd>C</kbd>).
 
-**Export** — the drawing exactly as the file authors it, in its own colors:
+The buttons are enabled once a file is open. Files are named after the drawing: `<drawing>.pdf`, `<drawing>-as-viewed.svg`, `<drawing>-validation.xlsx` and so on.
 
-- **PDF** — a vector PDF with embedded metric-compatible fonts (Carlito / Liberation / DejaVu subsets).
-- **SVG** — a spec-mapped, standalone SVG of the drawing with full visual fidelity.
+## Drawing exports
 
-**As viewed** — the same two formats, but showing what is on your screen right now:
+- **PDF** — vector PDF with embedded metric-compatible fonts (Carlito / Liberation / DejaVu subsets).
+- **SVG** — a standalone SVG of the drawing with full visual fidelity.
 
-- Black & white mode, if it is on.
-- Highlight colors, including hidden legend groups (hidden stays hidden) and **Dim others**.
-- The upstream/downstream trace overlays.
-- The alignment underlay, at its current opacity, tint, hide-white and under/over placement.
+**As viewed** adds what you have switched on:
 
-An *as viewed* export is always **light**: white paper and dark ink, whichever theme the app is in. The dark theme is a screen comfort setting, not a property of the drawing — a dark-theme export would print as pale ink on nothing. So switching theme changes nothing in the exported file; everything else in the list above does.
+- Black & white mode.
+- [Highlight](highlight.md) colours — hidden values stay hidden — and *Dim drawing*.
+- Upstream / downstream traces.
+- The underlay, at its current opacity, tint, hide-white and under/over placement.
+- The [Label Inspect and Node Positions](highlight.md#label-inspect) overlays.
 
-The selection and hover marks are deliberately left out — they follow your pointer, they are not part of the drawing. Files are named `<drawing>-as-viewed.pdf` / `.svg`.
+> [!NOTE]
+> An *as viewed* export is always **light**: white paper and dark ink, whatever the app theme. The dark theme is a screen comfort setting, not part of the drawing — a dark export would print as pale ink on nothing.
 
-Because the underlay is an image, an *as viewed* export that includes one is part raster and noticeably larger than the plain vector export. Everything else stays vector.
+The selection and hover marks are left out: they follow your pointer, they are not part of the drawing. An *as viewed* export that includes an underlay is part raster and noticeably larger; everything else stays vector.
 
-**Validation** — the findings, with your severity overrides applied:
+### Make a marked-up PDF
 
-- **Excel** — the findings as an Excel workbook (`.xlsx`): a frozen, bold header row, an auto-filter on every column and `line` as a real number, so sorting and filtering work with a double-click on Windows. No delimiter or locale guessing, unlike CSV.
+<!-- steps -->
+1. Set up the view: e.g. [Highlight](highlight.md) by fluid code, **B / W** on, and a downstream [trace](topology.md#trace-a-line).
+2. Press **As viewed → PDF** (#2).
+3. The PDF shows the drawing in ink with the tints and trace, on white paper.
+
+## Validation reports
+
+- **Excel** — an `.xlsx` workbook with a frozen bold header row, a filter on every column and `line` as a real number, so sorting and filtering work straight away. No delimiter or locale guessing, unlike CSV.
 - **CSV** — the same findings as a CSV file.
 
-Both reports carry the same columns:
+Both apply your [severity overrides](validation.md#change-a-rules-severity) and carry the same columns:
 
 | column | what it holds |
 | --- | --- |
@@ -39,8 +50,6 @@ Both reports carry the same columns:
 | `xpath` | positional XPath of that element, e.g. `/Model/Object[1]/Components/Object/References[2]` |
 | `message` | what is wrong |
 
-`line` and `xpath` point at the element the finding is really about — for a dangling reference, the `<References>` element itself, not just the object that owns it — so you can jump straight to it in your XML editor.
+`line` and `xpath` point at the element the finding is really about — for a dangling reference, the `<References>` element itself, not just the object that owns it — so you can jump straight to it in your XML editor. The Validation panel has the same two buttons in its toolbar.
 
-The Validation panel has the same two buttons (**CSV**, **Excel**) in its toolbar; they export exactly what the panel's severity overrides say.
-
-Drawing labels always use conventional unit symbols (barg, °C, m³/h) regardless of the unit-display setting.
+Drawing labels always use conventional unit symbols (barg, °C, m³/h), whatever the unit setting.

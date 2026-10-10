@@ -20,6 +20,11 @@ The **user manual** lives in [documentation/](documentation/index.md)
 DiscProfile symbol catalogue) and ships with the app as `manual/` —
 ribbon → Help → Docs. Regenerate derived content with
 `npm run generate:docs`; the build converts it to the static site.
+Screenshots and their numbered markers come from driving the real app:
+start `npm run dev -- --port 5199 --strictPort`, then run
+`node scripts/generateDocScreenshots.mjs` (all shots) or pass shot names
+to re-take a few (needs Playwright, not a project dependency — see the
+script header).
 
 ## Status
 

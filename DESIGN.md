@@ -2458,3 +2458,40 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   symbol's own catalogue geometry still scale with the placement — the
   prior art exempts only TextTemplate-driven ones, and no official
   fixture places such a symbol at a non-unit scale, so that stays as is.
+- **2026-10-10** Manual rewrite with numbered screenshots (director's ask:
+  "improve our user documentation a lot", modelled on the tredespace.com
+  guide). Callouts are no longer baked into the PNGs:
+  generateDocScreenshots.mjs captures CLEAN images and records numbered
+  marks (boxes measured with Playwright boundingBox() of the real
+  controls, CSS px relative to the clip) in `documentation/images/shots.json`;
+  buildDocsSite.mjs overlays them as positioned HTML (percent boxes +
+  fixed-size badges), so badges stay sharp at any width, follow the
+  theme, and match `(#n)` chips in the text. Markdown conventions on top
+  of GFM, all degrading to readable plain markdown on GitHub: an image
+  alone in a paragraph becomes a click-to-zoom figure; an ordered list
+  right after it is its legend; `(#3)` is a marker chip; `<!-- steps -->`
+  before an ordered list renders numbered step bullets; GitHub's
+  `> [!NOTE]`/`[!TIP]`/`[!WARNING]` become callouts; headings get slug
+  ids for deep links. Every shot runs in a fresh browser context
+  (default layout, no localStorage) on DISC_EXAMPLE-14-08 + profile
+  0.6.3, at 1560×900 — narrower and the ribbon scrolls, cutting off Help
+  — and 1.5× pixel ratio; figures display at native pixel size
+  (`scale` in the manifest). Shots are named functions so
+  `node scripts/generateDocScreenshots.mjs <name…>` re-takes just those;
+  a failing shot saves temp/<name>-failed.png and the run continues.
+  Gotchas found driving the UI: hidden dock tabs keep their DOM, so
+  locators need `:visible`; widening a dock resizes the canvas without a
+  re-fit, so sheet-mm clicks press Fit first; Label Inspect / Node
+  Positions sections start open (clicking their header collapses them).
+  Content: pages restructured task-first (legend + steps + reference
+  detail), new pages tasks.md (common recipes), explorer.md (Explorer +
+  Properties, previously undocumented), highlight.md (split from
+  topology.md; Label Inspect and Node Positions now documented) and
+  settings.md (all settings, full default keymap, what persists). Fixed
+  stale statements found against the code: "Dim others" is **Dim
+  drawing** (a whole-sheet veil under every overlay); double-click zooms
+  the drawing only from Topology graph nodes (Explorer has **Zoom to**,
+  Validation's ↳ link selects + zooms); Inspect drawing cards now drive
+  the Diagram Tree and global selection; as-viewed exports include the
+  Label Inspect / Node Positions overlays. Sidebar is grouped (Guide /
+  Panels / Reference); the landing page is a card grid of thumbnails.

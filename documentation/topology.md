@@ -1,33 +1,46 @@
-# Topology & highlighting
+# Topology & connections
 
 ## Topology graph
 
-![The semantic topology graph; the highlighted toolbar picks the mode, depth, edge kinds and node kinds](images/topology.png)
+The engineering data as a network: plant objects as nodes coloured by category, with **flow**, **containment** and **reference** edges, laid out along the flow direction. It starts as a collapsed rail next to the drawing; click it to expand.
 
-The engineering data as a semantic network: plant objects as category-colored nodes with **flow**, **containment** and **reference** edges, laid out along the flow direction. Neighborhood mode graphs the current selection with an adjustable hop depth; Document mode graphs the whole file. Connection hardware (nozzles, chambers, piping nodes, ports) collapses into its owner or shows as mini nodes. Nodes sync with the global selection; double-click zooms the drawing.
+![Topology graph around the selected ball valve](images/topology.png)
+
+1. **Neighborhood / Document** — graph the current selection and its surroundings, or the whole file. Document mode shows at most 400 objects; above that it tells you to use Neighborhood mode or the edge filters.
+2. **Depth** — how many hops around the selection (1–6, Neighborhood mode only).
+3. **Gap** — vertical spacing between nodes.
+4. **Linked** — tint the selection's direct neighbours: amber upstream, green downstream, violet signal. Next to it: zoom in / out.
+5. **Fit** — fit the graph in the panel. The **?** button next to it opens a legend explaining lines, borders, tints and mouse actions.
+6. **Edges** — which relation kinds to draw: Flow, Containment, References. At least one stays on.
+7. **Show** — connection hardware: Nozzles, Chambers, Piping nodes, Ports. Hidden hardware collapses into its owner.
+
+With the mouse:
+
+- **Click** a node to select it and re-centre the neighbourhood on it (the view stays put, so nothing jumps). <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>-click adds to the selection without re-centring.
+- **Double-click** a node to zoom the drawing to that object.
+- **Hover** a node to highlight it on the drawing; its tooltip lists the type and up to eight attributes. Edge tooltips name the property.
+- **Drag** to pan, **wheel** to zoom.
+
+The graph's options are remembered between sessions.
 
 ## Connections & tracing
 
-The Connections panel lists the selected object's flow neighbours and traces **upstream** (amber) / **downstream** (green) through the piping — the trace tints the drawing and recirculation loops are called out.
+The **Connections** panel lists what flows into and out of the selected object, and traces the whole run through the piping.
 
-## Highlight
+![Connections of the pump, with the full connected run traced in the drawing](images/connections.png)
 
-![Signal highlighting per type, black & white drawing, dim others](images/highlight-dim.png)
+1. **Trace in drawing** — **Upstream** (amber), **Downstream** (green) or **Both**. Click the active button again to clear the trace.
+2. **Upstream** — what feeds this object.
+3. **Downstream** — what this object feeds.
+4. **Connection points** — its ports, nodes and nozzles.
 
-The Highlight panel tints the drawing by classification — heat-traced runs, signal/instrument lines, fluid code or piping class (with ancestor inheritance) — each value in its own color with a legend of counts and per-value visibility toggles. Signal mode groups **per signal semantics** (electrical, bus, measuring, …), so each type highlights in its own color. A **Black & white drawing** toggle (also the big **B/W** button in ribbon → View, which shows when it is on) renders the file's content in ink only, so highlight tints never mix with the drawing's own colors, and **Dim others** fades everything outside the highlighted groups so the tints stand out; the palette deliberately contains no blue — blue always means selection.
+Flow through an object's own nozzles counts as the object's own flow.
 
-### Custom filters
+### Trace a line
 
-For anything the four built-in classifications don't cover, pick **Custom**. Each filter is one or more conditions on an object's **Type**, a named **Attribute**, its **ID**, its **XPath**, or a **Persistent ID**, matched with **Contains** / **Does not contain** / **Equals** / **Does not equal** (case-insensitive). Equals and Does not equal treat `*` as a wildcard, so on XPath a value like `/Model/Object[2]*` matches that object **and every descendant** — an XPath is a path from the root, so a child's path always starts with its parent's.
+<!-- steps -->
+1. Select a pump, valve or pipe in the drawing.
+2. Open **Connections** and press **Downstream** (#1). Everything the object feeds turns green in the drawing.
+3. Click another object: the trace follows the selection and re-traces from there. It clears when you clear the selection or open another file.
 
-Multiple conditions in one filter combine with AND. Flip a filter to **Advanced** to write your own `&` (and) / `|` (or) / `()` expression instead, e.g.:
-
-```
-TYPE = 'Piping.BallValve' & (ATTR('FluidCode') = 'A*' | ATTR('FluidCode') != 'B*')
-```
-
-Filters apply top-to-bottom, each with its own color; where two filters match the same object, **the lower one in the list wins** — reorder with the up/down arrows, and a warning banner reports how many objects overlap so an unintended one doesn't go unnoticed. Save the current filter set to a JSON file with **Save**, and bring it back later (or on another document) with **Load**.
-
-## Semantic signal-line styling
-
-Signal lines render by their semantics, matching the official DISC renderings: measuring and hydraulic lines solid, plain signal lines dashed, electrical lines solid with bracket marks, bus lines dashed with circle marks.
+If an object is part of a recirculation loop, the panel says so: those objects are both upstream and downstream, so both traces colour the same run.

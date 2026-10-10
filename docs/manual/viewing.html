@@ -1,25 +1,85 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Viewing the drawing — DEXPI Viewer manual</title><style>
-:root { color-scheme: light dark; --bg:#f8fafc; --fg:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#2563eb; --side:#eef2f7; }
-@media (prefers-color-scheme: dark) { :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --line:#1e293b; --accent:#60a5fa; --side:#111c31; } }
+:root { color-scheme: light dark; --bg:#f8fafc; --fg:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#2563eb; --side:#eef2f7; --card:#ffffff;
+  --mark:#f59e0b; --mark-fill:rgba(245,158,11,.07); --badge-fg:#111827; --tip:#059669; --warn:#d97706; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --line:#1e293b; --accent:#60a5fa; --side:#111c31; --card:#16213a;
+  --mark:#fbbf24; --mark-fill:rgba(251,191,36,.08); --tip:#34d399; --warn:#fbbf24; } }
 * { box-sizing: border-box; }
 body { margin:0; display:flex; min-height:100vh; background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; }
-nav { width:230px; flex-shrink:0; padding:1.2rem 1rem; background:var(--side); border-right:1px solid var(--line); position:sticky; top:0; height:100vh; overflow:auto; }
+nav { width:240px; flex-shrink:0; padding:1.2rem 1rem; background:var(--side); border-right:1px solid var(--line); position:sticky; top:0; height:100vh; overflow:auto; }
 nav h2 { font-size:.95rem; margin:0 0 .8rem; }
+nav h3 { font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem .5rem .3rem; }
 nav a { display:block; padding:.28rem .5rem; border-radius:6px; color:var(--fg); text-decoration:none; font-size:.88rem; }
 nav a:hover { background:var(--line); }
 nav a.active { background:var(--accent); color:#fff; }
-main { flex:1; min-width:0; padding:2rem 2.5rem 4rem; max-width:1000px; }
-main img { max-width:100%; border:1px solid var(--line); border-radius:8px; }
+main { flex:1; min-width:0; padding:2rem 2.5rem 4rem; max-width:1040px; }
+main > p > img { max-width:100%; border:1px solid var(--line); border-radius:8px; }
 main table { border-collapse:collapse; display:block; overflow-x:auto; max-width:100%; }
 main th, main td { border:1px solid var(--line); padding:.35rem .6rem; text-align:left; vertical-align:top; font-size:.86rem; }
 main th { background:var(--side); }
 main code { background:var(--side); padding:.1rem .3rem; border-radius:4px; font-size:.85em; }
+main pre { background:var(--side); padding:.8rem 1rem; border-radius:8px; overflow-x:auto; }
+main pre code { padding:0; }
 main h1 { margin-top:0; }
+main h2 { margin-top:2.4rem; padding-top:.6rem; border-top:1px solid var(--line); }
+main h1 + p, main h1 + figure { margin-top:0; }
 main a { color:var(--accent); }
+kbd { font:600 .78em ui-monospace, monospace; padding:.08rem .4rem; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; background:var(--card); white-space:nowrap; }
 td img { max-width:130px; max-height:60px; border:none; background:#fff; }
 .footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font-size:.8rem; }
+
+figure.shot { margin:1.4rem 0 1rem; }
+.shot-frame { position:relative; display:block; width:100%; padding:0; margin:0; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:zoom-in; box-shadow:0 1px 3px rgba(15,23,42,.08); }
+.shot-frame img { display:block; width:100%; height:auto; border-radius:7px; }
+.mark { position:absolute; border:2px solid var(--mark); background:var(--mark-fill); border-radius:5px; pointer-events:none; }
+.badge, .mk { display:inline-flex; align-items:center; justify-content:center; width:1.45rem; height:1.45rem; border-radius:50%;
+  background:var(--mark); color:var(--badge-fg); font:700 .78rem/1 system-ui, sans-serif; }
+.badge { position:absolute; box-shadow:0 0 0 2px #fff, 0 1px 4px rgba(0,0,0,.35); }
+.badge.tl { left:0; top:0; transform:translate(-45%,-45%); }
+.badge.tr { right:0; top:0; transform:translate(45%,-45%); }
+.badge.bl { left:0; bottom:0; transform:translate(-45%,45%); }
+.badge.br { right:0; bottom:0; transform:translate(45%,45%); }
+.badge.c { left:50%; top:50%; transform:translate(-50%,-50%); }
+.badge.t { left:50%; top:0; transform:translate(-50%,-55%); }
+.badge.b { left:50%; bottom:0; transform:translate(-50%,55%); }
+.badge.l { left:0; top:50%; transform:translate(-55%,-50%); }
+.badge.r { right:0; top:50%; transform:translate(55%,-50%); }
+.badge.above { left:50%; top:0; transform:translate(-50%,-125%); }
+figcaption { color:var(--muted); font-size:.85rem; margin-top:.45rem; }
+.mk { width:1.25rem; height:1.25rem; font-size:.7rem; vertical-align:.1em; margin:0 .1rem; }
+ol.legend { list-style:none; padding:0; margin:.4rem 0 1.6rem; counter-reset:legend; }
+ol.legend > li { counter-increment:legend; position:relative; padding-left:2.1rem; margin-bottom:.4rem; }
+ol.legend > li::before { content:counter(legend); position:absolute; left:0; top:.1rem; display:flex; align-items:center; justify-content:center;
+  width:1.45rem; height:1.45rem; border-radius:50%; background:var(--mark); color:var(--badge-fg); font:700 .78rem/1 system-ui, sans-serif; }
+ol.steps { padding-left:0; list-style:none; counter-reset:step; }
+ol.steps > li { counter-increment:step; position:relative; padding:0 0 .7rem 2.3rem; }
+ol.steps > li::before { content:counter(step); position:absolute; left:0; top:.05rem; width:1.6rem; height:1.6rem; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; background:var(--accent); color:#fff; font:700 .8rem/1 system-ui, sans-serif; }
+ol.steps > li::after { content:""; position:absolute; left:.78rem; top:1.8rem; bottom:.15rem; width:2px; background:var(--line); }
+ol.steps > li:last-child::after { display:none; }
+.callout { border:1px solid var(--line); border-left:4px solid var(--accent); background:var(--card); border-radius:8px; padding:.6rem 1rem; margin:1.2rem 0; }
+.callout.tip { border-left-color:var(--tip); }
+.callout.warning { border-left-color:var(--warn); }
+.callout > p:first-child { margin-top:0; }
+.callout > p:last-child { margin-bottom:0; }
+.callout-title { display:block; font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.15rem; color:var(--accent); }
+.tip .callout-title { color:var(--tip); }
+.warning .callout-title { color:var(--warn); }
+blockquote { margin:1.2rem 0; padding:.2rem 1rem; border-left:4px solid var(--line); color:var(--muted); }
+
+.cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:1rem; margin:1.2rem 0 2rem; }
+.card { display:flex; flex-direction:column; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--card); color:var(--fg) !important; text-decoration:none; transition:transform .12s ease, box-shadow .12s ease; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(15,23,42,.14); }
+.card img { width:100%; height:130px; object-fit:cover; object-position:var(--pos, center); border-bottom:1px solid var(--line); background:#fff; }
+.card b { padding:.6rem .8rem 0; }
+.card span { padding:.15rem .8rem .8rem; color:var(--muted); font-size:.85rem; line-height:1.45; }
+
+dialog.zoom { border:none; padding:0; background:transparent; max-width:none; max-height:none; overflow:visible; }
+dialog.zoom::backdrop { background:rgba(15,23,42,.82); }
+dialog.zoom .shot-frame { cursor:zoom-out; }
+dialog.zoom .zoom-close { position:fixed; top:.8rem; right:1rem; width:2.4rem; height:2.4rem; border-radius:50%; border:none; background:#fff; color:#0f172a; font-size:1.3rem; cursor:pointer; }
+
 .nav-toggle, .mobile-bar, .backdrop { display:none; }
 @media (max-width: 820px) {
   body { display:block; }
@@ -30,47 +90,93 @@ td img { max-width:130px; max-height:60px; border:none; background:#fff; }
   nav { position:fixed; top:0; left:0; bottom:0; height:100dvh; width:min(78vw, 280px); z-index:50; transform:translateX(-100%); transition:transform .25s ease; box-shadow:0 0 24px rgba(15,23,42,.35); }
   .nav-toggle:checked ~ nav { transform:none; }
   .nav-toggle:checked ~ .backdrop { display:block; position:fixed; inset:0; z-index:40; background:rgba(15,23,42,.45); }
-  main { padding:4.3rem 1.1rem 3rem; }
+  main { padding:4.3rem 1rem 3rem; }
+  .badge { width:1.15rem; height:1.15rem; font-size:.65rem; }
 }
 </style></head>
 <body><input class="nav-toggle" id="nav-toggle" type="checkbox">
 <header class="mobile-bar"><label for="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></label>DEXPI Viewer manual</header>
 <label class="backdrop" for="nav-toggle" aria-hidden="true"></label>
 <nav><h2><a href="index.html" style="padding:0">DEXPI Viewer</a></h2><a href="index.html">DEXPI Viewer manual</a>
+<h3>Guide</h3>
 <a href="getting-started.html">Getting started</a>
+<a href="tasks.html">Common tasks</a>
+<h3>Panels</h3>
 <a href="viewing.html" class="active">Viewing the drawing</a>
+<a href="explorer.html">Explorer & Properties</a>
 <a href="validation.html">Validation</a>
 <a href="inspect.html">Inspect panel</a>
-<a href="topology.html">Topology & highlighting</a>
+<a href="xml-trees.html">Conceptual Model Tree & Diagram Tree</a>
+<a href="topology.html">Topology & connections</a>
+<a href="highlight.html">Highlight</a>
 <a href="export.html">Exports</a>
+<a href="settings.html">Settings & shortcuts</a>
+<h3>Reference</h3>
 <a href="conventions.html">Conventions beyond the spec</a>
 <a href="rules.html">Validation rule reference</a>
 <a href="metamodel.html">DEXPI 2.0 information model</a>
 <a href="symbols.html">DiscProfile 0.6.4 symbol catalogue</a>
-<a href="xml-trees.html">Conceptual Model Tree & Diagram Tree</a>
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
-<main><h1>Viewing the drawing</h1>
-<h2>Navigation</h2>
-<p><img src="images/view-ribbon.png" alt="The highlighted View section of the ribbon: Fit, zoom, Dark and B/W"></p>
+<main><h1 id="viewing-the-drawing">Viewing the drawing</h1>
+<h2 id="zoom-and-pan">Zoom and pan</h2>
+<figure class="shot"><button type="button" class="shot-frame" aria-label="Enlarge image" data-w="437" data-h="153" style="max-width:437px"><img src="images/ribbon-view.png" alt="The View section of the ribbon" width="291" height="102" loading="lazy"><span class="mark" style="left:1.478%;top:0.980%;width:24.742%;height:78.431%"><span class="badge b">1</span></span><span class="mark" style="left:24.158%;top:0.980%;width:28.969%;height:78.431%"><span class="badge b">2</span></span><span class="mark" style="left:51.065%;top:0.980%;width:24.742%;height:78.431%"><span class="badge b">3</span></span><span class="mark" style="left:73.746%;top:0.980%;width:24.742%;height:78.431%"><span class="badge b">4</span></span></button><figcaption>The View section of the ribbon</figcaption></figure>
+<ol class="legend">
+<li><strong>Fit</strong> — the whole sheet in view (<kbd>F</kbd>).</li>
+<li><strong>In / Out / 100%</strong> — zoom by steps (<kbd>Z</kbd> then <kbd>I</kbd> / <kbd>O</kbd>) or to actual size (<kbd>0</kbd>).</li>
+<li><strong>Dark / Light</strong> — switch the app theme (<kbd>D</kbd>). The label shows the theme you will switch to.</li>
+<li><strong>B / W</strong> — draw the file in ink only, so <a href="highlight.html">highlight</a> colours never mix with the drawing&#39;s own colours (<kbd>B</kbd>). The button stays lit while it is on.</li>
+</ol>
+<p>With the mouse: the <strong>wheel</strong> zooms at the cursor, and <strong>dragging</strong> pans.</p>
+<p>The <strong>Minimap</strong> shows the whole sheet with your current view as a blue rectangle. Click or drag in it to move the view there.</p>
+<figure class="shot"><button type="button" class="shot-frame" aria-label="Enlarge image" data-w="392" data-h="353" style="max-width:392px"><img src="images/minimap.png" alt="Minimap while zoomed in on part of the sheet" width="261" height="235" loading="lazy"></button><figcaption>Minimap while zoomed in on part of the sheet</figcaption></figure>
+<h2 id="select-objects">Select objects</h2>
+<figure class="shot"><button type="button" class="shot-frame" aria-label="Enlarge image" data-w="990" data-h="630" style="max-width:990px"><img src="images/selection-halo.png" alt="A selected pump: yellow halo along its geometry, yellow backdrop behind its tag" width="660" height="420" loading="lazy"></button><figcaption>A selected pump: yellow halo along its geometry, yellow backdrop behind its tag</figcaption></figure>
 <ul>
-<li>Mouse wheel zooms at the cursor; drag pans. Ribbon → View has <strong>Fit</strong>, zoom in/out and <strong>100%</strong> (with hotkeys), plus the <strong>Dark</strong> theme and <strong>B / W</strong> monochrome toggles.</li>
-<li>The <strong>Minimap</strong> shows the whole sheet with a live viewport rectangle — click or drag it to navigate.</li>
-<li>Double-clicking objects in panels zooms the drawing to them.</li>
+<li><strong>Click</strong> an object to select it. Explorer, Properties, Connections, Inspect and the <a href="xml-trees.html">XML trees</a> all follow.</li>
+<li><kbd>Ctrl</kbd>/<kbd>Cmd</kbd>-<strong>click</strong> adds or removes objects from the selection.</li>
+<li><strong>Click empty paper</strong> to clear the selection.</li>
+<li><strong>Hover</strong> an object to highlight it; the status bar shows the cursor position in millimetres.</li>
 </ul>
-<h2>Selection</h2>
-<p><img src="images/selection-halo.png" alt="Selection: yellow halo along the geometry, yellow rect behind text"></p>
-<p>Click anything in the drawing to select it — the Explorer tree, Properties, Connections, Inspect and the <a href="xml-trees.html">Conceptual Model Tree &amp; Diagram Tree</a> all follow. Ctrl/Cmd-click toggles multi-selection (also on the canvas); Shift-click range-selects in the tree. Hovering rows in panels highlights the object on the canvas.</p>
-<p>Selection renders as a <strong>marker-pen yellow halo</strong> tracing the object&#39;s own geometry underneath the blue re-stroke — not a bounding box, so a large exchanger doesn&#39;t flood its whole footprint. Selected <strong>text</strong> gets a filled yellow rect instead (embolden-by-doubling reads blurry); Settings → Rendering → <em>Backdrop behind selected text</em> turns that off. Dashed lines <strong>stay dashed</strong> when selected or highlighted — a selected heat-traced pipe keeps its trace distinguishable from the pipe itself.</p>
-<h2>Verification underlay</h2>
-<p><img src="images/underlay.png" alt="Official SVG as red-tinted underlay behind the drawing, controlled from the highlighted toolbar"></p>
-<p>The toolbar above the drawing loads a reference <strong>image, SVG or PDF</strong> as an alignment underlay, stretched onto the diagram extent — the official DISC renderings align exactly. Controls:</p>
-<ul>
-<li><strong>Show</strong>, <strong>On top</strong> (draw over instead of under the drawing) and <strong>Opacity</strong>.</li>
-<li><strong>X / Y / Scale</strong> nudges (0.1 mm steps) for scans that need alignment.</li>
-<li><strong>Hide white</strong> multiply-blends the underlay so its paper background disappears — only its ink shows.</li>
-<li><strong>Tint</strong> recolors the underlay&#39;s ink via a color picker (default red): red reference under black drawing makes any deviation pop.</li>
-</ul>
-<p>When the underlay sits <em>under</em> the drawing, the sheet&#39;s white paper is suppressed automatically so the reference shows through.</p>
-<h2>Rendering settings</h2>
-<p>Settings → Rendering: minimum stroke width (px), stroke width scale, grid, unit display (conventional symbols vs spec unit names in the Properties panel), and <em>Built-in signal-line styling</em> — forces the viewer&#39;s <a href="conventions.html">signal-line convention</a> even when the loaded profile publishes its own LineStroke styling (useful while profile styling is early-stage).</p>
-<div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main></body></html>
+<p>The selection is a <strong>marker-pen yellow halo</strong> that traces the object&#39;s own geometry under a blue re-stroke — not a bounding box, so a large exchanger does not flood its whole footprint. Selected <strong>text</strong> gets a yellow backdrop instead; turn it off under <strong>Settings → Rendering → Backdrop behind selected text</strong>. Dashed lines stay dashed when selected, so a heat-traced pipe keeps its trace distinguishable from the pipe itself.</p>
+<p>To jump to an object from a panel, use <strong>Zoom to</strong> in the <a href="explorer.html">Explorer</a>, the <code>↳</code> object link in <a href="validation.html">Validation</a>, or double-click a node in the <a href="topology.html">Topology graph</a>.</p>
+<h2 id="compare-against-a-reference-rendering">Compare against a reference rendering</h2>
+<p>The toolbar above the drawing loads a reference <strong>image, SVG or PDF</strong> as an underlay, stretched onto the drawing&#39;s extent. The official DISC renderings line up exactly, so any difference stands out.</p>
+<figure class="shot"><button type="button" class="shot-frame" aria-label="Enlarge image" data-w="1466" data-h="1148" style="max-width:1466px"><img src="images/underlay.png" alt="The official SVG as a red underlay behind the drawing" width="977" height="765" loading="lazy"><span class="mark" style="left:0.542%;top:3.137%;width:9.427%;height:4.183%"><span class="badge tl">1</span></span><span class="mark" style="left:25.650%;top:3.660%;width:17.851%;height:3.137%"><span class="badge tl">2</span></span><span class="mark" style="left:54.145%;top:3.791%;width:27.830%;height:2.876%"><span class="badge tl">3</span></span><span class="mark" style="left:0.542%;top:7.843%;width:14.800%;height:3.137%"><span class="badge tl">4</span></span><span class="mark" style="left:28.076%;top:7.320%;width:5.875%;height:4.183%"><span class="badge tr">5</span></span></button><figcaption>The official SVG as a red underlay behind the drawing</figcaption></figure>
+<ol class="legend">
+<li><strong>Underlay…</strong> — choose the reference file (<code>.png .jpg .jpeg .webp .gif .bmp .svg .pdf</code>).</li>
+<li><strong>Show / On top / Opacity</strong> — show or hide it, draw it over instead of under the drawing, and set its opacity (default 50%).</li>
+<li><strong>X / Y / Scale</strong> — nudge it in 0.1 mm steps and scale it in percent, for scans that need aligning.</li>
+<li><strong>Hide white / Tint</strong> — <em>Hide white</em> drops the reference&#39;s white paper so only its ink shows; <em>Tint</em> recolours that ink (red by default) with the colour picker next to it.</li>
+<li><strong>Clear</strong> — remove the underlay.</li>
+</ol>
+<ol class="steps">
+<li>Open the DEXPI file, then press <strong>Underlay…</strong> <span class="mk">1</span> and choose the official rendering of the same sheet.</li>
+<li>Tick <strong>Hide white</strong> and <strong>Tint</strong> <span class="mk">4</span>. Red reference ink now sits under the black drawing.</li>
+<li>Zoom in. Where the two agree you see black on red; anything only red is missing from the drawing, anything only black is extra.</li>
+</ol>
+<p>When the underlay sits <em>under</em> the drawing, the sheet&#39;s own white paper is suppressed automatically so the reference shows through. Underlay settings are not remembered after a reload.</p>
+<h2 id="rendering-settings">Rendering settings</h2>
+<p>Line widths, the grid, unit names and signal-line styling are under <a href="settings.html#rendering">Settings → Rendering</a>.</p>
+<div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main>
+<script>
+const dialog = document.createElement("dialog");
+dialog.className = "zoom";
+document.body.append(dialog);
+dialog.addEventListener("click", () => dialog.close());
+for (const frame of document.querySelectorAll(".shot-frame")) {
+  frame.addEventListener("click", () => {
+    const copy = frame.cloneNode(true);
+    const w = Number(frame.dataset.w);
+    const h = Number(frame.dataset.h);
+    copy.style.width = "min(96vw, " + (92 * w / h).toFixed(2) + "vh, " + w + "px)";
+    copy.removeAttribute("aria-label");
+    const close = document.createElement("button");
+    close.className = "zoom-close";
+    close.type = "button";
+    close.setAttribute("aria-label", "Close");
+    close.textContent = "×";
+    dialog.replaceChildren(copy, close);
+    dialog.showModal();
+  });
+}
+</script></body></html>
