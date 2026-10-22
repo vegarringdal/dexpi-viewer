@@ -31,7 +31,9 @@ function versionTooltip(version: string): string {
 /**
  * Catalogue picker: auto / a bundled version / a custom DiscProfile.xml.
  * Auto and a version button can light at once — Auto is the mode, the lit
- * version is what that mode resolved the open document to.
+ * version is what that mode resolved the open document to. The ribbon packs
+ * by size, so the two mediums (Auto, Custom) share the first column and the
+ * version minis stack three high in the next.
  */
 export function ProfileSection(): JSX.Element {
   const { active, isPinned, autoLoad, declaredVersion } = profileState.use();
@@ -48,11 +50,19 @@ export function ProfileSection(): JSX.Element {
         <RibbonButton
           icon={<IconWand />}
           label="Auto"
-          size="mini"
+          size="medium"
           selected={!isPinned && autoLoad}
           disabled={!autoLoad}
           tooltip={(autoLoad ? AUTO_TOOLTIP_ON : AUTO_TOOLTIP_OFF) + autoHint}
           onClick={() => void followDeclaredProfile()}
+        />
+        <RibbonButton
+          icon={<IconPuzzle />}
+          label="Custom profile"
+          size="medium"
+          selected={active.kind === "custom"}
+          tooltip={CUSTOM_TOOLTIP}
+          onClick={profilePicker.open}
         />
         {BUNDLED_PROFILE_VERSIONS.map((version) => (
           <RibbonButton
@@ -66,14 +76,6 @@ export function ProfileSection(): JSX.Element {
             onClick={() => void selectBundledProfile(version)}
           />
         ))}
-        <RibbonButton
-          icon={<IconPuzzle />}
-          label="Custom profile"
-          size="big"
-          selected={active.kind === "custom"}
-          tooltip={CUSTOM_TOOLTIP}
-          onClick={profilePicker.open}
-        />
       </RibbonSection>
       {profilePicker.element}
     </>

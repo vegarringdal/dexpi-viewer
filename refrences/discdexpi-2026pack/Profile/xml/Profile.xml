@@ -1,4 +1,4 @@
-<Model name="Profile" uri="http://www.dexpi.org/specification/Temp/Profile/0.6.4">
+<Model name="Profile" uri="http://www.dexpi.org/specification/Temp/Profile/0.6.6">
   <Import prefix="Core" source="https://data.dexpi.org/models/2.0.0/Core.xml"/>
   <Import prefix="MetaData" source="https://data.dexpi.org/models/2.0.0/MetaData.xml"/>
   <ConcreteClass name="AggregatedStroke" superTypes="/Stroke">
@@ -316,27 +316,6 @@ A typical application of LateralOffset could be to define an :sp:Element:`~Profi
       <String>?symbolUsage</String>
     </Data>
     <Data property="Conditions">
-      <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
-?symbol Profile:Symbol.Variants ?symbolVariant.  
-?symbolVariant Profile:SymbolVariant.ResizingXAllowed false.
-?symbolUsage Profile:SymbolUsage.ScaleX ?scaleX.
-@notEqual(?scaleX 1)</String>
-    </Data>
-    <Data property="MessageTemplate">
-      <String>{?symbol} does not allow scaling in x-direction, but the {?symbolUsage} has ScaleX={?scaleX}.</String>
-    </Data>
-    <Data property="Name">
-      <String>invalid scaling in x-direction</String>
-    </Data>
-    <Data property="Target">
-      <String>?symbolUsage</String>
-    </Data>
-  </Object>
-  <Object type="/Rule">
-    <Data property="ApplyForEach">
-      <String>?symbolUsage</String>
-    </Data>
-    <Data property="Conditions">
       <String>?obj 
     meta:type ?cls.
 
@@ -369,15 +348,15 @@ A typical application of LateralOffset could be to define an :sp:Element:`~Profi
     <Data property="Conditions">
       <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
 ?symbol Profile:Symbol.Variants ?symbolVariant.  
-?symbolVariant Profile:SymbolVariant.RotationAllowed false.
-?symbolUsage Profile:SymbolUsage.Rotation ?rotation.
-@notEqual(?rotation 0)</String>
+?symbolVariant Profile:SymbolVariant.ResizingXAllowed false.
+?symbolUsage Profile:SymbolUsage.ScaleX ?scaleX.
+@notEqual(?scaleX 1)</String>
     </Data>
     <Data property="MessageTemplate">
-      <String>{?symbol} does not allow rotation, but the {?symbolUsage} has Rotation={?rotation}.</String>
+      <String>{?symbol} does not allow scaling in x-direction, but the {?symbolUsage} has ScaleX={?scaleX}.</String>
     </Data>
     <Data property="Name">
-      <String>invalid rotation</String>
+      <String>invalid scaling in x-direction</String>
     </Data>
     <Data property="Target">
       <String>?symbolUsage</String>
@@ -398,6 +377,27 @@ A typical application of LateralOffset could be to define an :sp:Element:`~Profi
     </Data>
     <Data property="Name">
       <String>invalid mirroring</String>
+    </Data>
+    <Data property="Target">
+      <String>?symbolUsage</String>
+    </Data>
+  </Object>
+  <Object type="/Rule">
+    <Data property="ApplyForEach">
+      <String>?symbolUsage</String>
+    </Data>
+    <Data property="Conditions">
+      <String>?symbolUsage Profile:SymbolUsage.Symbol ?symbol.
+?symbol Profile:Symbol.Variants ?symbolVariant.  
+?symbolVariant Profile:SymbolVariant.RotationAllowed false.
+?symbolUsage Profile:SymbolUsage.Rotation ?rotation.
+@notEqual(?rotation 0)</String>
+    </Data>
+    <Data property="MessageTemplate">
+      <String>{?symbol} does not allow rotation, but the {?symbolUsage} has Rotation={?rotation}.</String>
+    </Data>
+    <Data property="Name">
+      <String>invalid rotation</String>
     </Data>
     <Data property="Target">
       <String>?symbolUsage</String>

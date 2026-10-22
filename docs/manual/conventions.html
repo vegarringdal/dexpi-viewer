@@ -115,12 +115,12 @@ dialog.zoom .zoom-close { position:fixed; top:.8rem; right:1rem; width:2.4rem; h
 <a href="conventions.html" class="active">Conventions beyond the spec</a>
 <a href="rules.html">Validation rule reference</a>
 <a href="metamodel.html">DEXPI 2.0 information model</a>
-<a href="symbols.html">DiscProfile 0.6.4 symbol catalogue</a>
+<a href="symbols.html">DiscProfile 0.6.6 symbol catalogue</a>
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
 <main><h1 id="conventions-beyond-the-spec">Conventions beyond the spec</h1>
 <p>Several things every reader of DEXPI files must decide are <strong>not defined by any spec</strong>: neither the DEXPI 2.0 specification, the XML schema, nor the DISC profile says how to draw them. This page documents where this viewer follows <em>conventions recovered empirically</em> from the official DISC_EXAMPLE-14 renderings (15 sheets with authoritative SVGs), what the evidence was, and which known deltas remain. Everything here is a candidate for standardization upstream.</p>
 <h2 id="signal-line-styling">Signal-line styling</h2>
-<p>The XML gives <strong>every</strong> signal-family ConnectorLine the same authored stroke (<code>LongDash</code>, 248 lines across all 15 sheets), and DiscProfile (through 0.6.4) defines only the <code>SignalConveyingFunctionTypeRepresentation</code> <em>attribute</em> — no line graphics. The viewer styles the line by semantics and synthesizes repeated mark glyphs, following the DISC decoration table:</p>
+<p>The XML gives <strong>every</strong> signal-family ConnectorLine the same authored stroke (<code>LongDash</code>, 248 lines across all 15 sheets), and DiscProfile (through 0.6.6) defines only the <code>SignalConveyingFunctionTypeRepresentation</code> <em>attribute</em> — no line graphics. The viewer styles the line by semantics and synthesizes repeated mark glyphs, following the DISC decoration table:</p>
 <table>
 <thead>
 <tr>
@@ -186,7 +186,7 @@ dialog.zoom .zoom-close { position:fixed; top:.8rem; right:1rem; width:2.4rem; h
 </tr>
 </tbody></table>
 <p>Marks repeat every 6.5 mm starting 2.5 mm in (cadence measured from the official electrical samples), rotated to the local line direction; circles keep the observed 10 mm cadence starting 5 mm in. Glyphs are hand-drawn vectors (~2.5 mm tall) so SVG/PDF exports need no font.</p>
-<p><strong>Profile precedence:</strong> if a loaded DISC profile publishes <code>Profile/LineStroke</code> styling for signal types (neither 0.6.3 nor 0.6.4 publishes any), the profile&#39;s styling wins by default. Settings → Rendering → <em>Built-in signal-line styling</em> forces the table above instead — useful while profile styling is early-stage.</p>
+<p><strong>Profile precedence:</strong> if a loaded DISC profile publishes <code>Profile/LineStroke</code> styling for signal types (none of the bundled releases, 0.6.3 to 0.6.6, publishes any), the profile&#39;s styling wins by default. Settings → Rendering → <em>Built-in signal-line styling</em> forces the table above instead — useful while profile styling is early-stage.</p>
 <h2 id="profile-label-placement">Profile label placement</h2>
 <p>The profile defines label templates but not how a placement&#39;s rotation affects them. Recovered rules:</p>
 <ul>

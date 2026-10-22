@@ -291,7 +291,7 @@ function checkShapeUsages(
         ? "The exporting tool renders this (e.g. the sheet border); no catalogue provides its geometry."
         : hasProfile
           ? "Load a DISC profile that defines this symbol."
-          : "Load the bundled Profile 0.6.3 (or a custom DiscProfile.xml) so profile symbols resolve.",
+          : "Load a bundled DISC profile (ribbon → Profile) or a custom DiscProfile.xml so profile symbols resolve.",
     });
   }
 }

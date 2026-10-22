@@ -1,6 +1,6 @@
-# DiscProfile 0.6.4 symbol catalogue
+# DiscProfile 0.6.6 symbol catalogue
 
-Generated from the official `DiscProfile.xml` by `npm run generate:docs`, rendered with the app's own SVG emitter — 292 symbols.
+Generated from the official `DiscProfile.xml` by `npm run generate:docs`, rendered with the app's own SVG emitter — 343 symbols.
 Conditional variants render their default variant; label-template placeholders are listed per symbol.
 
 | Symbol | Preview | Variants | Label templates |
@@ -11,7 +11,7 @@ Conditional variants render their default variant; label-template placeholders a
 | `ND0003` | ![ND0003](symbols/ND0003.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;NonSasFunction&gt; |
 | `ND0004` | ![ND0004](symbols/ND0004.svg) | 3 (ValvePosition=NormallyClose; ValvePosition=OneNormallyCloseAngle) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
 | `ND0005` | ![ND0005](symbols/ND0005.svg) | 3 (ValvePosition=NormallyClose; ValvePosition=OneNormallyCloseAngle) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
-| `ND0006` | ![ND0006](symbols/ND0006.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
+| `ND0006` | ![ND0006](symbols/ND0006.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H'<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L'<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
 | `ND0007` | ![ND0007](symbols/ND0007.svg) | 1 | &lt;BreakValue1&gt;<br>&lt;BreakValue2&gt; |
 | `ND0008A` | ![ND0008A](symbols/ND0008A.svg) | 1 | &lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt; |
 | `ND0008B` | ![ND0008B](symbols/ND0008B.svg) | 1 | &lt;ReferencedDrawingNumber&gt;<br>&lt;ReferencedDrawingDescriptor&gt; |
@@ -290,10 +290,61 @@ Conditional variants render their default variant; label-template placeholders a
 | `ND0266` | ![ND0266](symbols/ND0266.svg) | 1 | — |
 | `ND0267` | ![ND0267](symbols/ND0267.svg) | 1 | — |
 | `ND0268` | ![ND0268](symbols/ND0268.svg) | 1 | — |
-| `ND0269` | ![ND0269](symbols/ND0269.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
-| `ND0270` | ![ND0270](symbols/ND0270.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
-| `ND0271` | ![ND0271](symbols/ND0271.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
+| `ND0269` | ![ND0269](symbols/ND0269.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H'<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L'<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
+| `ND0270` | ![ND0270](symbols/ND0270.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H'<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L'<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
+| `ND0271` | ![ND0271](symbols/ND0271.svg) | 1 | &lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>'SP = ' &amp; &lt;SetPoint&gt;<br>'H'<br>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>'L'<br>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt; |
 | `ND0272` | ![ND0272](symbols/ND0272.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;NonSasFunction&gt; |
 | `ND0273` | ![ND0273](symbols/ND0273.svg) | 1 | 'Min: ' &amp; &lt;LowerLimitEndToEndLength&gt; |
 | `ND0274` | ![ND0274](symbols/ND0274.svg) | 1 | — |
 | `ND0275` | ![ND0275](symbols/ND0275.svg) | 1 | — |
+| `ND0276` | ![ND0276](symbols/ND0276.svg) | 1 | — |
+| `ND0277` | ![ND0277](symbols/ND0277.svg) | 1 | — |
+| `ND0278` | ![ND0278](symbols/ND0278.svg) | 1 | — |
+| `ND0279` | ![ND0279](symbols/ND0279.svg) | 1 | &lt;ObjectDisplayName&gt; |
+| `ND0280A` | ![ND0280A](symbols/ND0280A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0280B` | ![ND0280B](symbols/ND0280B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0281A` | ![ND0281A](symbols/ND0281A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0281B` | ![ND0281B](symbols/ND0281B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0282A` | ![ND0282A](symbols/ND0282A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0282B` | ![ND0282B](symbols/ND0282B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0283A` | ![ND0283A](symbols/ND0283A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0283B` | ![ND0283B](symbols/ND0283B.svg) | 2 (ValvePosition=NormallyClose) | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0284A` | ![ND0284A](symbols/ND0284A.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0285A` | ![ND0285A](symbols/ND0285A.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0286A` | ![ND0286A](symbols/ND0286A.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0287A` | ![ND0287A](symbols/ND0287A.svg) | 1 | &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0288A` | ![ND0288A](symbols/ND0288A.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0289A` | ![ND0289A](symbols/ND0289A.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0290A` | ![ND0290A](symbols/ND0290A.svg) | 1 | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0291A` | ![ND0291A](symbols/ND0291A.svg) | 2 (ValvePosition=NormallyClose) | &lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt; |
+| `ND0292` | ![ND0292](symbols/ND0292.svg) | 1 | — |
+| `ND0293` | ![ND0293](symbols/ND0293.svg) | 1 | — |
+| `ND0294` | ![ND0294](symbols/ND0294.svg) | 1 | — |
+| `ND0295` | ![ND0295](symbols/ND0295.svg) | 1 | — |
+| `ND0296` | ![ND0296](symbols/ND0296.svg) | 1 | — |
+| `ND0297` | ![ND0297](symbols/ND0297.svg) | 1 | — |
+| `ND0298` | ![ND0298](symbols/ND0298.svg) | 1 | — |
+| `ND0299` | ![ND0299](symbols/ND0299.svg) | 1 | &lt;TypeCode&gt; |
+| `ND0300A` | ![ND0300A](symbols/ND0300A.svg) | 1 | — |
+| `ND0300B` | ![ND0300B](symbols/ND0300B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;Length&gt; x &lt;Width&gt; x &lt;Height&gt;<br>&lt;FlowRateAtUpperLimitFlow&gt;<br>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;<br>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0301A` | ![ND0301A](symbols/ND0301A.svg) | 1 | — |
+| `ND0301B` | ![ND0301B](symbols/ND0301B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;InsideDiameter&gt; x &lt;LengthTanTan&gt;<br>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;<br>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;<br>&lt;InsulationType&gt;/&lt;InsulationThickness&gt;/&lt;InsulationMaterial&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0302A` | ![ND0302A](symbols/ND0302A.svg) | 1 | — |
+| `ND0302B` | ![ND0302B](symbols/ND0302B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;InletFluidDensity&gt;<br>&lt;InletFlowRate&gt;<br>&lt;NormalInletPressure&gt;/&lt;NormalOutletPressure&gt;<br>&lt;ShaftPower&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0303A` | ![ND0303A](symbols/ND0303A.svg) | 1 | — |
+| `ND0303B` | ![ND0303B](symbols/ND0303B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;Length&gt; x &lt;Width&gt; x &lt;Height&gt; or &lt;InsideDiameter&gt; x &lt;Width&gt;<br>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;<br>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;<br>&lt;TotalStorageCapacity&gt;<br>&lt;InsulationType&gt;/&lt;InsulationThickness&gt;/&lt;InsulationMaterial&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0304A` | ![ND0304A](symbols/ND0304A.svg) | 1 | — |
+| `ND0304B` | ![ND0304B](symbols/ND0304B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;ParticleDiameter&gt;<br>&lt;Length&gt; x &lt;Width&gt; x &lt;Height&gt;<br>&lt;FlowRateAtUpperLimitFlow&gt;<br>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;<br>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;<br>&lt;UpperLimitPressureDrop&gt;<br>&lt;TotalFilterArea&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0305A` | ![ND0305A](symbols/ND0305A.svg) | 1 | — |
+| `ND0305B` | ![ND0305B](symbols/ND0305B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;InletFlowRate&gt;<br>&lt;NormalInletPressure&gt;/&lt;NormalOutletPressure&gt;<br>&lt;NormalInletTemperature&gt;/&lt;NormalOutletTemperature&gt;<br>&lt;ShaftPower&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0306A` | ![ND0306A](symbols/ND0306A.svg) | 1 | — |
+| `ND0306B` | ![ND0306B](symbols/ND0306B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;InsideDiameter&gt; / &lt;InsideDiameter&gt; x &lt;LengthTanTan&gt;<br>&lt;FlowRateAtUpperLimitFlow&gt;<br>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;<br>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0307A` | ![ND0307A](symbols/ND0307A.svg) | 1 | — |
+| `ND0307B` | ![ND0307B](symbols/ND0307B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;Length&gt;x&lt;Height&gt;x&lt;Width&gt;<br>&lt;DesignCaseHeatFlowRate&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0308A` | ![ND0308A](symbols/ND0308A.svg) | 1 | — |
+| `ND0308B` | ![ND0308B](symbols/ND0308B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;InsideDiameter&gt; x &lt;LengthTanTan&gt;<br>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;<br>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0309A` | ![ND0309A](symbols/ND0309A.svg) | 1 | — |
+| `ND0309B` | ![ND0309B](symbols/ND0309B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;InsulationType&gt;/&lt;InsulationThickness&gt;/&lt;InsulationMaterial&gt;<br>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;<br>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;<br>&lt;DesignCaseHeatFlowRate&gt;<br>&lt;Length&gt; x &lt;Width&gt; x &lt;Height&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0310A` | ![ND0310A](symbols/ND0310A.svg) | 1 | — |
+| `ND0310B` | ![ND0310B](symbols/ND0310B.svg) | 1 | &lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;Length&gt; x &lt;Width&gt; x &lt;Height&gt;<br>&lt;FlowRateAtUpperLimitFlow&gt;<br>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;<br>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt; |
+| `ND0311` | ![ND0311](symbols/ND0311.svg) | 1 | — |

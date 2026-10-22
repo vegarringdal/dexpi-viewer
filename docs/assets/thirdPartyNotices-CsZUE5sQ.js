@@ -1,4 +1,4 @@
-const e=[{name:"@pdf-lib/fontkit",version:"1.1.1",license:"MIT",text:"License text not included in the package — see its repository."},{name:"@pdf-lib/standard-fonts",version:"1.0.0",license:"MIT",text:`MIT License
+var e=[{name:`@pdf-lib/fontkit`,version:`1.1.1`,license:`MIT`,text:`License text not included in the package — see its repository.`},{name:`@pdf-lib/standard-fonts`,version:`1.0.0`,license:`MIT`,text:`MIT License
 
 Copyright (c) 2018 Andrew Dillon
 
@@ -19,7 +19,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`},{name:"@pdf-lib/upng",version:"1.0.1",license:"MIT",text:`MIT License
+`},{name:`@pdf-lib/upng`,version:`1.0.1`,license:`MIT`,text:`MIT License
 
 Copyright (c) 2017 Photopea
 
@@ -40,7 +40,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`},{name:"@tabler/icons",version:"3.45.0",license:"MIT",text:`MIT License
+`},{name:`@tabler/icons`,version:`3.45.0`,license:`MIT`,text:`MIT License
 
 Copyright (c) 2020-2026 Paweł Kuna
 
@@ -61,7 +61,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`},{name:"@tabler/icons-react",version:"3.45.0",license:"MIT",text:`MIT License
+`},{name:`@tabler/icons-react`,version:`3.45.0`,license:`MIT`,text:`MIT License
 
 Copyright (c) 2020-2026 Paweł Kuna
 
@@ -82,7 +82,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`},{name:"@tredespace/ui",version:"0.0.56",license:"MIT",text:`MIT License
+`},{name:`@tredespace/ui`,version:`0.0.56`,license:`MIT`,text:`MIT License
 
 Copyright (c) 2026 Vegar Ringdal
 
@@ -103,7 +103,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`},{name:"@types/trusted-types",version:"2.0.7",license:"MIT",text:`    MIT License
+`},{name:`@types/trusted-types`,version:`2.0.7`,license:`MIT`,text:`    MIT License
 
     Copyright (c) Microsoft Corporation.
 
@@ -124,7 +124,7 @@ SOFTWARE.
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
-`},{name:"@webgpu/types",version:"0.1.21",license:"BSD-3-Clause",text:`Copyright 2022 WebGPU Developers
+`},{name:`@webgpu/types`,version:`0.1.21`,license:`BSD-3-Clause`,text:`Copyright 2022 WebGPU Developers
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -149,7 +149,7 @@ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.`},{name:"canvaskit-wasm",version:"0.40.0",license:"BSD-3-Clause",text:`// Copyright (c) 2011 Google Inc. All rights reserved.
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.`},{name:`canvaskit-wasm`,version:`0.40.0`,license:`BSD-3-Clause`,text:`// Copyright (c) 2011 Google Inc. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -178,7 +178,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.`},{name:"ca
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
-`},{name:"clsx",version:"2.1.1",license:"MIT",text:`MIT License
+`},{name:`clsx`,version:`2.1.1`,license:`MIT`,text:`MIT License
 
 Copyright (c) Luke Edwards <luke.edwards05@gmail.com> (lukeed.com)
 
@@ -187,7 +187,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-`},{name:"lit-html",version:"3.3.3",license:"BSD-3-Clause",text:`BSD 3-Clause License
+`},{name:`lit-html`,version:`3.3.3`,license:`BSD-3-Clause`,text:`BSD 3-Clause License
 
 Copyright (c) 2017 Google LLC. All rights reserved.
 
@@ -215,7 +215,7 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-`},{name:"pako",version:"1.0.11",license:"(MIT AND Zlib)",text:`(The MIT License)
+`},{name:`pako`,version:`1.0.11`,license:`(MIT AND Zlib)`,text:`(The MIT License)
 
 Copyright (C) 2014-2017 by Vitaly Puzrin and Andrei Tuputcyn
 
@@ -236,7 +236,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-`},{name:"pdf-lib",version:"1.17.1",license:"MIT",text:`MIT License
+`},{name:`pdf-lib`,version:`1.17.1`,license:`MIT`,text:`MIT License
 
 Copyright (c) 2019 Andrew Dillon
 
@@ -257,7 +257,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`},{name:"pdfjs-dist",version:"6.2.108",license:"Apache-2.0",text:`
+`},{name:`pdfjs-dist`,version:`6.2.108`,license:`Apache-2.0`,text:`
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -434,7 +434,7 @@ SOFTWARE.
       of your accepting any such warranty or additional liability.
 
    END OF TERMS AND CONDITIONS
-`},{name:"react",version:"19.2.8",license:"MIT",text:`MIT License
+`},{name:`react`,version:`19.2.8`,license:`MIT`,text:`MIT License
 
 Copyright (c) Meta Platforms, Inc. and affiliates.
 
@@ -455,7 +455,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`},{name:"react-dom",version:"19.2.8",license:"MIT",text:`MIT License
+`},{name:`react-dom`,version:`19.2.8`,license:`MIT`,text:`MIT License
 
 Copyright (c) Meta Platforms, Inc. and affiliates.
 
@@ -476,7 +476,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`},{name:"scheduler",version:"0.27.0",license:"MIT",text:`MIT License
+`},{name:`scheduler`,version:`0.27.0`,license:`MIT`,text:`MIT License
 
 Copyright (c) Meta Platforms, Inc. and affiliates.
 
@@ -497,7 +497,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`},{name:"tailwind-merge",version:"3.6.0",license:"MIT",text:`MIT License
+`},{name:`tailwind-merge`,version:`3.6.0`,license:`MIT`,text:`MIT License
 
 Copyright (c) 2021 Dany Castillo
 
@@ -518,7 +518,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`},{name:"tslib",version:"1.14.1",license:"0BSD",text:`Copyright (c) Microsoft Corporation.\r
+`},{name:`tslib`,version:`1.14.1`,license:`0BSD`,text:`Copyright (c) Microsoft Corporation.\r
 \r
 Permission to use, copy, modify, and/or distribute this software for any\r
 purpose with or without fee is hereby granted.\r
@@ -529,7 +529,7 @@ AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,\r
 INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM\r
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR\r
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR\r
-PERFORMANCE OF THIS SOFTWARE.`}],n=[{name:"Liberation Sans",version:"2.x",license:"OFL-1.1",text:`Digitized data copyright (c) 2010 Google Corporation
+PERFORMANCE OF THIS SOFTWARE.`}],t=[{name:`Liberation Sans`,version:`2.x`,license:`OFL-1.1`,text:`Digitized data copyright (c) 2010 Google Corporation
 	with Reserved Font Arimo, Tinos and Cousine.
 Copyright (c) 2012 Red Hat, Inc.
 	with Reserved Font Name Liberation.
@@ -631,7 +631,7 @@ DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER
 DEALINGS IN THE FONT SOFTWARE.
 
-`},{name:"Carlito",version:"1.x",license:"OFL-1.1",text:`Copyright 2013 The Carlito Project Authors (https://github.com/googlefonts/carlito), with Reserved Font Name "Carlito"
+`},{name:`Carlito`,version:`1.x`,license:`OFL-1.1`,text:`Copyright 2013 The Carlito Project Authors (https://github.com/googlefonts/carlito), with Reserved Font Name "Carlito"
 
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
@@ -725,7 +725,7 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
-`},{name:"DejaVu Sans",version:"2.x",license:"Bitstream Vera / public domain",text:`Fonts are (c) Bitstream (see below). DejaVu changes are in public domain.
+`},{name:`DejaVu Sans`,version:`2.x`,license:`Bitstream Vera / public domain`,text:`Fonts are (c) Bitstream (see below). DejaVu changes are in public domain.
 Glyphs imported from Arev fonts are (c) Tavmjong Bah (see below)
 
 
@@ -912,4 +912,4 @@ has requested that any alterations which yield different font metrics be
 given a different name.
 
 $Id$
-`}];export{n as fontNotices,e as npmNotices};
+`}];export{t as fontNotices,e as npmNotices};

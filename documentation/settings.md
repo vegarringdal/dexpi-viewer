@@ -43,7 +43,7 @@ Shortcuts use plain keys so nothing collides with the browser. "<kbd>E</kbd> the
 | --- | --- |
 | Open file | <kbd>Ctrl</kbd>+<kbd>O</kbd> |
 | Load example | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> |
-| Use latest profile (0.6.4) | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> |
+| Use latest profile (0.6.6) | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> |
 | Fit drawing | <kbd>F</kbd> |
 | Zoom in / out | <kbd>Z</kbd> then <kbd>I</kbd> / <kbd>O</kbd> |
 | Zoom 100% | <kbd>0</kbd> |

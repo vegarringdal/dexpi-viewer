@@ -4,7 +4,7 @@ Several things every reader of DEXPI files must decide are **not defined by any 
 
 ## Signal-line styling
 
-The XML gives **every** signal-family ConnectorLine the same authored stroke (`LongDash`, 248 lines across all 15 sheets), and DiscProfile (through 0.6.4) defines only the `SignalConveyingFunctionTypeRepresentation` *attribute* — no line graphics. The viewer styles the line by semantics and synthesizes repeated mark glyphs, following the DISC decoration table:
+The XML gives **every** signal-family ConnectorLine the same authored stroke (`LongDash`, 248 lines across all 15 sheets), and DiscProfile (through 0.6.6) defines only the `SignalConveyingFunctionTypeRepresentation` *attribute* — no line graphics. The viewer styles the line by semantics and synthesizes repeated mark glyphs, following the DISC decoration table:
 
 | `SignalConveyingFunctionTypeRepresentation` | Preview | Rendering |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ The XML gives **every** signal-family ConnectorLine the same authored stroke (`L
 
 Marks repeat every 6.5 mm starting 2.5 mm in (cadence measured from the official electrical samples), rotated to the local line direction; circles keep the observed 10 mm cadence starting 5 mm in. Glyphs are hand-drawn vectors (~2.5 mm tall) so SVG/PDF exports need no font.
 
-**Profile precedence:** if a loaded DISC profile publishes `Profile/LineStroke` styling for signal types (neither 0.6.3 nor 0.6.4 publishes any), the profile's styling wins by default. Settings → Rendering → *Built-in signal-line styling* forces the table above instead — useful while profile styling is early-stage.
+**Profile precedence:** if a loaded DISC profile publishes `Profile/LineStroke` styling for signal types (none of the bundled releases, 0.6.3 to 0.6.6, publishes any), the profile's styling wins by default. Settings → Rendering → *Built-in signal-line styling* forces the table above instead — useful while profile styling is early-stage.
 
 ## Profile label placement
 

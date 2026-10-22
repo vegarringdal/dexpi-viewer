@@ -122,7 +122,7 @@ in `refrences/` when in doubt.
 | `refrences/DEXPIViewer/` | The prior-art viewer (JS + SVG); its `src/dexpiParser.js` documents the 2.0 XML shapes in practice |
 | `refrences/spec-model-Core-Diagram.py` | The spec's own Core.Diagram model source (from gitlab dexpi/Specification `src/model/Core/Diagram/Diagram.py`) — authoritative for graphics semantics: SVG mapping, DashStyle table, FillStyle, EllipseArc geometry |
 | `refrences/discdexpi-disc-profile/` | DISC Profile spec from [ToniaPedersen/DISCDEXPI](https://github.com/ToniaPedersen/DISCDEXPI): 0.4/0.5 zips (html + xml) + schema; 0.5 XML extracted (`DISC-Profile-0.5-xml/xml/` — Builtin/Core/Plant/DiscProfile model XML incl. FL0/FL10 variants). The 97 MB html extraction is deliberately NOT committed — unzip on demand |
-| `refrences/discdexpi-2026pack/` | [ToniaPedersen/DISCDEXPI_2026Pack](https://github.com/ToniaPedersen/DISCDEXPI_2026Pack): DISC Profile **0.6.x** — `Profile/xml/` holds the CURRENT release (0.6.4), upstream's `0.6.3xml.zip`/`0.6.4xml.zip`/`0.6.4html.zip` and the schema sit beside it, with changes docs 0.6.0→0.6.3 and 0.6.3→0.6.4; plus PID Validation Method (docx/drawio/pptx) and `Blueprint/DISC_EXAMPLE-14/` — real DEXPI XML files WITH official SVG renderings (verification fixtures like C01). The html extraction is deliberately NOT committed — unzip on demand. The catalogues the APP ships (and every test parses) live in `public/profiles/`, not here, so the same 6.4 MB file is not stored twice per release |
+| `refrences/discdexpi-2026pack/` | [ToniaPedersen/DISCDEXPI_2026Pack](https://github.com/ToniaPedersen/DISCDEXPI_2026Pack): DISC Profile **0.6.x** — `Profile/xml/` holds the CURRENT release (0.6.6, synced to upstream `dbbd4ec`), upstream's `0.6.3xml.zip`/`0.6.4xml.zip`/`0.6.4html.zip`/`DISC Profile 0.6.6.xml.zip`/`DISC Profile 0.6.6.html.zip` and the schema sit beside it, with changes docs 0.6.0→0.6.3, 0.6.3→0.6.4 and 0.6.4→0.6.6 (there is no 0.6.5) and the Pilot Transfer Requirements rev 6.2; plus PID Validation Method (docx/drawio/pptx) and `Blueprint/DISC_EXAMPLE-14/` — real DEXPI XML files WITH official SVG renderings (verification fixtures like C01). The html extraction is deliberately NOT committed — unzip on demand. The catalogues the APP ships (and every test parses) live in `public/profiles/`, not here, so the same 6.4 MB file is not stored twice per release |
 | `external/tredespace-ui-0.0.56.tgz` | UI library (`@tredespace/ui`); README inside covers setup |
 | `external/tredespace-client.ts` | tredespace embed API reference (not used yet) |
 
@@ -2495,3 +2495,46 @@ Scope note: covers per-object SHAPE only — cross-object semantics
   the Diagram Tree and global selection; as-viewed exports include the
   Label Inspect / Node Positions overlays. Sidebar is grouped (Guide /
   Panels / Reference); the landing page is a card grid of thumbnails.
+
+- **2026-10-22** DiscProfile 0.6.6 bundled as the latest release
+  (director, off the pack's `DiscProfile_Changes_0.6.4_to_0.6.6.md`).
+  Upstream skipped 0.6.5 — there is no such file, so no document can
+  legitimately declare it.
+  - `public/profiles/DiscProfile-0.6.6.xml` (8.2 MB, byte-identical to
+    upstream's `DISC Profile 0.6.6.xml.zip` and `Profile/xml/`);
+    `BUNDLED_PROFILE_VERSIONS` is 0.6.6 / 0.6.4 / 0.6.3 and
+    `LATEST_BUNDLED_PROFILE` 0.6.6, which moves the Ctrl+Shift+L hotkey
+    and the generated symbols.md along. Version detection needed no
+    change: the 0.6.6 stamp and URIs have the 0.6.4 shape. The
+    `refrences/` mirror is synced to upstream `dbbd4ec` (0.6.6 XML,
+    both 0.6.6 zips, the change reports, requirements rev 6.2).
+  - Ribbon Profile section relaid (director): Auto and Custom profile as
+    mediums sharing the first column, the three version minis stacked in
+    the second — the section packs children by size, so this is order
+    and size only. Custom profile is no longer a big button.
+  - The one behavioural change. 0.6.6 cuts the H and L alarm templates
+    of ND0006 / ND0269 / ND0270 / ND0271 to bare literals (`'H'`,
+    `'L'`). The `SignalConveyingFunction:<AlarmValue>` role path that
+    used to suppress them on an instrument WITHOUT that alarm went with
+    the value, so a literal template would have lit H and L on every such
+    instrument lacking authored text. Director's call: a template that is
+    nothing but an alarm letter stays conditional on a
+    SignalConveyingFunction child with the matching PortStatus
+    (`resolveLiteralText` in profileLabels.ts) — the 0.6.4 behaviour
+    minus the value. A scan of all three catalogues found bare alarm
+    letters only on those four symbols and only in 0.6.6, so the rule
+    catches nothing else.
+  - Everything else is additive and data-driven: 51 symbols, 20 classes,
+    IOPS → IOPPS, the High/Low type codes, ND0186's label moved to
+    LeftTop. Pinned in discProfileOfficial.test.ts ("what 0.6.6 changed
+    against 0.6.4"; 343 symbols / 388 variants / 244 with templates,
+    cross-checked against an independent count of the XML).
+  - Deferred on purpose. Equipment boxes (ND0300–ND0310) resolve their
+    placeholders through the 2-hop BFS, which cannot tell the heat
+    exchanger box's Cooling Chamber (rows D/E) from its Heating Chamber
+    (rows F/G); rev 6.2 has the B label carry authored Text rows, which
+    suppress the overlay anyway, and no 0.6.6 sample drawing exists to
+    verify against (the blueprints are still 0.6.3). Rev 6.2 §7.5's
+    "rule B" label alignment under rotation/mirroring is a requirements
+    change rather than a profile one, and the note it cites is not in
+    the pack — not implemented.

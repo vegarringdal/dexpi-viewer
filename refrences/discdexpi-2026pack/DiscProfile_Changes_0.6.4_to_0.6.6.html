@@ -1,0 +1,1478 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DiscProfile changes 0.6.4 to 0.6.6</title>
+  <style>
+    body { margin: 0; color: #171717; background: #ffffff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 48px 24px; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 1.4em 0 0.6em; }
+    h1 { font-size: 2.25rem; margin-top: 0; }
+    .tbl { width: 100%; overflow-x: auto; margin: 1.5rem 0; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #d4d4d4; padding: 0.6rem 0.75rem; text-align: left; vertical-align: top; }
+    th { background: #f5f5f5; }
+    tr:nth-child(even) td { background: #fafafa; }
+    pre { overflow-x: auto; background: #171717; color: #f5f5f5; padding: 1rem; border-radius: 0.5rem; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    :not(pre) > code { background: #f5f5f5; color: #171717; padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.9em; word-break: break-word; }
+    blockquote { border-left: 4px solid #d4d4d4; margin-left: 0; padding-left: 1rem; color: #525252; }
+    a { color: #1d4ed8; }
+    img { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <main>
+<h1 id="discprofile-model-comparison-report">DiscProfile Model Comparison Report</h1>
+<h3 id="class-modelling-and-symbol-library-version-064-version-066">Class Modelling and Symbol Library: Version 0.6.4 → Version 0.6.6</h3>
+<p><strong>Prepared:</strong> 20 October 2026, updated 21 October 2026 (§7 requirements document)<br />
+<strong>Prepared for:</strong> Users of the DiscProfile DEXPI extension model</p>
+<h2 id="1-purpose-and-scope">1. Purpose and Scope</h2>
+<p>This report documents all differences between the version 0.6.4 and version 0.6.6 releases of the DiscProfile DEXPI extension model — the information model that defines equipment classes, attributes, and graphical symbols used across the DiscProfile profile.</p>
+<p>Files compared:</p>
+<ul>
+<li>DiscProfile.xml (v0.6.4 → v0.6.6)</li>
+<li>Profile.xml (v0.6.4 → v0.6.6)</li>
+<li>DISC DEXPI Pilot Transfer Requirements (rev 6.1 → rev 6.2), see §7</li>
+</ul>
+<p>There is no separate 0.6.5 release file; the changes below are the cumulative changes from 0.6.4 to 0.6.6.</p>
+<p><code>Profile.xml</code> — the metamodel that defines symbols, symbol usage and the validation rules — has no substantive change apart from its version URI; see §5. The changes made to the requirements document for 0.6.6 are listed in §7.</p>
+<p>The DiscProfile.xml review covers the class model (new, removed and modified classes and attributes), the type-code packages, the usage constraint (profile scope) and the symbol library (graphical objects, label templates and their linkage to classes). Purely cosmetic differences in the XML — element ordering, indentation and floating-point coordinate rounding — are excluded.</p>
+<p>The comparison was produced by structurally parsing both model files and diffing their class definitions, data properties, enumerations, type codes, constraint objects and symbol catalogue entries.</p>
+<h2 id="2-summary-of-changes">2. Summary of Changes</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Model Element</th>
+<th>v0.6.4</th>
+<th>v0.6.6</th>
+<th>Net Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Concrete Classes</td>
+<td>173</td>
+<td>193</td>
+<td>+20 (20 added, 0 removed)</td>
+</tr>
+<tr>
+<td>Abstract Classes</td>
+<td>4</td>
+<td>4</td>
+<td>No change</td>
+</tr>
+<tr>
+<td>Class Extensions</td>
+<td>23</td>
+<td>29</td>
+<td>+6 (6 added, 2 modified)</td>
+</tr>
+<tr>
+<td>Data Properties on extensions</td>
+<td>106</td>
+<td>140</td>
+<td>+34</td>
+</tr>
+<tr>
+<td>Enumerations</td>
+<td>3</td>
+<td>3</td>
+<td>No change</td>
+</tr>
+<tr>
+<td>Type-code packages</td>
+<td>5</td>
+<td>5</td>
+<td>No change (1 modified: +2 codes, 1 renamed)</td>
+</tr>
+<tr>
+<td>Symbols (graphical)</td>
+<td>292</td>
+<td>343</td>
+<td>+51</td>
+</tr>
+<tr>
+<td>Symbol variants</td>
+<td>328</td>
+<td>388</td>
+<td>+60</td>
+</tr>
+<tr>
+<td>Label templates</td>
+<td>328</td>
+<td>458</td>
+<td>+130</td>
+</tr>
+<tr>
+<td>Symbols modified</td>
+<td>—</td>
+<td>5</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Allowed classes (UsageConstraint)</td>
+<td>273</td>
+<td>294</td>
+<td>+21 / −0</td>
+</tr>
+<tr>
+<td>Validation rules (<code>Profile.xml</code>)</td>
+<td>5</td>
+<td>5</td>
+<td>No change</td>
+</tr>
+<tr>
+<td>Allowed properties (UsageConstraint)</td>
+<td>289</td>
+<td>332</td>
+<td>+43 / −0</td>
+</tr>
+<tr>
+<td>Requirements document</td>
+<td>rev 6.1</td>
+<td>rev 6.2</td>
+<td>Equipment boxes, alarm labels, label rotation (§7)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Nothing was removed: no classes, attributes, type codes, allowed classes, allowed properties or symbols. 0.6.6 is purely additive apart from the five symbol modifications in §4.2 and the IOPS → IOPPS rename in §3.4.</p>
+<p><em>Counts are taken directly from the two files. Data properties include all <code>DataProperty</code>/<code>ReferenceProperty</code>/<code>CompositionProperty</code> elements on class extensions. The 0.6.3 → 0.6.4 report gave 172 concrete classes and 110 extension data properties for 0.6.4; counted directly in the 0.6.4 file, the figures are 173 and 106.</em></p>
+<h3 id="21-version-stamping">2.1 Version Stamping</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>v0.6.4</th>
+<th>v0.6.6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Model/@uri</code> (DiscProfile)</td>
+<td><code>http://www.to.define/DiscProfile/0.6.4</code></td>
+<td><code>http://www.to.define/DiscProfile/0.6.6</code></td>
+</tr>
+<tr>
+<td><code>Profile</code> import source</td>
+<td><code>http://www.dexpi.org/specification/Temp/Profile/0.6.4</code></td>
+<td><code>http://www.dexpi.org/specification/Temp/Profile/0.6.6</code></td>
+</tr>
+<tr>
+<td><code>MetaData/version</code> (DiscProfile)</td>
+<td><code>0.6.4</code></td>
+<td><code>0.6.6</code></td>
+</tr>
+<tr>
+<td><code>Model/@uri</code> (Profile.xml)</td>
+<td><code>http://www.dexpi.org/specification/Temp/Profile/0.6.4</code></td>
+<td><code>http://www.dexpi.org/specification/Temp/Profile/0.6.6</code></td>
+</tr>
+<tr>
+<td><code>MetaData/version</code> (Profile.xml)</td>
+<td>absent</td>
+<td>absent</td>
+</tr>
+<tr>
+<td><code>Core</code> / <code>MetaData</code> / <code>Plant</code> imports</td>
+<td>DEXPI 2.0.0</td>
+<td>DEXPI 2.0.0 (unchanged)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The version jumps from 0.6.4 straight to 0.6.6. Tooling that matches on the exact model URI or <code>Profile</code> import URI must be updated. Profile.xml carries its version only in the model URI; unlike DiscProfile.xml it has no <code>MetaData/version</code> element.</p>
+<h2 id="3-class-model-changes">3. Class Model Changes</h2>
+<h3 id="31-new-concrete-classes">3.1 New Concrete Classes</h3>
+<p>20 concrete classes were added. Each one is the class behind a new symbol (§4.1) and is added to the allowed classes (§3.5).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Class Name</th>
+<th>Superclass</th>
+<th>RDL Label</th>
+<th>RDL URI</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AngleChokeValve</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>ANGLE CHOKE VALVE</td>
+<td><code>http://noaka.org/rdl/AngleChokeValve</code></td>
+<td>Angle Choke Valve</td>
+</tr>
+<tr>
+<td>DelugeNozzle</td>
+<td><code>Plant/Piping.PipingComponent</code></td>
+<td>DELUGE NOZZLE</td>
+<td><code>http://data.posccaesar.org/rdl/RDS458009</code></td>
+<td>Deluge Nozzle</td>
+</tr>
+<tr>
+<td>DirectionalWaterSprayNozzle</td>
+<td><code>Plant/Piping.PipingComponent</code></td>
+<td>DIRECTIONAL WATER SPRAY NOZZLE</td>
+<td><code>http://data.posccaesar.org/rdl/RDS5855484</code></td>
+<td>Directional Water Spray Nozzle</td>
+</tr>
+<tr>
+<td>DoubleIsolationAndBleedValveTubing</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>DOUBLE ISOLATION AND BLEED VALVE TUBING</td>
+<td><code>http://noaka.org/rdl/DoubleIsolationAndBleedValveTubing</code></td>
+<td>Double Isolation And Bleed Valve (Tubing)</td>
+</tr>
+<tr>
+<td>EndOutArrow</td>
+<td><code>Plant/Piping.PipingComponent</code></td>
+<td>END OUT ARROW</td>
+<td><code>http://noaka.org/rdl/EndOutArrow</code></td>
+<td>End Out Arrow</td>
+</tr>
+<tr>
+<td>FlushingRingWithBleedPlugs</td>
+<td><code>Plant/Piping.PipingComponent</code></td>
+<td>FLUSHING RING WITH BLEED PLUGS</td>
+<td><code>http://noaka.org/rdl/FlushingRingWithBleedPlugs</code></td>
+<td>Flushing Ring With Bleed Plugs</td>
+</tr>
+<tr>
+<td>GateValveDoubleExpanding</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>GATE VALVE DOUBLE EXPANDING</td>
+<td><code>http://noaka.org/rdl/GateValveDoubleExpanding</code></td>
+<td>Gate Valve Double Expanding</td>
+</tr>
+<tr>
+<td>GateValveWithPlug</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>GATE VALVE WITH PLUG</td>
+<td><code>http://noaka.org/rdl/GateValveWithPlug</code></td>
+<td>Gate Valve With Plug</td>
+</tr>
+<tr>
+<td>InergenNozzle</td>
+<td><code>Plant/Piping.PipingComponent</code></td>
+<td>INERGEN NOZZLE</td>
+<td><code>http://noaka.org/rdl/InergenNozzle</code></td>
+<td>Inergen Nozzle</td>
+</tr>
+<tr>
+<td>InternalPipe</td>
+<td><code>/InformationModel.ProcessVesselComponent</code></td>
+<td>INTERNAL PIPE</td>
+<td><code>http://noaka.org/rdl/InternalPipe</code></td>
+<td>Internal Pipe</td>
+</tr>
+<tr>
+<td>KnifeGateValve</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>KNIFE GATE VALVE</td>
+<td><code>http://data.posccaesar.org/rdl/RDS645029</code></td>
+<td>Knife Gate Valve</td>
+</tr>
+<tr>
+<td>NeedleValveWithPlug</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>NEEDLE VALVE WITH PLUG</td>
+<td><code>http://noaka.org/rdl/NeedleValveWithPlug</code></td>
+<td>Needle Valve With Plug</td>
+</tr>
+<tr>
+<td>QuickClosingValve</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>QUICK CLOSING VALVE</td>
+<td><code>http://noaka.org/rdl/QuickClosingValve</code></td>
+<td>Quick Closing Valve</td>
+</tr>
+<tr>
+<td>SelfClosingValve</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>SELF CLOSING VALVE</td>
+<td><code>http://noaka.org/rdl/SelfClosingValve</code></td>
+<td>Self Closing Valve</td>
+</tr>
+<tr>
+<td>SlabGateValve</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>SLAB GATE VALVE</td>
+<td><code>http://data.posccaesar.org/rdl/RDS487214</code></td>
+<td>Slab Gate Valve</td>
+</tr>
+<tr>
+<td>SprinklerNozzle</td>
+<td><code>Plant/Piping.PipingComponent</code></td>
+<td>SPRINKLER NOZZLE</td>
+<td><code>http://data.posccaesar.org/rdl/RDS303029</code></td>
+<td>Sprinkler Nozzle</td>
+</tr>
+<tr>
+<td>StopCheckValve</td>
+<td><code>Plant/Piping.CheckValve</code></td>
+<td>STOP CHECK VALVE</td>
+<td><code>http://data.posccaesar.org/rdl/RDS644804</code></td>
+<td>Stop Check Valve</td>
+</tr>
+<tr>
+<td>StraightThroughChokeValve</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>STRAIGHT THROUGH CHOKE VALVE</td>
+<td><code>http://noaka.org/rdl/StraightThroughChokeValve</code></td>
+<td>Straight Through Choke Valve</td>
+</tr>
+<tr>
+<td>WaterMistNozzle</td>
+<td><code>Plant/Piping.PipingComponent</code></td>
+<td>WATER MIST NOZZLE</td>
+<td><code>http://noaka.org/rdl/WaterMistNozzle</code></td>
+<td>Water Mist Nozzle</td>
+</tr>
+<tr>
+<td>YGlobeValve</td>
+<td><code>Plant/Piping.OperatedValve</code></td>
+<td>Y-GLOBE VALVE</td>
+<td><code>http://data.posccaesar.org/rdl/RDS7461140</code></td>
+<td>Y-Globe Valve</td>
+</tr>
+</tbody>
+</table></div>
+<p>Groupings:</p>
+<ul>
+<li><strong>Valves</strong> (<code>Plant/Piping.OperatedValve</code>): AngleChokeValve, DoubleIsolationAndBleedValveTubing, GateValveDoubleExpanding, GateValveWithPlug, KnifeGateValve, NeedleValveWithPlug, QuickClosingValve, SelfClosingValve, SlabGateValve, StraightThroughChokeValve, YGlobeValve.</li>
+<li><strong>Check valve</strong> (<code>Plant/Piping.CheckValve</code>): StopCheckValve. It is the only new valve class not derived from OperatedValve.</li>
+<li><strong>Fire-fighting nozzles</strong> (<code>Plant/Piping.PipingComponent</code>): InergenNozzle, SprinklerNozzle, DelugeNozzle, DirectionalWaterSprayNozzle, WaterMistNozzle.</li>
+<li><strong>Other piping components</strong> (<code>Plant/Piping.PipingComponent</code>): EndOutArrow, FlushingRingWithBleedPlugs.</li>
+<li><strong>Vessel internals</strong> (<code>/InformationModel.ProcessVesselComponent</code>): InternalPipe.</li>
+</ul>
+<p>7 of the 20 new classes reference a POSC Caesar RDS class (<code>data.posccaesar.org</code>). The other 13 use a <code>noaka.org/rdl</code> URI.</p>
+<h3 id="32-new-class-extensions">3.2 New Class Extensions</h3>
+<p>6 new class extensions were added on standard DEXPI equipment classes. They carry the attributes needed by the new equipment-box labels.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Class Extension</th>
+<th>Extends</th>
+<th>Attributes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ChamberExtension</td>
+<td><code>Plant/ProcessEquipment.Chamber</code></td>
+<td>FlowRateAtUpperLimitFlow, LengthTanTan, LowerLimitOperatingPressure, LowerLimitOperatingTemperature, NormalOperatingPressure, NormalOperatingTemperature, UpperLimitOperatingPressure, UpperLimitOperatingTemperature</td>
+</tr>
+<tr>
+<td>CompressorExtension</td>
+<td><code>Plant/ProcessEquipment.Compressor</code></td>
+<td>InletFlowRate, NormalInletPressure, NormalInletTemperature, NormalOutletPressure, NormalOutletTemperature, ShaftPower</td>
+</tr>
+<tr>
+<td>FilterExtension</td>
+<td><code>Plant/ProcessEquipment.Filter</code></td>
+<td>ParticleDiameter, TotalFilterArea, UpperLimitPressureDrop</td>
+</tr>
+<tr>
+<td>HeatExchangerExtension</td>
+<td><code>Plant/ProcessEquipment.HeatExchanger</code></td>
+<td>DesignCaseHeatFlowRate, InsulationMaterial, InsulationThickness, InsulationType</td>
+</tr>
+<tr>
+<td>HeaterExtension</td>
+<td><code>Plant/ProcessEquipment.Heater</code></td>
+<td>DesignCaseHeatFlowRate</td>
+</tr>
+<tr>
+<td>PumpExtension</td>
+<td><code>Plant/ProcessEquipment.Pump</code></td>
+<td>InletFlowRate, InletFluidDensity, NormalInletPressure, NormalOutletPressure, ShaftPower</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="33-new-attributes-data-properties">3.3 New Attributes (Data Properties)</h3>
+<p>34 new data properties were added: 27 on the six new extensions and 7 on two existing ones (ProcessEquipmentExtension, VesselExtension). All are optional (<code>lower="0" upper="1"</code>) unions with <code>Undefined</code>.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Class Extension</th>
+<th>Attribute</th>
+<th>Data Type</th>
+<th>Description</th>
+<th>RDL URI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ChamberExtension</td>
+<td>FlowRateAtUpperLimitFlow</td>
+<td>Undefined | PhysicalQuantity[VolumeFlowRateUnit]</td>
+<td>A volume flow rate at upper limit flow.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS8276324</code></td>
+</tr>
+<tr>
+<td>ChamberExtension</td>
+<td>LengthTanTan</td>
+<td>Undefined | PhysicalQuantity[LengthUnit]</td>
+<td>A straight linear distance which is the total length of the cylindrical section/part of a cylindrical vessel, ie. including the cylindrical sections of the vessel heads.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS357254</code></td>
+</tr>
+<tr>
+<td>ChamberExtension</td>
+<td>LowerLimitOperatingPressure</td>
+<td>Undefined | PhysicalQuantity[PressureGaugeUnit]</td>
+<td>Lower Limit Operating Pressure</td>
+<td><code>http://data.posccaesar.org/rdl/RDS1469272681</code></td>
+</tr>
+<tr>
+<td>ChamberExtension</td>
+<td>LowerLimitOperatingTemperature</td>
+<td>Undefined | PhysicalQuantity[TemperatureUnit]</td>
+<td>A temperature that is the lowest temperature at which a functional or physical object is expected to operate.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS360584</code></td>
+</tr>
+<tr>
+<td>ChamberExtension</td>
+<td>NormalOperatingPressure</td>
+<td>Undefined | PhysicalQuantity[PressureGaugeUnit]</td>
+<td>A pressure at which a functional or physical object is expected to operate normally.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS369629</code></td>
+</tr>
+<tr>
+<td>ChamberExtension</td>
+<td>NormalOperatingTemperature</td>
+<td>Undefined | PhysicalQuantity[TemperatureUnit]</td>
+<td>A temperature at which a functional or physical object is expected to operate normally.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS369674</code></td>
+</tr>
+<tr>
+<td>ChamberExtension</td>
+<td>UpperLimitOperatingPressure</td>
+<td>Undefined | PhysicalQuantity[PressureGaugeUnit]</td>
+<td>Upper Limit Operating Pressure</td>
+<td><code>http://data.posccaesar.org/rdl/RDS1469251881</code></td>
+</tr>
+<tr>
+<td>ChamberExtension</td>
+<td>UpperLimitOperatingTemperature</td>
+<td>Undefined | PhysicalQuantity[TemperatureUnit]</td>
+<td>A temperature that is the highest temperature at which a functional or physical object is expected to operate.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS360539</code></td>
+</tr>
+<tr>
+<td>CompressorExtension</td>
+<td>InletFlowRate</td>
+<td>Undefined | PhysicalQuantity[VolumeFlowRateUnit]</td>
+<td>Design case suction flow</td>
+<td><code>http://data.posccaesar.org/rdl/RDS7354764</code></td>
+</tr>
+<tr>
+<td>CompressorExtension</td>
+<td>NormalInletPressure</td>
+<td>Undefined | PhysicalQuantity[PressureGaugeUnit]</td>
+<td>Suction Pressure</td>
+<td><code>http://data.posccaesar.org/rdl/RDS7343782</code></td>
+</tr>
+<tr>
+<td>CompressorExtension</td>
+<td>NormalInletTemperature</td>
+<td>Undefined | PhysicalQuantity[TemperatureUnit]</td>
+<td>Suction Temperature</td>
+<td><code>http://data.posccaesar.org/rdl/RDS14261975</code></td>
+</tr>
+<tr>
+<td>CompressorExtension</td>
+<td>NormalOutletPressure</td>
+<td>Undefined | PhysicalQuantity[PressureGaugeUnit]</td>
+<td>Discharge Pressure</td>
+<td><code>http://data.posccaesar.org/rdl/RDS14261705</code></td>
+</tr>
+<tr>
+<td>CompressorExtension</td>
+<td>NormalOutletTemperature</td>
+<td>Undefined | PhysicalQuantity[TemperatureUnit]</td>
+<td>Discharge Temperature</td>
+<td><code>http://data.posccaesar.org/rdl/RDS14262065</code></td>
+</tr>
+<tr>
+<td>CompressorExtension</td>
+<td>ShaftPower</td>
+<td>Undefined | PhysicalQuantity[PowerUnit]</td>
+<td>A power that is the power of a machine shaft.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS361259</code></td>
+</tr>
+<tr>
+<td>FilterExtension</td>
+<td>ParticleDiameter</td>
+<td>Undefined | PhysicalQuantity[LengthUnit]</td>
+<td>A diameter of a sphere with the same qualities as the particle in a given situation.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS403019</code></td>
+</tr>
+<tr>
+<td>FilterExtension</td>
+<td>TotalFilterArea</td>
+<td>Undefined | PhysicalQuantity[AreaUnit]</td>
+<td>Total filter area</td>
+<td><code>http://noaka.org/rdl/TotalFilterArea</code></td>
+</tr>
+<tr>
+<td>FilterExtension</td>
+<td>UpperLimitPressureDrop</td>
+<td>Undefined | PhysicalQuantity[PressureGaugeUnit]</td>
+<td>A pressure drop that is the highest allowable permanent pressure loss.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS7452620</code></td>
+</tr>
+<tr>
+<td>HeatExchangerExtension</td>
+<td>DesignCaseHeatFlowRate</td>
+<td>Undefined | PhysicalQuantity[PowerUnit]</td>
+<td>Represents the maximum heat transfer rate the exchanger is specified to handle under its most demanding operational scenario.</td>
+<td><code>http://noaka.org/rdl/DesignCaseHeatFlowRate</code></td>
+</tr>
+<tr>
+<td>HeatExchangerExtension</td>
+<td>InsulationMaterial</td>
+<td>Undefined | String</td>
+<td>An isolation material intended to insulate an item from its environment</td>
+<td><code>http://data.posccaesar.org/rdl/RDS11856535</code></td>
+</tr>
+<tr>
+<td>HeatExchangerExtension</td>
+<td>InsulationThickness</td>
+<td>Undefined | PhysicalQuantity[LengthUnit]</td>
+<td>Insulation thickness.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS4238040</code></td>
+</tr>
+<tr>
+<td>HeatExchangerExtension</td>
+<td>InsulationType</td>
+<td>Undefined | String</td>
+<td>The identification code for the insulation type.</td>
+<td><code>http://sandbox.dexpi.org/rdl/InsulationTypeAssignmentClass</code></td>
+</tr>
+<tr>
+<td>HeaterExtension</td>
+<td>DesignCaseHeatFlowRate</td>
+<td>Undefined | PhysicalQuantity[PowerUnit]</td>
+<td>Represents the maximum heat transfer rate the exchanger is specified to handle under its most demanding operational scenario.</td>
+<td><code>http://noaka.org/rdl/DesignCaseHeatFlowRate</code></td>
+</tr>
+<tr>
+<td>ProcessEquipmentExtension</td>
+<td>MaterialOfConstructionCode</td>
+<td>Undefined | String</td>
+<td>General Material of construction</td>
+<td><code>http://data.posccaesar.org/rdl/RDS1460719741</code></td>
+</tr>
+<tr>
+<td>ProcessEquipmentExtension</td>
+<td>PurchaseOrderIdentificationCode</td>
+<td>Undefined | String</td>
+<td>Purchase Order code</td>
+<td><code>http://data.posccaesar.org/rdl/RDS13599522</code></td>
+</tr>
+<tr>
+<td>ProcessEquipmentExtension</td>
+<td>VendorCompanyName</td>
+<td>Undefined | String</td>
+<td>Vendor name</td>
+<td><code>http://sandbox.dexpi.org/rdl/VendorCompanyNameAssignmentClass</code></td>
+</tr>
+<tr>
+<td>PumpExtension</td>
+<td>InletFlowRate</td>
+<td>Undefined | PhysicalQuantity[VolumeFlowRateUnit]</td>
+<td>Design case suction flow</td>
+<td><code>http://data.posccaesar.org/rdl/RDS7354764</code></td>
+</tr>
+<tr>
+<td>PumpExtension</td>
+<td>InletFluidDensity</td>
+<td>Undefined | PhysicalQuantity[DensityUnit]</td>
+<td>Fluid density at suction conditions</td>
+<td><code>http://noaka.org/rdl/InletFluidDensity</code></td>
+</tr>
+<tr>
+<td>PumpExtension</td>
+<td>NormalInletPressure</td>
+<td>Undefined | PhysicalQuantity[PressureGaugeUnit]</td>
+<td>Suction Pressure</td>
+<td><code>http://data.posccaesar.org/rdl/RDS7343782</code></td>
+</tr>
+<tr>
+<td>PumpExtension</td>
+<td>NormalOutletPressure</td>
+<td>Undefined | PhysicalQuantity[PressureGaugeUnit]</td>
+<td>Discharge Pressure</td>
+<td><code>http://data.posccaesar.org/rdl/RDS14261705</code></td>
+</tr>
+<tr>
+<td>PumpExtension</td>
+<td>ShaftPower</td>
+<td>Undefined | PhysicalQuantity[PowerUnit]</td>
+<td>A power that is the power of a machine shaft.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS361259</code></td>
+</tr>
+<tr>
+<td>VesselExtension</td>
+<td>InsulationMaterial</td>
+<td>Undefined | String</td>
+<td>An isolation material intended to insulate an item from its environment</td>
+<td><code>http://data.posccaesar.org/rdl/RDS11856535</code></td>
+</tr>
+<tr>
+<td>VesselExtension</td>
+<td>InsulationThickness</td>
+<td>Undefined | PhysicalQuantity[LengthUnit]</td>
+<td>Insulation thickness.</td>
+<td><code>http://data.posccaesar.org/rdl/RDS4238040</code></td>
+</tr>
+<tr>
+<td>VesselExtension</td>
+<td>InsulationType</td>
+<td>Undefined | String</td>
+<td>The identification code for the insulation type.</td>
+<td><code>http://sandbox.dexpi.org/rdl/InsulationTypeAssignmentClass</code></td>
+</tr>
+<tr>
+<td>VesselExtension</td>
+<td>TotalStorageCapacity</td>
+<td>Undefined | PhysicalQuantity[VolumeUnit]</td>
+<td>Net storage capacity</td>
+<td><code>http://data.posccaesar.org/rdl/RDS17034315</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Notes:</p>
+<ul>
+<li><code>DesignCaseHeatFlowRate</code> is defined twice with identical definitions, on HeaterExtension and on HeatExchangerExtension. <code>InsulationType</code>, <code>InsulationThickness</code> and <code>InsulationMaterial</code> are likewise defined on both VesselExtension and HeatExchangerExtension, and <code>InletFlowRate</code>, <code>NormalInletPressure</code>, <code>NormalOutletPressure</code> and <code>ShaftPower</code> on both PumpExtension and CompressorExtension.</li>
+<li>ChamberExtension adds <code>LowerLimitOperatingPressure/Temperature</code> and <code>UpperLimitOperatingPressure/Temperature</code> for AKSO's version of the equipment box. The DISC profile labels use <code>NormalOperatingPressure</code> / <code>NormalOperatingTemperature</code> instead.</li>
+<li>Most new attributes are physical quantities bound to a unit type. Only <code>InsulationType</code>, <code>InsulationMaterial</code>, <code>MaterialOfConstructionCode</code>, <code>PurchaseOrderIdentificationCode</code> and <code>VendorCompanyName</code> are display strings.</li>
+<li>Standard DEXPI <code>Plant.ProcessEquipment.Chamber</code> attributes (InsideDiameter, Length, Width, Height, Lower/UpperLimitDesignPressure/Temperature, ChamberFunction) are not redefined. They are only added to the allowed properties (§3.5).</li>
+</ul>
+<p>No data properties were removed or modified.</p>
+<h3 id="34-enumerations-and-type-code-packages">3.4 Enumerations and Type-Code Packages</h3>
+<p>All three enumerations are unchanged. Four of the five type-code packages are unchanged. <code>ProcessInstrumentationFunctionTypeCodes</code> changed:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Type Code Object</th>
+<th>Abbreviation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Added</td>
+<td>High</td>
+<td><code>H</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td>Low</td>
+<td><code>L</code></td>
+</tr>
+<tr>
+<td>Changed</td>
+<td>InputOutputOperationsPerSecond</td>
+<td><code>IOPS</code> → <code>IOPPS</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>High</code> and <code>Low</code> are referenced as <code>AllowedTypeCodes</code> by the new symbol ND0299 <em>Generic Logic Function</em> (Select High / Select Low). The IOPPS change affects only the abbreviation; the object name <code>InputOutputOperationsPerSecond</code> is unchanged, so references to it stay valid.</p>
+<p><strong>Note:</strong> the <code>AllowedTypeCodes</code> of ND0249A <em>Shut Down – Arrow Down</em> and ND0249C are still only <code>EmergencyShutdown</code> and <code>ProcessShutdown</code> in both versions. Symbols.xlsm lists ESD, PSD, F&amp;G and IOPPS for these symbols, so IOPPS (and F&amp;G) cannot yet be used on them.</p>
+<h3 id="35-profile-scope-usageconstraint">3.5 Profile Scope (UsageConstraint)</h3>
+<p><strong>Allowed classes</strong>: 21 added, none removed (273 → 294).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Entry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.AngleChokeValve</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.DelugeNozzle</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.DirectionalWaterSprayNozzle</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.DoubleIsolationAndBleedValveTubing</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.EndOutArrow</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.FlushingRingWithBleedPlugs</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.GateValveDoubleExpanding</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.GateValveWithPlug</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.InergenNozzle</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.InternalPipe</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.KnifeGateValve</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.NeedleValveWithPlug</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.QuickClosingValve</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.SelfClosingValve</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.SlabGateValve</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.SprinklerNozzle</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.StopCheckValve</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.StraightThroughChokeValve</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.WaterMistNozzle</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.YGlobeValve</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>Plant.ProcessEquipment.Chamber</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>Plant.ProcessEquipment.Chamber</code> is the only standard DEXPI class added. It is needed so that chamber-level design and operating data can be carried for the equipment boxes. The other 20 are the new concrete classes from §3.1.</p>
+<p><strong>Allowed properties</strong>: 43 added, none removed (289 → 332). These are the 34 new data properties in §3.3, plus the nine standard DEXPI Chamber attributes below:</p>
+<ul>
+<li><code>Plant.ProcessEquipment.Chamber.ChamberFunction</code></li>
+<li><code>Plant.ProcessEquipment.Chamber.Height</code></li>
+<li><code>Plant.ProcessEquipment.Chamber.InsideDiameter</code></li>
+<li><code>Plant.ProcessEquipment.Chamber.Length</code></li>
+<li><code>Plant.ProcessEquipment.Chamber.LowerLimitDesignPressure</code></li>
+<li><code>Plant.ProcessEquipment.Chamber.LowerLimitDesignTemperature</code></li>
+<li><code>Plant.ProcessEquipment.Chamber.UpperLimitDesignPressure</code></li>
+<li><code>Plant.ProcessEquipment.Chamber.UpperLimitDesignTemperature</code></li>
+<li><code>Plant.ProcessEquipment.Chamber.Width</code></li>
+</ul>
+<h2 id="4-symbol-library-changes">4. Symbol Library Changes</h2>
+<p>Total symbols: 292 → 343. No symbols were removed. 51 were added and 5 were modified. Label template objects rose from 328 to 458.</p>
+<h3 id="41-new-symbols">4.1 New Symbols</h3>
+<h4 id="411-piping-components-and-in-line-items">4.1.1 Piping components and in-line items</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+<th>Linked Class (<code>MetaData/usage</code>)</th>
+<th>Variants</th>
+<th>Nodes</th>
+<th>Bounding Box</th>
+<th>Rot/Mir/ResX/ResY</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0276</td>
+<td>End Out Arrow</td>
+<td><code>DiscProfile.InformationModel.EndOutArrow</code></td>
+<td>ND0276_0</td>
+<td>1</td>
+<td>(-5, -1.5) – (0, 1.5)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+<tr>
+<td>ND0277</td>
+<td>Flange</td>
+<td><code>Plant.Piping.Flange</code></td>
+<td>ND0277_0</td>
+<td>2</td>
+<td>(0, -2) – (0, 2)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+<tr>
+<td>ND0278</td>
+<td>Clamp-on</td>
+<td><code>DiscProfile.InformationModel.ClampOn</code></td>
+<td>ND0278_0</td>
+<td>4</td>
+<td>(-3, -1) – (3, 1)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+<tr>
+<td>ND0279</td>
+<td>Flexible Hose</td>
+<td><code>Plant.Piping.Hose</code></td>
+<td>ND0279_0</td>
+<td>2</td>
+<td>(0, -2) – (30, 2)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+<tr>
+<td>ND0297</td>
+<td>Flushing Ring With Bleed Plugs</td>
+<td><code>DiscProfile.InformationModel.FlushingRingWithBleedPlugs</code></td>
+<td>ND0297_0</td>
+<td>2</td>
+<td>(-1, -3) – (1, 3)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="412-valves">4.1.2 Valves</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+<th>Linked Class (<code>MetaData/usage</code>)</th>
+<th>Variants</th>
+<th>Nodes</th>
+<th>Bounding Box</th>
+<th>Rot/Mir/ResX/ResY</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0280A</td>
+<td>Slab Gate Valve (Manual Valve)</td>
+<td><code>DiscProfile.InformationModel.SlabGateValve</code></td>
+<td>ND0280A_0, ND0280A_1</td>
+<td>2</td>
+<td>(-4, -2.5) – (4, 2.5)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0280B</td>
+<td>Slab Gate Valve (Actuated Valve)</td>
+<td><code>DiscProfile.InformationModel.SlabGateValve</code></td>
+<td>ND0280B_0, ND0280B_1</td>
+<td>2</td>
+<td>(-4, -2.5) – (4, 2.5)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0281A</td>
+<td>Knife Gate Valve (Manual Valve)</td>
+<td><code>DiscProfile.InformationModel.KnifeGateValve</code></td>
+<td>ND0281A_0, ND0281A_1</td>
+<td>2</td>
+<td>(-4, -2.5) – (4, 2.5)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0281B</td>
+<td>Knife Gate Valve (Actuated Valve)</td>
+<td><code>DiscProfile.InformationModel.KnifeGateValve</code></td>
+<td>ND0281B_0, ND0281B_1</td>
+<td>2</td>
+<td>(-4, -2.5) – (4, 2.5)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0282A</td>
+<td>Y-Globe Valve (Manual Valve)</td>
+<td><code>DiscProfile.InformationModel.YGlobeValve</code></td>
+<td>ND0282A_0, ND0282A_1</td>
+<td>2</td>
+<td>(-4, -3.5) – (4, 2.5)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0282B</td>
+<td>Y-Globe Valve (Actuated Valve)</td>
+<td><code>DiscProfile.InformationModel.YGlobeValve</code></td>
+<td>ND0282B_0, ND0282B_1</td>
+<td>2</td>
+<td>(-4, -3.5) – (4, 2.5)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0283A</td>
+<td>Gate Valve Double Expanding (Manual Valve)</td>
+<td><code>DiscProfile.InformationModel.GateValveDoubleExpanding</code></td>
+<td>ND0283A_0, ND0283A_1</td>
+<td>2</td>
+<td>(-4, -2.5) – (4, 2.5)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0283B</td>
+<td>Gate Valve Double Expanding (Actuated Valve)</td>
+<td><code>DiscProfile.InformationModel.GateValveDoubleExpanding</code></td>
+<td>ND0283B_0, ND0283B_1</td>
+<td>2</td>
+<td>(-4, -2.5) – (4, 2.5)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0284A</td>
+<td>Angle Choke Valve</td>
+<td><code>DiscProfile.InformationModel.AngleChokeValve</code></td>
+<td>ND0284A_0</td>
+<td>2</td>
+<td>(-2, -4) – (4, 4)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0285A</td>
+<td>Quick Closing Valve</td>
+<td><code>DiscProfile.InformationModel.QuickClosingValve</code></td>
+<td>ND0285A_0</td>
+<td>2</td>
+<td>(-4, -4) – (4, 2)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0286A</td>
+<td>Self Closing Valve</td>
+<td><code>DiscProfile.InformationModel.SelfClosingValve</code></td>
+<td>ND0286A_0</td>
+<td>2</td>
+<td>(-4, -3) – (4, 2)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0287A</td>
+<td>Straight Through Choke Valve</td>
+<td><code>DiscProfile.InformationModel.StraightThroughChokeValve</code></td>
+<td>ND0287A_0</td>
+<td>2</td>
+<td>(-4, -2) – (4, 2)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0288A</td>
+<td>Stop Check Valve</td>
+<td><code>DiscProfile.InformationModel.StopCheckValve</code></td>
+<td>ND0288A_0</td>
+<td>2</td>
+<td>(-4, -2) – (4, 2)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0289A</td>
+<td>Gate Valve With Plug</td>
+<td><code>DiscProfile.InformationModel.GateValveWithPlug</code></td>
+<td>ND0289A_0</td>
+<td>1</td>
+<td>(-4, -2) – (5.25, 2)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0290A</td>
+<td>Needle Valve With Plug</td>
+<td><code>DiscProfile.InformationModel.NeedleValveWithPlug</code></td>
+<td>ND0290A_0</td>
+<td>1</td>
+<td>(-4, -2) – (5.25, 4)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0291A</td>
+<td>Double Isolation And Bleed Valve (Tubing)</td>
+<td><code>DiscProfile.InformationModel.DoubleIsolationAndBleedValveTubing</code></td>
+<td>ND0291A_0, ND0291A_1</td>
+<td>2</td>
+<td>(-8, -4) – (8, 14)</td>
+<td>Y/Y/N/N</td>
+</tr>
+</tbody>
+</table></div>
+<p>Valve symbol notes:</p>
+<ul>
+<li>All new valves have rotation and mirroring allowed and resizing not allowed, the same as the existing valve symbols.</li>
+<li>The <strong>A</strong> variants (manual) use the full valve label <code>&lt;ObjectDisplayName&gt;</code> + <code>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt;</code> / <code>&lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt;</code>. The <strong>B</strong> variants (actuated) and the choke/quick-closing/self-closing valves leave out <code>&lt;ObjectDisplayName&gt;</code>, because the tag is shown on the IM005B instrument label.</li>
+<li>ND0280A/B, ND0281A/B, ND0282A/B, ND0283A/B and ND0291A each have a second variant (<code>_1</code>) with the condition <code>OperatedValveExtension.ValvePosition = ValvePosition.NormallyClose</code>.</li>
+<li>ND0289A and ND0290A (valves with plug) have only one piping node.</li>
+</ul>
+<h4 id="413-fire-fighting-nozzles">4.1.3 Fire-fighting nozzles</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+<th>Linked Class (<code>MetaData/usage</code>)</th>
+<th>Variants</th>
+<th>Nodes</th>
+<th>Bounding Box</th>
+<th>Rot/Mir/ResX/ResY</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0292</td>
+<td>Inergen Nozzle</td>
+<td><code>DiscProfile.InformationModel.InergenNozzle</code></td>
+<td>ND0292_0</td>
+<td>1</td>
+<td>(-2, 0) – (2, 3)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+<tr>
+<td>ND0293</td>
+<td>Sprinkler Spray Nozzle</td>
+<td><code>DiscProfile.InformationModel.SprinklerNozzle</code></td>
+<td>ND0293_0</td>
+<td>1</td>
+<td>(-2, 0) – (2, 7)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+<tr>
+<td>ND0294</td>
+<td>Deluge Spray Nozzle</td>
+<td><code>DiscProfile.InformationModel.DelugeNozzle</code></td>
+<td>ND0294_0</td>
+<td>1</td>
+<td>(-2, 0) – (2, 7)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+<tr>
+<td>ND0295</td>
+<td>Directional Water Spray Nozzle</td>
+<td><code>DiscProfile.InformationModel.DirectionalWaterSprayNozzle</code></td>
+<td>ND0295_0</td>
+<td>1</td>
+<td>(-2, 0) – (2, 9)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+<tr>
+<td>ND0296</td>
+<td>Water Mist Spray Nozzle</td>
+<td><code>DiscProfile.InformationModel.WaterMistNozzle</code></td>
+<td>ND0296_0</td>
+<td>2</td>
+<td>(-2, 0) – (2, 8)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="414-vessel-internals-and-instrumentation">4.1.4 Vessel internals and instrumentation</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+<th>Linked Class (<code>MetaData/usage</code>)</th>
+<th>Variants</th>
+<th>Nodes</th>
+<th>Bounding Box</th>
+<th>Rot/Mir/ResX/ResY</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0298</td>
+<td>Level Profiler</td>
+<td><code>DiscProfile.InformationModel.LevelProfiler</code></td>
+<td>ND0298_0</td>
+<td>0</td>
+<td>(0, 0) – (2, 48)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+<tr>
+<td>ND0299</td>
+<td>Generic Logic Function</td>
+<td><code>Plant.Instrumentation.ProcessInstrumentationFunction</code></td>
+<td>ND0299_0</td>
+<td>4</td>
+<td>(-2, -2) – (2, 2)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+<tr>
+<td>ND0311</td>
+<td>Internal Pipe</td>
+<td><code>DiscProfile.InformationModel.InternalPipe</code></td>
+<td>ND0311_0</td>
+<td>0</td>
+<td>(0, 0) – (0, 20)</td>
+<td>Y/Y/Y/Y</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>ND0299</strong> has a single label <code>&lt;TypeCode&gt;</code> and <code>AllowedTypeCodes</code> = Low, High (§3.4).</li>
+<li><strong>ND0298</strong> <em>Level Profiler</em> uses the existing <code>LevelProfiler</code> class (already in 0.6.4) and has no connection nodes.</li>
+<li><strong>ND0311</strong> <em>Internal Pipe</em> is a zero-width vertical line (20 mm long) with no nodes.</li>
+</ul>
+<h4 id="415-equipment-boxes-nd0300ab-nd0310ab">4.1.5 Equipment boxes (ND0300A/B – ND0310A/B)</h4>
+<p>Eleven equipment-box pairs were added, all linked to <code>Core.Diagram.Label</code>. The <strong>A</strong> variant is the full 65 mm-wide box frame with no labels. The <strong>B</strong> variant is the 45 mm-wide data column carrying the label templates. All have rotation, mirroring and resizing allowed, and no connection nodes.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+<th>Size (W × H)</th>
+<th>Label templates (B variant)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0300A / ND0300B</td>
+<td>Equipment box 1: skid, top tag</td>
+<td>A: 65 × 50<br>B: 45 × 50</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;Length&gt; x &lt;Width&gt; x &lt;Height&gt;</code><br><strong>D</strong> <code>&lt;FlowRateAtUpperLimitFlow&gt;</code><br><strong>E</strong> <code>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;</code><br><strong>F</strong> <code>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;</code><br><strong>G</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>H</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>I</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0301A / ND0301B</td>
+<td>Equipment box 2: Separator</td>
+<td>A: 65 × 50<br>B: 45 × 50</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;InsideDiameter&gt; x &lt;LengthTanTan&gt;</code><br><strong>D</strong> <code>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;</code><br><strong>E</strong> <code>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;</code><br><strong>F</strong> <code>&lt;InsulationType&gt;/&lt;InsulationThickness&gt;/&lt;InsulationMaterial&gt;</code><br><strong>G</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>H</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>I</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0302A / ND0302B</td>
+<td>Equipment box 3: Centrifugal Pump</td>
+<td>A: 65 × 50<br>B: 45 × 50</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;InletFluidDensity&gt;</code><br><strong>D</strong> <code>&lt;InletFlowRate&gt;</code><br><strong>E</strong> <code>&lt;NormalInletPressure&gt;/&lt;NormalOutletPressure&gt;</code><br><strong>F</strong> <code>&lt;ShaftPower&gt;</code><br><strong>G</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>H</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>I</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0303A / ND0303B</td>
+<td>Equipment box 4: Tank</td>
+<td>A: 65 × 55<br>B: 45 × 55</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;Length&gt; x &lt;Width&gt; x &lt;Height&gt; or &lt;InsideDiameter&gt; x &lt;Width&gt;</code><br><strong>D</strong> <code>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;</code><br><strong>E</strong> <code>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;</code><br><strong>F</strong> <code>&lt;TotalStorageCapacity&gt;</code><br><strong>G</strong> <code>&lt;InsulationType&gt;/&lt;InsulationThickness&gt;/&lt;InsulationMaterial&gt;</code><br><strong>H</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>I</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>J</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0304A / ND0304B</td>
+<td>Equipment box 5: Filter</td>
+<td>A: 65 × 70<br>B: 45 × 70</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;ParticleDiameter&gt;</code><br><strong>D</strong> <code>&lt;Length&gt; x &lt;Width&gt; x &lt;Height&gt;</code><br><strong>E</strong> <code>&lt;FlowRateAtUpperLimitFlow&gt;</code><br><strong>F</strong> <code>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;</code><br><strong>G</strong> <code>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;</code><br><strong>H</strong> <code>&lt;UpperLimitPressureDrop&gt;</code><br><strong>I</strong> <code>&lt;TotalFilterArea&gt;</code><br><strong>J</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>K</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>L</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0305A / ND0305B</td>
+<td>Equipment box 6: Centrifugal Compressor</td>
+<td>A: 65 × 50<br>B: 45 × 50</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;InletFlowRate&gt;</code><br><strong>D</strong> <code>&lt;NormalInletPressure&gt;/&lt;NormalOutletPressure&gt;</code><br><strong>E</strong> <code>&lt;NormalInletTemperature&gt;/&lt;NormalOutletTemperature&gt;</code><br><strong>F</strong> <code>&lt;ShaftPower&gt;</code><br><strong>G</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>H</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>I</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0306A / ND0306B</td>
+<td>Equipment box 7: Pig Launcher/Receiver</td>
+<td>A: 65 × 60<br>B: 45 × 60</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;InsideDiameter&gt; / &lt;InsideDiameter&gt; x &lt;LengthTanTan&gt;</code><br><strong>D</strong> <code>&lt;FlowRateAtUpperLimitFlow&gt;</code><br><strong>E</strong> <code>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;</code><br><strong>F</strong> <code>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;</code><br><strong>G</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>H</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>I</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0307A / ND0307B</td>
+<td>Equipment box 8: Process Heater</td>
+<td>A: 65 × 40<br>B: 45 × 40</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;Length&gt;x&lt;Height&gt;x&lt;Width&gt;</code><br><strong>D</strong> <code>&lt;DesignCaseHeatFlowRate&gt;</code><br><strong>E</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>F</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>G</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0308A / ND0308B</td>
+<td>Equipment box 9: Pump Caisson</td>
+<td>A: 65 × 45<br>B: 45 × 45</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;InsideDiameter&gt; x &lt;LengthTanTan&gt;</code><br><strong>D</strong> <code>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;</code><br><strong>E</strong> <code>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;</code><br><strong>F</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>G</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>H</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0309A / ND0309B</td>
+<td>Equipment box 10: Heat Exchanger</td>
+<td>A: 65 × 65<br>B: 45 × 65</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;InsulationType&gt;/&lt;InsulationThickness&gt;/&lt;InsulationMaterial&gt;</code><br><strong>D</strong> <code>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;</code><br><strong>E</strong> <code>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;</code><br><strong>F</strong> <code>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;</code><br><strong>G</strong> <code>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;</code><br><strong>H</strong> <code>&lt;DesignCaseHeatFlowRate&gt;</code><br><strong>I</strong> <code>&lt;Length&gt; x &lt;Width&gt; x &lt;Height&gt;</code><br><strong>J</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>K</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>L</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0310A / ND0310B</td>
+<td>Equipment box 11: vent, flare tip</td>
+<td>A: 65 × 50<br>B: 45 × 50</td>
+<td><strong>A</strong> <code>&lt;ObjectDisplayName&gt;</code><br><strong>B</strong> <code>&lt;EquipmentDescription&gt;</code><br><strong>C</strong> <code>&lt;Length&gt; x &lt;Width&gt; x &lt;Height&gt;</code><br><strong>D</strong> <code>&lt;FlowRateAtUpperLimitFlow&gt;</code><br><strong>E</strong> <code>&lt;LowerLimitDesignPressure&gt; &amp; &lt;UpperLimitDesignPressure&gt; / &lt;NormalOperatingPressure&gt;</code><br><strong>F</strong> <code>&lt;LowerLimitDesignTemperature&gt; &amp; &lt;UpperLimitDesignTemperature&gt; / &lt;NormalOperatingTemperature&gt;</code><br><strong>G</strong> <code>&lt;MaterialOfConstructionCode&gt;</code><br><strong>H</strong> <code>&lt;VendorCompanyName&gt;</code><br><strong>I</strong> <code>&lt;PurchaseOrderIdentificationCode&gt;</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Every attribute placeholder used in these labels resolves to an entry in the UsageConstraint allowed properties (§3.5).</p>
+<h3 id="42-modified-symbols">4.2 Modified Symbols</h3>
+<h4 id="421-alarm-label-templates-h-and-l-alarm-values-no-longer-shown-4-symbols">4.2.1 Alarm label templates — H and L alarm values no longer shown (4 symbols)</h4>
+<p>For the H and L alarms the label now shows only the alarm letter, not the alarm value. HH and LL are unchanged.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Label</th>
+<th>v0.6.4</th>
+<th>v0.6.6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>E</td>
+<td><code>'H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;</code></td>
+<td><code>'H'</code></td>
+</tr>
+<tr>
+<td>G</td>
+<td><code>'L=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;</code></td>
+<td><code>'L'</code></td>
+</tr>
+</tbody>
+</table></div>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0006</td>
+<td>Function available on VDU</td>
+</tr>
+<tr>
+<td>ND0269</td>
+<td>SAS Function</td>
+</tr>
+<tr>
+<td>ND0270</td>
+<td>SAS Function Inaccessable</td>
+</tr>
+<tr>
+<td>ND0271</td>
+<td>SAS Function VDU Local</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="422-label-template-repositioned-1-symbol">4.2.2 Label template repositioned (1 symbol)</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0186</td>
+<td>Valve Choke</td>
+<td>Label A alignment <code>CenterTop</code> → <code>LeftTop</code>, position (0.492, 4.993) → (3.121, 2.996). Label text unchanged.</td>
+</tr>
+</tbody>
+</table></div>
+<p>The requested change for ND0186 was to remove the label details and use the IM005B instrument label instead. However, label A (<code>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt;</code> / <code>&lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt;</code>) is still present in 0.6.6. Only its placement changed. Confirm whether the label should have been removed.</p>
+<p>No other symbol had changes to geometry, nodes, transformation flags, class linkage, variants or conditions.</p>
+<h3 id="43-removed-symbols">4.3 Removed Symbols</h3>
+<p>None.</p>
+<h2 id="5-validation-rule-changes-profilexml">5. Validation Rule Changes (<code>Profile.xml</code>)</h2>
+<p><code>Profile.xml</code> is the DEXPI Profile metamodel that DiscProfile imports. Between 0.6.4 and 0.6.6 the only change is the version in the model URI (§2.1). The <code>Core</code> and <code>MetaData</code> imports (DEXPI 2.0.0) are the same.</p>
+<ul>
+<li><strong>Class definitions:</strong> all 18 class and enumeration definitions are identical. These are AggregatedStroke, Constraint, LabelTemplate, LineRounding, LineStroke, NodePosition, NodePositionType, PropertyConstraint, PropertyValueCondition, Rule, SimpleStroke, Stroke, Symbol, SymbolCatalogue, SymbolStroke, SymbolUsage, SymbolVariant and UsageConstraint. No classes, data properties, reference properties or enumeration literals were added, removed or modified.</li>
+<li><strong>Rules:</strong> the same five rules, with identical ApplyForEach, Conditions, MessageTemplate and Target. Only the order of the rule objects in the file changed, which has no effect on validation.</li>
+</ul>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Rule Name</th>
+<th>v0.6.4</th>
+<th>v0.6.6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>invalid rotation</td>
+<td>✓</td>
+<td>✓ (unchanged)</td>
+</tr>
+<tr>
+<td>invalid mirroring</td>
+<td>✓</td>
+<td>✓ (unchanged)</td>
+</tr>
+<tr>
+<td>invalid scaling in x-direction</td>
+<td>✓</td>
+<td>✓ (unchanged)</td>
+</tr>
+<tr>
+<td>invalid scaling in y-direction</td>
+<td>✓</td>
+<td>✓ (unchanged)</td>
+</tr>
+<tr>
+<td>wrong symbol usage</td>
+<td>✓</td>
+<td>✓ (unchanged)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Note:</strong> the 0.6.3 → 0.6.4 report lists six rules for 0.6.4, including a reworded <em>invalid SignalConveyingFunction source</em> rule. That rule is not in the 0.6.4 Profile.xml supplied here, and it is not in 0.6.6 either. If the rule is still wanted, it needs to be added back. Until then, a SignalConveyingFunction whose Source is a ProcessSignalGeneratingFunction is not machine-checked.</p>
+<h2 id="6-guidance-for-profile-users">6. Guidance for Profile Users</h2>
+<ol>
+<li><strong>Version identification.</strong> 0.6.6 files carry <code>MetaData/version</code> = <code>0.6.6</code> and the version-qualified URIs <code>http://www.to.define/DiscProfile/0.6.6</code> and <code>…/Temp/Profile/0.6.6</code>. There is no 0.6.5 file. Tooling keyed on the 0.6.4 URIs must be updated.</li>
+<li><strong>Validation rules.</strong> <code>Profile.xml</code> 0.6.6 applies the same five rules as 0.6.4 (rotation, mirroring, x/y scaling, symbol usage). No new checks were introduced, and there is still no rule for SignalConveyingFunction or MeasuringLineFunction sources.</li>
+<li><strong>Backward compatibility.</strong> Nothing was removed or renamed in the class model, so data valid against 0.6.4 stays valid against 0.6.6. The only exception is a <code>ProcessInstrumentationFunction</code> type code written as the literal string <code>IOPS</code>: it must now be <code>IOPPS</code>.</li>
+<li><strong>New valve and nozzle classes.</strong> Exporters that previously mapped these items to generic <code>CustomOperatedValve</code> / <code>CustomPipingComponent</code> should now use the dedicated classes in §3.1 and the matching symbols.</li>
+<li><strong>Equipment boxes.</strong> To fill the new equipment-box labels, exporters must populate the new extension attributes (§3.3) and the standard DEXPI Chamber attributes on the equipment's <code>Chamber</code> objects. All are optional, so unfilled placeholders should not render literally.</li>
+<li><strong>Alarm labels.</strong> H and L alarms now render as the letter only (<code>H</code>, <code>L</code>). The alarm value is still carried in the SignalConveyingFunction and is still shown for HH and LL.</li>
+<li><strong>Generic Logic Function.</strong> ND0299 accepts only the type codes <code>H</code> (Select High) and <code>L</code> (Select Low).</li>
+<li><strong>Open points found in this comparison:</strong><ul>
+<li>ND0249A / ND0249C <code>AllowedTypeCodes</code> do not include IOPPS or F&amp;G, although Symbols.xlsm lists them (§3.4).</li>
+<li>ND0186 label A was repositioned, not removed, although the requested change was to remove it (§4.2.2).</li>
+<li>The class label of <code>DoubleIsolationAndBleedValveTubing</code> is "DOUBLE ISOLATION AND BLEED VALVE TUBING", while Symbols.xlsm has "… (TUBING)".</li>
+<li>The <em>invalid SignalConveyingFunction source</em> rule, which the 0.6.3 → 0.6.4 report lists for 0.6.4, is not in either Profile.xml (§5).</li>
+<li>The <code>SprinklerNozzle</code> RDL URI uses <code>http://</code>, while Symbols.xlsm has <code>https://</code>.</li>
+</ul>
+</li>
+<li><strong>Requirements document.</strong> Rev 6.2 of <em>DISC DEXPI Pilot Transfer Requirements</em> includes the equipment box transfer, alarm label and profile-label rotation requirements for 0.6.6 (§7).</li>
+</ol>
+<h2 id="7-requirements-document-changes">7. Requirements Document Changes</h2>
+<p>This section covers the changes made to the requirements document <em>DISC DEXPI Pilot Transfer Requirements</em> to reflect DiscProfile 0.6.6 and the equipment box and label work.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Before</th>
+<th>After</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>6.1</td>
+<td>6.2 (21.10.2026)</td>
+</tr>
+<tr>
+<td>Pages</td>
+<td>87</td>
+<td>99</td>
+</tr>
+<tr>
+<td>Change record 6.2</td>
+<td>—</td>
+<td>"Add details for Equipment boxes, SpecialItem usage, Equipment Internals, Alarm labels (H/L) and Valve labels. Profile label text alignment after mirroring/rotation."</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="71-profile-version-and-references">7.1 Profile version and references</h3>
+<p>Relates to §2.1.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Rev 6.1</th>
+<th>Rev 6.2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reference [5] DISC DEXPI Profile</td>
+<td>version <code>1.0</code></td>
+<td>version <code>0.6.6</code></td>
+</tr>
+<tr>
+<td>Reference [7]</td>
+<td>—</td>
+<td><strong>New:</strong> AkerBP Symbol Legend, FUI-AKSO-P-XB-000xx sheets</td>
+</tr>
+<tr>
+<td>Import table, <code>Profile</code> source</td>
+<td><code>http://www.dexpi.org/specification/Temp/Profile</code></td>
+<td><code>http://www.dexpi.org/specification/Temp/Profile/0.6.6</code></td>
+</tr>
+<tr>
+<td>Import table, <code>DiscProfile</code> source</td>
+<td>"Source to be defined can be set as: http://www.to.define"</td>
+<td><code>http://www.to.define/DiscProfile/0.6.6</code></td>
+</tr>
+<tr>
+<td>Change record, rev 5.8 date</td>
+<td>21.04.2025</td>
+<td>21.04.2026 (corrected)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="72-equipment-boxes">7.2 Equipment boxes</h3>
+<p>Relates to §3.2, §3.3, §3.5 and §4.1.5. Rev 6.1 excluded equipment boxes from the transfer. Rev 6.2 requires them.</p>
+<ul>
+<li><strong>Constraints/Assumptions:</strong> item 11, "Equipment box/table shall not be transferred.", is removed.</li>
+<li><strong>Equipment section:</strong> a new requirement says that equipment shown with an equipment box shall include the equipment box attributes (ANNEX F). Design and operating conditions and dimensions are transferred on the <code>Plant/ProcessEquipment.Chamber</code> objects in the equipment's Chambers composition.</li>
+<li><strong>Equipment Box section, rewritten.</strong> Rev 6.1 said "Equipment box shall not be transferred" and listed only TagName and EquipmentDescription. Rev 6.2 has:<ul>
+<li><strong>Definition:</strong> an equipment box is a pair of profile symbols per equipment type. The 'A' symbol is the frame with the static captions and units, with no values. The 'B' symbol sits directly to the right of 'A', and its LabelTemplates define the value in each row. Figure 23 is a DEXPI model example.</li>
+<li><strong>Transfer as symbol references only:</strong> no graphical primitives for the box frame or captions (Constraints/Assumptions 6).</li>
+<li><strong>'A' symbol:</strong> a <code>Core/Diagram.Static</code> with a <code>Profile/SymbolUsage</code>, in a RepresentationGroup with no Represents reference. It is not placed in the equipment's RepresentationGroup.</li>
+<li><strong>'B' symbol:</strong> a <code>Core/Diagram.Label</code> in the equipment's RepresentationGroup (Represents = the equipment), holding the 'B' SymbolUsage and one <code>Core/Diagram.Text</code> per LabelTemplate row that has a value.</li>
+<li><strong>Values:</strong> transferred as conceptual-model attributes on the object given in ANNEX F ("Declared on").</li>
+<li><strong>Chambers:</strong> equipment with one process side has one Chamber (ChamberFunction optional). A heat exchanger has two Chambers identified by ChamberFunction: hot side = <strong>Cooling</strong>, cold side = <strong>Heating</strong>. The first occurrence of the repeated pressure/temperature LabelTemplates (rows D and E, HOT SIDE) reads the Cooling Chamber; the second (rows F and G, COLD SIDE) reads the Heating Chamber. Heat exchanger dimensions are transferred on the Cooling Chamber.</li>
+<li><strong>Units:</strong> numeric values are transferred as PhysicalQuantity (value and unit) in the units shown in the 'A' symbol, e.g. Bar (gauge, barg), DegreeCelsius, Kilowatt, Millimetre. Full vacuum, shown as <code>FV</code>, is transferred as <code>-1.01325</code> Bar.</li>
+<li><strong>Operating limits:</strong> <code>LowerLimitOperatingPressure</code>, <code>UpperLimitOperatingPressure</code>, <code>LowerLimitOperatingTemperature</code> and <code>UpperLimitOperatingTemperature</code> are transferred when available but are not displayed (the default 'B' LabelTemplates show <code>NormalOperatingPressure</code> / <code>NormalOperatingTemperature</code>).</li>
+<li><strong>Attribute tables:</strong> RDS URI, example value and "Declared on" for each attribute. The <strong>Equipment object</strong> table has MaterialOfConstructionCode, VendorCompanyName, PurchaseOrderIdentificationCode, DesignCaseHeatFlowRate, InsulationType, InsulationThickness, InsulationMaterial, TotalStorageCapacity, InletFluidDensity, InletFlowRate, NormalInletPressure, NormalOutletPressure, NormalInletTemperature, NormalOutletTemperature, ShaftPower, ParticleDiameter, TotalFilterArea and UpperLimitPressureDrop. The <strong>Chamber object</strong> table has ChamberFunction, InsideDiameter, LengthTanTan, Length, Height, Width, Lower/UpperLimitDesignPressure, NormalOperatingPressure, Lower/UpperLimitOperatingPressure, Lower/UpperLimitDesignTemperature, NormalOperatingTemperature, Lower/UpperLimitOperatingTemperature and FlowRateAtUpperLimitFlow.</li>
+</ul>
+</li>
+<li><strong>New ANNEX F, Equipment box Attribute usage.</strong> A matrix (Figure 42) of 36 attributes against the 11 equipment types ND0300–ND0310, with the equipment box caption (e.g. <code>DES. PRESSURE (MAX)</code>) and the declaring class (ProcessEquipment, Chamber, Heater + HeatExchanger, Vessel, Vessel + HeatExchanger, Pump, Pump + Compressor, Compressor, Filter). <code>✓ C + H</code> marks the heat exchanger attributes transferred on both the Cooling and the Heating Chamber.</li>
+</ul>
+<h3 id="73-instrumentation-and-alarm-labels">7.3 Instrumentation and alarm labels</h3>
+<p>Relates to §3.4 and §4.2.1.</p>
+<ul>
+<li><strong>Shutdown type code example:</strong> "ESD/PSD/F&amp;G/IOPS" → "ESD/PSD/F&amp;G/<strong>IOPPS</strong>" (the abbreviation change in <code>ProcessInstrumentationFunctionTypeCodes</code>).</li>
+<li><strong>Off-line instrumentation alarm levels:</strong> the SignalConveyingFunction attribute table now has <code>AlarmValue</code> next to <code>PortStatus</code> (<code>http://sandbox.dexpi.org/rdl/AlarmValue</code>, example <code>12 barg</code>). The comment says the value may be of <strong>any Quantity unit, and the unit must be specified</strong>.</li>
+<li><strong>New requirement:</strong> in the instrument alarm labels H and L are shown with the letter only (<code>H</code>, <code>L</code>). The alarm value is shown for HH and LL only. AlarmValue shall still be transferred for all alarm levels.</li>
+<li><strong>ANNEX C:</strong> the <code>AlarmValue</code> row is removed from the SignalConveyingFunction table (it is now with the alarm levels above). The table keeps only <code>SignalConveyingFunctionTypeRepresentation</code>, introduced as "the following attribute to provide information about the linestyle representation".</li>
+</ul>
+<h3 id="74-valves">7.4 Valves</h3>
+<ul>
+<li><strong>PV019A</strong> (Valve Ball, closed variant): condition <code>ValvePosition = 'NC'</code> → <code>ValvePosition = 'NormallyClose'</code>, the enumeration literal used by the 0.6.6 variant conditions (§4.1.2).</li>
+<li><strong>ANNEX D, barrier information:</strong> "The following DIB valves will be added to the DISC DEXPI symbol legend soon." is replaced by "Next release of the DISC Profile will require the barrier information to be shown for the valve according to the AkerBP legend" (Ref [7]).</li>
+</ul>
+<h3 id="75-profile-label-text-under-rotation-and-mirroring">7.5 Profile label text under rotation and mirroring</h3>
+<p>This change has no counterpart in the profile files. It is a new requirement on how tools display profile labels.</p>
+<ul>
+<li><strong>ANNEX B intro</strong> reworded ("The tables in this section show …"); Figure 37 (Symbol Rotation Attribute Example) now follows the <em>Rotation and Mirroring Details</em> list.</li>
+<li><strong>New subsection <em>Profile Label Text under Rotation and Mirroring</em>:</strong><ul>
+<li>A symbol's LabelTemplate is defined for the symbol at rotation 0, not mirrored.</li>
+<li>Labels stored in the DEXPI file with their own position, rotation and alignment (e.g. a moved label) are shown exactly as stored.</li>
+<li>Figure 38 shows an example.</li>
+</ul>
+</li>
+<li>
+<p><strong>Implementation (rule B):</strong> DEXPIViewer 2.2, AKSODEXPIViewer 2.5 and <code>Update-DexpiLabels.ps1</code> place profile labels as follows:</p>
+<ul>
+<li>text reads left to right at 0°/180° and bottom to top at 90°/270°;</li>
+<li>Top ↔ Bottom swap at 90° and 180°;</li>
+<li>Left ↔ Right swap when the symbol is mirrored;</li>
+<li>Center never changes.</li>
+</ul>
+<p>See <code>LabelAlignment_RuleB/ProfileLabel_TextAlignment_RuleB.md</code> and the Visio file in the same folder.</p>
+</li>
+</ul>
+<h3 id="76-numbering">7.6 Numbering</h3>
+<ul>
+<li><strong>TOC:</strong> updated for the new sections. ANNEX B–E move from pages 82–87 to 89–95, and ANNEX F is on page 96.</li>
+<li><strong>Figures:</strong> Figure 38 is new. The SignalConveyingFunctionTypeRepresentation values figure becomes Figure 39, Valve Barrier variants Figure 40, SegmentLineTypeRepresentation values Figure 41, and the new ANNEX F matrix is Figure 42.</li>
+</ul>
+<h3 id="77-points-found-in-the-rev-62-document">7.7 Points found in the rev 6.2 document</h3>
+<ul>
+<li><strong>Broken ANNEX C cross-reference.</strong> The bookmark on the <em>ANNEX C: Signal conveying Line Types</em> heading (<code>_Ref238807483</code>) now starts at the Figure 38 caption. Cross-references to ANNEX C therefore display "Figure 38: Profile label text under rotation and mirroring – example ANNEX C: Signal conveying Line Types", e.g. in the Instrumentation section's signal conveying lines requirement. The bookmark must be reset to the heading only and the fields updated. In the same requirement the "Ref:" paragraph has lost its bullet.</li>
+<li>The profile open points in §6 (ND0249A/C type codes, ND0186 label, invalid SignalConveyingFunction source rule) are not recorded in rev 6.2.</li>
+</ul>
+  </main>
+</body>
+</html>

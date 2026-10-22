@@ -23,6 +23,11 @@ describe("normalizeLabelTemplateText", () => {
     );
   });
 
+  it("reduces 0.6.6's bare alarm letters to the letter alone", () => {
+    expect(normalizeLabelTemplateText("'H'")).toBe("H");
+    expect(normalizeLabelTemplateText("'L'")).toBe("L");
+  });
+
   it("repairs 0.6.3's missing opening quote to the same result", () => {
     // 0.6.3 shipped "H=' & …" — an odd quote count means the first quote
     // closes a literal that was never opened.

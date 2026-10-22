@@ -1,4 +1,4 @@
-const e=`                    GNU AFFERO GENERAL PUBLIC LICENSE
+var e=`                    GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>

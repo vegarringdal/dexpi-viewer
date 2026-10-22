@@ -1,6 +1,7 @@
 // Regenerates the manual's screenshots in documentation/images/ by driving
 // the real app. Prerequisites (not project dependencies):
 //   1. `npm run dev -- --port 5199 --strictPort` running in another shell
+//      (or any port, passed as APP_URL=http://localhost:<port>/)
 //   2. playwright available to node (e.g. `npm i --no-save playwright` +
 //      `npx playwright install chromium-headless-shell`)
 // Run: node scripts/generateDocScreenshots.mjs [shot-name …]
@@ -19,7 +20,7 @@ const OUT = new URL("../documentation/images/", import.meta.url).pathname;
 const MANIFEST = `${OUT}shots.json`;
 const SAMPLE_DIR = new URL("../refrences/discdexpi-2026pack/Blueprint/DISC_EXAMPLE-14/", import.meta.url).pathname;
 const SAMPLE = "DISC_EXAMPLE-14-08";
-const APP_URL = "http://localhost:5199/";
+const APP_URL = process.env.APP_URL ?? "http://localhost:5199/";
 /** Wide enough that the ribbon does not scroll (it is ~1540 px). */
 const VIEWPORT = { width: 1560, height: 900 };
 const PIXEL_RATIO = 1.5;
@@ -274,8 +275,9 @@ SHOTS.ribbonFile = async (page) => {
     marks: [
       { target: button(page, "Open"), at: "b" },
       { target: button(page, "Example"), at: "b" },
-      { target: await around(button(page, "Auto"), button(page, "0.6.3")), at: "b" },
-      { target: button(page, "Custom profile"), at: "b" },
+      { target: button(page, "Auto"), at: "l" },
+      { target: button(page, "Custom profile"), at: "l" },
+      { target: await around(button(page, "0.6.6"), button(page, "0.6.3")), at: "b" },
     ],
   });
 };

@@ -7,9 +7,9 @@ import { normalizeLabelTemplateText } from "./labelExpression.ts";
 // -----------------------------------------------------------------------------
 // The official DISC Profile catalogues from the DISC DEXPI 2026 Pack — the
 // first real, published profile data (earlier support was reconstructed from
-// the prior-art viewer). Both bundled releases are regression anchors: the
+// the prior-art viewer). Every bundled release is a regression anchor: the
 // counts match the pack's own comparison reports (284 symbols in v0.6.3, 292
-// in v0.6.4), and §4.2 of the 0.6.3→0.6.4 report drives the diff assertions.
+// in v0.6.4, 343 in v0.6.6), and those reports drive the diff assertions.
 // -----------------------------------------------------------------------------
 
 const BUNDLED_DIR = join(__dirname, "../../../public/profiles");
@@ -60,6 +60,7 @@ type CatalogueShape = Readonly<{
 const CATALOGUES: readonly CatalogueShape[] = [
   { version: "0.6.3", stamp: null, symbols: 284, variants: 320, withTemplates: 210 },
   { version: "0.6.4", stamp: "0.6.4", symbols: 292, variants: 328, withTemplates: 215 },
+  { version: "0.6.6", stamp: "0.6.6", symbols: 343, variants: 388, withTemplates: 244 },
 ];
 
 for (const shape of CATALOGUES) {
@@ -192,6 +193,107 @@ describe("what 0.6.4 changed against 0.6.3", () => {
     expect(templateTexts(v3, "ND0248B")).toContain("<SetPoint>");
     expect(templateTexts(v4, "ND0248B")).toContain("'SP = ' & <SetPoint>");
     expect(normalizeLabelTemplateText("'SP = ' & <SetPoint>")).toBe("SP = <SetPoint>");
+  });
+});
+
+// -----------------------------------------------------------------------------
+// 0.6.4 → 0.6.6 diff (DiscProfile_Changes_0.6.4_to_0.6.6.md §3, §4). There is
+// no 0.6.5: upstream went straight from 0.6.4 to 0.6.6.
+// -----------------------------------------------------------------------------
+
+/** §4.1.5 — the eleven equipment-box pairs: A is the frame, B the label column. */
+const EQUIPMENT_BOXES = Array.from({ length: 11 }, (_, i) => `ND0${String(300 + i)}`);
+
+/** §4.1 — every symbol 0.6.6 adds. */
+const SYMBOLS_ADDED_IN_066 = [
+  ...["ND0276", "ND0277", "ND0278", "ND0279", "ND0297"],
+  ...["ND0280", "ND0281", "ND0282", "ND0283"].flatMap((n) => [`${n}A`, `${n}B`]),
+  ...["ND0284A", "ND0285A", "ND0286A", "ND0287A", "ND0288A", "ND0289A", "ND0290A", "ND0291A"],
+  ...["ND0292", "ND0293", "ND0294", "ND0295", "ND0296", "ND0298", "ND0299", "ND0311"],
+  ...EQUIPMENT_BOXES.flatMap((n) => [`${n}A`, `${n}B`]),
+];
+
+/** §3.1 — the concrete classes behind the new valve, nozzle and pipe symbols. */
+const CLASSES_ADDED_IN_066 = [
+  "AngleChokeValve",
+  "DelugeNozzle",
+  "DirectionalWaterSprayNozzle",
+  "DoubleIsolationAndBleedValveTubing",
+  "EndOutArrow",
+  "FlushingRingWithBleedPlugs",
+  "GateValveDoubleExpanding",
+  "GateValveWithPlug",
+  "InergenNozzle",
+  "InternalPipe",
+  "KnifeGateValve",
+  "NeedleValveWithPlug",
+  "QuickClosingValve",
+  "SelfClosingValve",
+  "SlabGateValve",
+  "SprinklerNozzle",
+  "StopCheckValve",
+  "StraightThroughChokeValve",
+  "WaterMistNozzle",
+  "YGlobeValve",
+];
+
+function bareSymbolNames(profile: DiscProfile): string[] {
+  return [...profile.symbols.keys()].filter((k) => !k.startsWith("DiscProfile/"));
+}
+
+function typeCodeKey(code: string): string {
+  return `DiscProfile/InformationModel.ProcessInstrumentationFunctionTypeCodes.${code}`;
+}
+
+describe("what 0.6.6 changed against 0.6.4", () => {
+  const v4 = loadBundledProfile("0.6.4");
+  const v6 = loadBundledProfile("0.6.6");
+
+  it("adds 51 symbols and removes none (§4.1, §4.3)", () => {
+    expect(SYMBOLS_ADDED_IN_066).toHaveLength(51);
+    const added = bareSymbolNames(v6).filter((k) => !v4.symbols.has(k));
+    expect(added.sort()).toEqual([...SYMBOLS_ADDED_IN_066].sort());
+    expect(bareSymbolNames(v4).filter((k) => !v6.symbols.has(k))).toEqual([]);
+  });
+
+  it("adds the 20 classes behind the new valve, nozzle and pipe symbols (§3.1)", () => {
+    for (const name of CLASSES_ADDED_IN_066) {
+      expect(v4.classSupers.has(`DiscProfile/InformationModel.${name}`)).toBe(false);
+      expect(v6.classSupers.has(`DiscProfile/InformationModel.${name}`)).toBe(true);
+    }
+  });
+
+  it("cuts the H and L alarm templates to the bare letter; HH and LL keep their value (§4.2.1)", () => {
+    for (const symbol of ["ND0006", "ND0269", "ND0270", "ND0271"]) {
+      expect(templateTexts(v4, symbol)).toContain("'H=' & SignalConveyingFunction:<AlarmValue>");
+      const texts = templateTexts(v6, symbol);
+      expect(texts).toEqual(expect.arrayContaining(["'H'", "'L'"]));
+      expect(texts).toContain("'HH=' & SignalConveyingFunction:<AlarmValue>");
+      expect(texts).toContain("'LL=' & SignalConveyingFunction:<AlarmValue>");
+    }
+  });
+
+  it("renames IOPS to IOPPS and adds the High/Low type codes (§3.4)", () => {
+    const iops = typeCodeKey("InputOutputOperationsPerSecond");
+    expect(v4.instances.get(iops)?.get("Abbreviation")).toBe("IOPS");
+    expect(v6.instances.get(iops)?.get("Abbreviation")).toBe("IOPPS");
+    expect(v4.instances.has(typeCodeKey("High"))).toBe(false);
+    expect(v6.instances.get(typeCodeKey("High"))?.get("Abbreviation")).toBe("H");
+    expect(v6.instances.get(typeCodeKey("Low"))?.get("Abbreviation")).toBe("L");
+  });
+
+  it("moves ND0186's valve label to LeftTop without changing its text (§4.2.2)", () => {
+    const labelOf = (profile: DiscProfile) => profile.symbols.get("ND0186")?.variants[0]?.labelTemplates[0];
+    expect(labelOf(v4)?.hAlign).toBe("Center");
+    expect(labelOf(v6)).toMatchObject({ hAlign: "Left", vAlign: "Top", text: labelOf(v4)?.text });
+  });
+
+  it("splits each equipment box into a bare frame (A) and a label column (B) (§4.1.5)", () => {
+    for (const box of EQUIPMENT_BOXES) {
+      expect(templateTexts(v6, `${box}A`)).toEqual([]);
+      expect(templateTexts(v6, `${box}B`).length).toBeGreaterThanOrEqual(7);
+    }
+    expect(templateTexts(v6, "ND0301B")).toContain("<InsideDiameter> x <LengthTanTan>");
   });
 });
 

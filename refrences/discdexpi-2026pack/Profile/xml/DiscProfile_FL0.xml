@@ -1,6 +1,116 @@
-<Model name="DiscProfile_FL0" uri="http://www.to.define/DiscProfile_FL0/0.6.4">
+<Model name="DiscProfile_FL0" uri="http://www.to.define/DiscProfile_FL0/0.6.6">
   <Import prefix="MetaData" source="https://data.dexpi.org/models/2.0.0/MetaData.xml"/>
-  <Import prefix="Profile" source="http://www.dexpi.org/specification/Temp/Profile/0.6.4"/>
+  <Import prefix="Profile" source="http://www.dexpi.org/specification/Temp/Profile/0.6.6"/>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>DiscProfile/InformationModel.LogicalBreak</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.LogicalBreak.BreakValue2</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Instrumentation.ProcessInstrumentationFunction</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.ProcessInstrumentationFunctionExtension.ProcessInstrumentationFunctionLocation</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Diagram.PlantMetaData</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>Core/Diagram.MetaData.RevisionNumber</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>DiscProfile/InformationModel.TieInPoint</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.TieInPoint.TieInPointIdentifier</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Instrumentation.ProcessInstrumentationFunction</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.ProcessInstrumentationFunctionExtension.ProcessInstrumentationFunctionType</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Core/Note</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>Core/Note.LocalNoteIdentifier</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/ProcessEquipment.Nozzle</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.NozzleExtension.IsVirtualMount</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Core/Note</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>Core/Note.NoteText</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Piping.PropertyBreak</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.PropertyBreakExtension.BreakIdentifier</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Piping.PipingNetworkSegment</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.PipingNetworkSegmentExtension.SegmentLineTypeRepresentation</String>
+    </Data>
+  </Object>
   <Object type="Profile/PropertyConstraint">
     <Data property="ConstrainedType">
       <String>Plant/Piping.PropertyBreak</String>
@@ -14,13 +124,101 @@
   </Object>
   <Object type="Profile/PropertyConstraint">
     <Data property="ConstrainedType">
+      <String>Plant/Piping.PipingNetworkSystem</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.PipingNetworkSystemExtension.TagType</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
       <String>Plant/Piping.PropertyBreak</String>
     </Data>
     <Data property="Lower">
       <Integer>1</Integer>
     </Data>
     <Data property="Property">
-      <String>DiscProfile/InformationModel.PropertyBreakExtension.BreakIdentifier</String>
+      <String>DiscProfile/InformationModel.PropertyBreakExtension.BreakValue2</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Piping.PipingNetworkSystem</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>Plant/Piping.PipingNetworkSystem.HeatTracingType</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Instrumentation.SignalConveyingFunction</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>DiscProfile/InformationModel.SignalConveyingFunctionExtension.SignalConveyingFunctionTypeRepresentation</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/PlantStructure.PlantArea</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>Plant/PlantStructure.PlantArea.PlantAreaIdentificationCode</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Diagram.PlantMetaData</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>Core/Diagram.MetaData.CreatorName</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/PlantStructure.PlantSystem</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>Plant/PlantStructure.PlantSystem.PlantSystemIdentificationCode</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/PlantStructure.ProcessPlant</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>Plant/PlantStructure.ProcessPlant.ProcessPlantIdentificationCode</String>
+    </Data>
+  </Object>
+  <Object type="Profile/PropertyConstraint">
+    <Data property="ConstrainedType">
+      <String>Plant/Diagram.PlantMetaData</String>
+    </Data>
+    <Data property="Lower">
+      <Integer>1</Integer>
+    </Data>
+    <Data property="Property">
+      <String>Core/Diagram.MetaData.DrawingName</String>
     </Data>
   </Object>
   <Object type="Profile/PropertyConstraint">
@@ -47,13 +245,13 @@
   </Object>
   <Object type="Profile/PropertyConstraint">
     <Data property="ConstrainedType">
-      <String>Core/Note</String>
+      <String>DiscProfile/InformationModel.LogicalBreak</String>
     </Data>
     <Data property="Lower">
       <Integer>1</Integer>
     </Data>
     <Data property="Property">
-      <String>Core/Note.NoteText</String>
+      <String>DiscProfile/InformationModel.LogicalBreak.BreakValue1</String>
     </Data>
   </Object>
   <Object type="Profile/PropertyConstraint">
@@ -67,205 +265,7 @@
       <String>Plant/Diagram.PlantMetaData.ProcessPlantName</String>
     </Data>
   </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/Piping.PipingNetworkSegment</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.PipingNetworkSegmentExtension.SegmentLineTypeRepresentation</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/Piping.PipingNetworkSystem</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>Plant/Piping.PipingNetworkSystem.HeatTracingType</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/Diagram.PlantMetaData</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>Core/Diagram.MetaData.RevisionNumber</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/Piping.PipingNetworkSystem</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.PipingNetworkSystemExtension.TagType</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>DiscProfile/InformationModel.LogicalBreak</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.LogicalBreak.BreakValue1</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Core/Note</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>Core/Note.LocalNoteIdentifier</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/Piping.PropertyBreak</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.PropertyBreakExtension.BreakValue2</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/Instrumentation.SignalConveyingFunction</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.SignalConveyingFunctionExtension.SignalConveyingFunctionTypeRepresentation</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>DiscProfile/InformationModel.LogicalBreak</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.LogicalBreak.BreakValue2</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/PlantStructure.PlantSystem</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>Plant/PlantStructure.PlantSystem.PlantSystemIdentificationCode</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>DiscProfile/InformationModel.TieInPoint</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.TieInPoint.TieInPointIdentifier</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/PlantStructure.PlantArea</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>Plant/PlantStructure.PlantArea.PlantAreaIdentificationCode</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/PlantStructure.ProcessPlant</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>Plant/PlantStructure.ProcessPlant.ProcessPlantIdentificationCode</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/Diagram.PlantMetaData</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>Core/Diagram.MetaData.CreatorName</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/Instrumentation.ProcessInstrumentationFunction</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.ProcessInstrumentationFunctionExtension.ProcessInstrumentationFunctionLocation</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/Instrumentation.ProcessInstrumentationFunction</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.ProcessInstrumentationFunctionExtension.ProcessInstrumentationFunctionType</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/Diagram.PlantMetaData</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>Core/Diagram.MetaData.DrawingName</String>
-    </Data>
-  </Object>
-  <Object type="Profile/PropertyConstraint">
-    <Data property="ConstrainedType">
-      <String>Plant/ProcessEquipment.Nozzle</String>
-    </Data>
-    <Data property="Lower">
-      <Integer>1</Integer>
-    </Data>
-    <Data property="Property">
-      <String>DiscProfile/InformationModel.NozzleExtension.IsVirtualMount</String>
-    </Data>
-  </Object>
   <Data property="MetaData/version">
-    <String>0.6.4</String>
+    <String>0.6.6</String>
   </Data>
 </Model>

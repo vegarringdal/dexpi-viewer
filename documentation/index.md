@@ -31,6 +31,6 @@ A fast viewer and checker for **DEXPI 2.0 XML** P&ID files. Everything runs in y
 - [Conventions beyond the spec](conventions.md) — where no spec exists and what this viewer does instead
 - [Validation rule reference](rules.md) — all rules with defaults and meaning *(generated)*
 - [DEXPI 2.0 information model](metamodel.md) — the classes validation checks against *(generated)*
-- [DiscProfile 0.6.4 symbol catalogue](symbols.md) — every profile symbol rendered *(generated)*
+- [DiscProfile 0.6.6 symbol catalogue](symbols.md) — every profile symbol rendered *(generated)*
 
 The screenshots in this manual use the official DISC example sheet `DISC_EXAMPLE-14-08` with DiscProfile 0.6.3.

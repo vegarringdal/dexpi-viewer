@@ -16,21 +16,27 @@
 
 1. **Open** — pick a DEXPI 2.0 `.xml` file (<kbd>Ctrl</kbd>+<kbd>O</kbd>). You can also drag a file anywhere onto the app.
 2. **Example** — load a bundled official DISC example sheet (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>).
-3. **Auto / 0.6.4 / 0.6.3** — which DISC profile catalogue resolves the drawing's profile symbols. **Auto** follows the version the open document declares; a version button pins that bundled release.
+3. **Auto** — let the open document decide which DISC profile catalogue resolves its profile symbols: it loads the version the document declares.
 4. **Custom profile** — load your own `DiscProfile.xml`.
+5. **0.6.6 / 0.6.4 / 0.6.3** — pin one of the bundled official releases (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> picks the newest).
 
 <!-- steps -->
 1. Press **Open** (#1) and choose a file, or drop it on the window.
-2. Look at the status bar: if the profile field is **amber**, the loaded catalogue is not the one the document declares — pick the matching version (#3).
+2. Look at the status bar: if the profile field is **amber**, the loaded catalogue is not the one the document declares — pick the matching version (#5).
 3. If symbols are missing from the drawing, no catalogue is loaded at all. Validation reports this too, with the version to load.
 
 Only the DEXPI 2.0 XML serialization is supported (Proteus 4.x files from the DEXPI 1.x era are out of scope).
 
 ### Which profile version?
 
-DiscProfile 0.6.4 is the first release to stamp its version, both in the catalogue itself and in the `<Import prefix="DiscProfile" …>` URI a drawing written against it carries. Turn on **Settings → Profile → Auto-load the declared profile** and opening a drawing loads the release it names; a drawing importing the older unversioned URI loads 0.6.3. Picking a version in the ribbon pins it — press **Auto** to hand the choice back to the document. **Auto** is greyed out while auto-loading is off.
+DiscProfile 0.6.4 is the first release to stamp its version, both in the catalogue itself and in the `<Import prefix="DiscProfile" …>` URI a drawing written against it carries. Turn on **Settings → Profile → Auto-load the declared profile** and opening a drawing loads the release it names; a drawing importing the older unversioned URI loads 0.6.3. Picking a version in the ribbon pins it — press **Auto** to hand the choice back to the document. **Auto** is greyed out while auto-loading is off. There is no 0.6.5: the official numbering goes straight from 0.6.4 to 0.6.6.
 
-The releases are not interchangeable: 0.6.4 adds eight symbols, removes two classes, relinks two symbols, and adds a `ShutoffCapability` field to 38 valve labels. A mismatch is reported in Validation as [META-003](rules.md).
+The releases are not interchangeable:
+
+- **0.6.4** adds eight symbols, removes two classes, relinks two symbols, and adds a `ShutoffCapability` field to 38 valve labels.
+- **0.6.6** removes nothing. It adds 51 symbols (new valves, fire-fighting nozzles, an internal pipe and the ND0300–ND0310 equipment boxes) and the 20 classes they draw. It also renames the `IOPS` type code to `IOPPS`, and shows the H and L alarms as the letter only. The viewer draws that letter only on instruments that actually carry the alarm.
+
+A mismatch is reported in Validation as [META-003](rules.md).
 
 ## The status bar
 

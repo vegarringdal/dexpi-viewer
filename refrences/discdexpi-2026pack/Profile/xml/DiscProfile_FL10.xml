@@ -1,6 +1,6 @@
-<Model name="DiscProfile_FL10" uri="http://www.to.define/DiscProfile_FL10/0.6.4">
+<Model name="DiscProfile_FL10" uri="http://www.to.define/DiscProfile_FL10/0.6.6">
   <Import prefix="MetaData" source="https://data.dexpi.org/models/2.0.0/MetaData.xml"/>
-  <Import prefix="Profile" source="http://www.dexpi.org/specification/Temp/Profile/0.6.4"/>
+  <Import prefix="Profile" source="http://www.dexpi.org/specification/Temp/Profile/0.6.6"/>
   <Object type="Profile/PropertyConstraint">
     <Data property="ConstrainedType">
       <String>DiscProfile/InformationModel.Plug</String>
@@ -35,6 +35,6 @@
     </Data>
   </Object>
   <Data property="MetaData/version">
-    <String>0.6.4</String>
+    <String>0.6.6</String>
   </Data>
 </Model>

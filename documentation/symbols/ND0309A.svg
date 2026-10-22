@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="77mm" height="77mm" viewBox="-6 -6 77 77">
+  <rect x="-6" y="-6" width="77" height="77" fill="white"/>
+  <text transform="translate(1.1563,43.4063)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">DESIGN CASE DUTY</text>
+  <text transform="translate(58.5938,18.4063)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">mm</text>
+  <text transform="translate(1.3438,48.3438)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">DIMENSION LxWxH</text>
+  <text transform="translate(1.9688,12.0313)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">HEAT EXCHANGER</text>
+  <text transform="translate(1.9688,9.0938)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">SERVICE</text>
+  <text transform="translate(59.2188,28.2813)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">°C</text>
+  <text transform="translate(1.1563,28.5313)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">HOT SIDE DES./OPER. TEMP.</text>
+  <text transform="translate(1.1563,38.5313)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">COLD SIDE DES./OPER. TEMP.</text>
+  <text transform="translate(59.2188,38.2813)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">°C</text>
+  <text transform="translate(1.1563,33.5313)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">COLD SIDE DES./OPER. PRES.</text>
+  <text transform="translate(56.8438,33.3438)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">barg</text>
+  <text transform="translate(1.1563,23.5313)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">HOT SIDE DES./OPER. PRES.</text>
+  <text transform="translate(1.0313,18.4063)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">INS.CODE/THICKNESS/MATERIAL</text>
+  <text transform="translate(1.9063,3.4688)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">TAG NUMBER</text>
+  <text transform="translate(58.3438,43.3438)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">kW</text>
+  <text transform="translate(56.8438,23.3438)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">barg</text>
+  <text transform="translate(1.5313,63.2813)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">PURCHASE NO.</text>
+  <text transform="translate(1.5313,53.3438)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">MATERIAL</text>
+  <text transform="translate(1.5313,58.2813)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">VENDOR</text>
+  <text transform="translate(57.7188,48.1563)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">mm</text>
+  <polyline points="0,55 65,55" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,50 65,50" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,25 65,25" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,20 65,20" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,45 65,45" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,35 65,35" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,5 65,5" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,15 65,15" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,40 65,40" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,30 65,30" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="0,0 65,0 65,65 0,65" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,60 65,60" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

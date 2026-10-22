@@ -7,18 +7,21 @@
 // import that same qualified URI. Everything before it used the bare
 // "http://www.to.define", so an unstamped file means "pre-0.6.4" rather than
 // "unknown" — PRE_STAMP_VERSION names the release we treat that as.
+//
+// The numbering skips 0.6.5: upstream went straight from 0.6.4 to 0.6.6, so
+// no document can legitimately declare it.
 // -----------------------------------------------------------------------------
 
 /** The version an unstamped DiscProfile model/import is taken to mean. */
 export const PRE_STAMP_VERSION = "0.6.3";
 
 /** Bundled catalogues, newest first — the version picker's option order. */
-export const BUNDLED_PROFILE_VERSIONS = ["0.6.4", "0.6.3"] as const;
+export const BUNDLED_PROFILE_VERSIONS = ["0.6.6", "0.6.4", "0.6.3"] as const;
 
 export type BundledProfileVersion = (typeof BUNDLED_PROFILE_VERSIONS)[number];
 
 /** The newest bundled catalogue — what the ribbon's profile hotkey loads. */
-export const LATEST_BUNDLED_PROFILE: BundledProfileVersion = "0.6.4";
+export const LATEST_BUNDLED_PROFILE: BundledProfileVersion = "0.6.6";
 
 export function isBundledProfileVersion(value: string): value is BundledProfileVersion {
   return BUNDLED_PROFILE_VERSIONS.some((v) => v === value);

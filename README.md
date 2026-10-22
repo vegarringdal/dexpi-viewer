@@ -70,11 +70,11 @@ panel (count in the tab, severity + category filters, click to jump to
 the object, per-rule severity overrides incl. Ignore, persisted); and a
 **DISC profile** (DiscProfile.xml, DEXPI 2.1) resolves
 Profile/SymbolUsage references with per-instance variant conditions —
-both official releases **0.6.3** and **0.6.4** ship with the app, a
-custom `DiscProfile.xml` can be loaded instead, and Settings → Profile
-can **auto-load the release the document's `DiscProfile` Import
-declares** (0.6.4 is the first to carry a version stamp; unversioned
-imports mean 0.6.3).
+the official releases **0.6.3**, **0.6.4** and **0.6.6** ship with the
+app (upstream skipped 0.6.5), a custom `DiscProfile.xml` can be loaded
+instead, and Settings → Profile can **auto-load the release the
+document's `DiscProfile` Import declares** (0.6.4 is the first to carry
+a version stamp; unversioned imports mean 0.6.3).
 Clicking the drawing reveals the object in the searchable tree
 (expand/collapse-all included).
 

@@ -2,7 +2,7 @@
   "name": "dexpi-viewer",
   "private": true,
   "license": "AGPL-3.0-only",
-  "version": "0.1.37",
+  "version": "0.1.38",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -24,7 +24,7 @@
     "@tredespace/ui": "file:external/tredespace-ui-0.0.80.tgz",
     "canvaskit-wasm": "0.40.0",
     "pdf-lib": "1.17.1",
-    "pdfjs-dist": "^6.2.108",
+    "pdfjs-dist": "6.4.299",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
@@ -36,11 +36,11 @@
     "@types/react-dom": "19.2.4",
     "@vitejs/plugin-react": "5.2.0",
     "jsdom": "30.0.1",
-    "marked": "^18.0.10",
+    "marked": "18.1.1",
     "tailwindcss": "4.3.3",
-    "typescript": "5.9.3",
-    "vite": "7.3.6",
-    "vitest": "4.1.11"
+    "typescript": "6.0.3",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
   },
   "allowScripts": {
     "esbuild@0.28.2": true

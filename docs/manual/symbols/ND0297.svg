@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="13.9844mm" height="18.0476mm" viewBox="-7.0079 -9.0238 13.9844 18.0476">
+  <rect x="-7.0079" y="-9.0238" width="13.9844" height="18.0476" fill="white"/>
+  <polygon points="-0.5197,2.0159 0.4882,2.0159 0.4882,3.0238 -0.5197,3.0238" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="-0.504,-3.0238 0.504,-3.0238 0.504,-2.0159 -0.504,-2.0159" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="0.9764,-2.0159 0.9764,2.0398 -1.0079,2.0398 -1.0079,-2.0159" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

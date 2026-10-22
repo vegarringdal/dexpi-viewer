@@ -19,6 +19,8 @@ import { dataValue, directChildrenByTag, getData, refLocalName } from "./xml.ts"
 //                       by PortStatus when the text carries an H=/HH=/L=/LL=
 //                       alarm prefix, else positionally. No matching child
 //                       suppresses the whole template (no right answer).
+//   'H' / 'L'           — a bare alarm letter (0.6.6) is conditional too: it
+//                       renders only when the matching alarm exists.
 // Semantics reconstructed from the prior-art viewer. The official 0.6.3
 // catalogue (refrences/discdexpi-2026pack/) now verifies the FORMAT parses
 // (discProfileOfficial.test.ts); the placeholder-resolution semantics here
@@ -42,6 +44,12 @@ const PORT_STATUS_HINTS: Readonly<Record<string, string>> = {
   L: "StatusLowPort",
 };
 
+/** A template text that is nothing but an alarm level's letter(s). */
+const ALARM_LETTER = /^\s*(HHH|HH|H|LLL|LL|L)\s*$/;
+
+/** The child class an instrument's alarm levels are modelled on. */
+const ALARM_CARRIER_CLASS = "SignalConveyingFunction";
+
 const PLACEHOLDER = /(?:([A-Za-z][A-Za-z0-9_]*):)?<([^<>]+)>/g;
 
 /** The symbol-intrinsic type-code abbreviation placeholder (e.g. "M" for Motor). */
@@ -55,6 +63,12 @@ export type ExplicitLabelInfo = Readonly<{
 
 function extractPortStatusHint(text: string): string | null {
   const match = /^\s*(HHH|HH|H|LLL|LL|L)\s*=/.exec(text);
+  return match ? (PORT_STATUS_HINTS[match[1] ?? ""] ?? null) : null;
+}
+
+/** The PortStatus a bare alarm-letter template ("H", "LL") stands for. */
+function alarmLetterPortStatus(text: string): string | null {
+  const match = ALARM_LETTER.exec(text);
   return match ? (PORT_STATUS_HINTS[match[1] ?? ""] ?? null) : null;
 }
 
@@ -120,6 +134,28 @@ function pickRoleChild(
   const idx = roleCounters.get(roleName) ?? 0;
   roleCounters.set(roleName, idx + 1);
   return matches[idx] ?? matches[matches.length - 1] ?? null;
+}
+
+/**
+ * A placeholder-free template text, or null to suppress it. DiscProfile 0.6.6
+ * cut the H and L alarm templates down to the bare letter ('H', 'L'), losing
+ * the `SignalConveyingFunction:<AlarmValue>` role path that suppressed them
+ * on an instrument without that alarm. The letter stays conditional the same
+ * way — it shows only when a SignalConveyingFunction with the matching
+ * PortStatus exists — so only the value is gone, as the profile intends.
+ */
+function resolveLiteralText(
+  text: string,
+  objectId: string,
+  index: LookupIndex,
+  roleCounters: Map<string, number>,
+): string | null {
+  const portStatus = alarmLetterPortStatus(text);
+  if (!portStatus) {
+    return text;
+  }
+
+  return pickRoleChild(index, objectId, ALARM_CARRIER_CLASS, roleCounters, portStatus) ? text : null;
 }
 
 /**
@@ -196,10 +232,11 @@ function instanceValueFromReferences(
 
 /**
  * Resolves one LabelTemplate text for an instance; null suppresses the
- * template (an alarm role-path with no matching child). The VB-style
- * concatenation syntax some templates embed collapses to plain template text
- * first (see labelExpression.ts), so the alarm prefix an H=/HH=/L=/LL=
- * template carries is visible to the port-status hint either way.
+ * template (an alarm role-path or alarm letter with no matching child). The
+ * VB-style concatenation syntax some templates embed collapses to plain
+ * template text first (see labelExpression.ts), so the alarm prefix an
+ * H=/HH=/L=/LL= template carries is visible to the port-status hint either
+ * way.
  */
 export function resolveProfileLabelText(
   rawText: string,
@@ -210,7 +247,7 @@ export function resolveProfileLabelText(
 ): string | null {
   const text = normalizeLabelTemplateText(rawText);
   if (!/[<>]/.test(text)) {
-    return text;
+    return resolveLiteralText(text, objectId, index, roleCounters);
   }
 
   const portStatusHint = extractPortStatusHint(text);

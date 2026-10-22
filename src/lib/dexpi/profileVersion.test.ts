@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  BUNDLED_PROFILE_VERSIONS,
   bundledProfileName,
   bundledProfileUrl,
   detectDeclaredProfile,
   detectDeclaredProfileFromText,
   detectProfileFileVersion,
   isBundledProfileVersion,
+  LATEST_BUNDLED_PROFILE,
   PRE_STAMP_VERSION,
 } from "./profileVersion.ts";
 
@@ -44,11 +46,18 @@ function parse(xml: string): Element {
 
 describe("bundled catalogue registry", () => {
   it("knows the versions it ships and how to reach them", () => {
+    expect(isBundledProfileVersion("0.6.6")).toBe(true);
     expect(isBundledProfileVersion("0.6.4")).toBe(true);
     expect(isBundledProfileVersion("0.6.3")).toBe(true);
+    expect(isBundledProfileVersion("0.6.5")).toBe(false);
     expect(isBundledProfileVersion("0.7.0")).toBe(false);
-    expect(bundledProfileUrl("0.6.4")).toBe("profiles/DiscProfile-0.6.4.xml");
+    expect(bundledProfileUrl("0.6.6")).toBe("profiles/DiscProfile-0.6.6.xml");
     expect(bundledProfileName("0.6.3")).toBe("DiscProfile 0.6.3");
+  });
+
+  it("orders the picker newest first and makes 0.6.6 the latest", () => {
+    expect(BUNDLED_PROFILE_VERSIONS).toEqual(["0.6.6", "0.6.4", "0.6.3"]);
+    expect(LATEST_BUNDLED_PROFILE).toBe("0.6.6");
   });
 });
 
@@ -99,7 +108,13 @@ describe("detectDeclaredProfile", () => {
 
 describe("detectDeclaredProfileFromText", () => {
   it("matches the parsed reading on every prologue shape", () => {
-    for (const source of ["http://www.to.define/DiscProfile/0.6.4", "http://www.to.define", null]) {
+    const sources = [
+      "http://www.to.define/DiscProfile/0.6.6",
+      "http://www.to.define/DiscProfile/0.6.4",
+      "http://www.to.define",
+      null,
+    ];
+    for (const source of sources) {
       const xml = documentText(source);
       expect(detectDeclaredProfileFromText(xml)).toEqual(detectDeclaredProfile(parse(xml)));
     }

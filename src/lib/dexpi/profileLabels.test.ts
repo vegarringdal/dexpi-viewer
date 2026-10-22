@@ -83,6 +83,12 @@ const MAIN_XML = `<?xml version="1.0" encoding="UTF-8"?>
   </Object>
 </Model>`;
 
+/** PROFILE_XML with its alarm templates cut down to 0.6.6's bare letters. */
+const LETTER_PROFILE_XML = PROFILE_XML.replace(
+  "H=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;",
+  "'H'",
+).replace("LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;", "'L'");
+
 function overlayTexts(xml: string, profileXml: string = PROFILE_XML): TextPrim[] {
   const profile = parseDiscProfile(profileXml).data ?? null;
   const doc = parseDexpiDocument(xml, profile).data;
@@ -116,6 +122,21 @@ describe("profile label overlays", () => {
     // entirely, not render a dangling "LL=".
     const texts = overlayTexts(MAIN_XML);
     expect(texts.some((t) => t.value.startsWith("LL"))).toBe(false);
+  });
+
+  it("shows a bare alarm letter (0.6.6) only when that alarm exists", () => {
+    // 'H' and 'L' carry no role path any more; the PIF has a StatusHighPort
+    // signal and no StatusLowPort one, so H shows — without its value — and
+    // L stays hidden instead of lighting up on every instrument.
+    const values = overlayTexts(MAIN_XML, LETTER_PROFILE_XML).map((t) => t.value);
+    expect(values).toContain("H");
+    expect(values).not.toContain("H=100");
+    expect(values).not.toContain("L");
+  });
+
+  it("keeps a literal template that is not an alarm letter unconditional", () => {
+    const profile = LETTER_PROFILE_XML.replace("'L'", "'LO'");
+    expect(overlayTexts(MAIN_XML, profile).map((t) => t.value)).toContain("LO");
   });
 
   it("renders NO overlays when the object carries an explicit diagram label", () => {
