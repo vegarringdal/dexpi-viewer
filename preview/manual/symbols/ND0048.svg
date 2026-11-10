@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24mm" height="24mm" viewBox="-6 -18 24 24">
+  <rect x="-6" y="-18" width="24" height="24" fill="white"/>
+  <text transform="translate(2.9688,-7.7813)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.8125" text-anchor="middle" fill="rgb(0,0,0)" y="0">SI</text>
+  <polyline points="0,0 12,-12" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="0,-12 12,-12 12,0 0,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

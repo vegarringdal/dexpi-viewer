@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18mm" height="22mm" viewBox="-8 -12 18 22">
+  <rect x="-8" y="-12" width="18" height="22" fill="white"/>
+  <polygon points="-1.5625,-6 1.5625,-6 1.5625,-2.875 -1.5625,-2.875" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <text transform="translate(-0.0313,-4.2188)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="0.9375" text-anchor="middle" fill="rgb(0,0,0)" y="0">P</text>
+  <polyline points="0,0 0,-2.875" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="4,-2 0,0 4,2" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="-2,4 0,0 2,4" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

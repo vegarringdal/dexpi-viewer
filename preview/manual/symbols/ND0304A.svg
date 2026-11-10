@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="77mm" height="82mm" viewBox="-6 -6 77 82">
+  <rect x="-6" y="-6" width="77" height="82" fill="white"/>
+  <text transform="translate(62.7188,53.4688)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="end" fill="rgb(0,0,0)" y="0">m²</text>
+  <text transform="translate(2.0313,53.4688)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">FILTER AREA</text>
+  <text transform="translate(62.7188,34.0313)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="end" fill="rgb(0,0,0)" y="0">barg</text>
+  <text transform="translate(62.7188,19.0313)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="end" fill="rgb(0,0,0)" y="0">MICRON</text>
+  <text transform="translate(1.9688,18.4688)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">PARTICLE SIZE</text>
+  <text transform="translate(1.9688,48.4688)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">PRESSURE DIRTY</text>
+  <text transform="translate(1.9688,12.5313)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">FILTER</text>
+  <text transform="translate(62.7188,28.4688)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="end" fill="rgb(0,0,0)" y="0">m³/h</text>
+  <text transform="translate(2.0313,23.3438)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">DIMENSION LxWxH</text>
+  <text transform="translate(1.9688,8.4063)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">SERVICE</text>
+  <text transform="translate(1.9688,33.4688)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">DES./OPER. PRESSURE</text>
+  <text transform="translate(1.9688,43.4688)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">MAX. DIFFERENTIAL</text>
+  <text transform="translate(2.0313,28.4688)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">FLOW AT OPER. CONDITIONS</text>
+  <text transform="translate(2.0313,3.2813)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">TAG NUMBER</text>
+  <text transform="translate(1.9688,58.5313)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">MATERIAL</text>
+  <text transform="translate(62.7188,45.9688)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="end" fill="rgb(0,0,0)" y="0">bar</text>
+  <text transform="translate(1.9063,38.3438)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">DES./OPER. TEMPERATURE</text>
+  <text transform="translate(62.7188,38.7188)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="end" fill="rgb(0,0,0)" y="0">°C</text>
+  <text transform="translate(1.9688,63.5313)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">VENDOR</text>
+  <text transform="translate(1.9688,68.3438)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="start" fill="rgb(0,0,0)" y="0">PURCHASE NO.</text>
+  <text transform="translate(62.7188,23.7188)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.5" text-anchor="end" fill="rgb(0,0,0)" y="0">mm</text>
+  <polyline points="0,25 65,25" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,15 65,15" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,55 65,55" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,30 65,30" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,60 65,60" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,65 65,65" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,5 65,5" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,40 65,40" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,20 65,20" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="0,0 65,0 65,70 0,70" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,35 65,35" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,50 65,50" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

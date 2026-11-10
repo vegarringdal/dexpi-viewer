@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DEXPI Viewer manual — DEXPI Viewer manual</title><style>
+:root { color-scheme: light dark; --bg:#f8fafc; --fg:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#2563eb; --side:#eef2f7; --card:#ffffff;
+  --mark:#f59e0b; --mark-fill:rgba(245,158,11,.07); --badge-fg:#111827; --tip:#059669; --warn:#d97706; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --line:#1e293b; --accent:#60a5fa; --side:#111c31; --card:#16213a;
+  --mark:#fbbf24; --mark-fill:rgba(251,191,36,.08); --tip:#34d399; --warn:#fbbf24; } }
+* { box-sizing: border-box; }
+body { margin:0; display:flex; min-height:100vh; background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; }
+nav { width:240px; flex-shrink:0; padding:1.2rem 1rem; background:var(--side); border-right:1px solid var(--line); position:sticky; top:0; height:100vh; overflow:auto; }
+nav h2 { font-size:.95rem; margin:0 0 .8rem; }
+nav h3 { font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem .5rem .3rem; }
+nav a { display:block; padding:.28rem .5rem; border-radius:6px; color:var(--fg); text-decoration:none; font-size:.88rem; }
+nav a:hover { background:var(--line); }
+nav a.active { background:var(--accent); color:#fff; }
+main { flex:1; min-width:0; padding:2rem 2.5rem 4rem; max-width:1040px; }
+main > p > img { max-width:100%; border:1px solid var(--line); border-radius:8px; }
+main table { border-collapse:collapse; display:block; overflow-x:auto; max-width:100%; }
+main th, main td { border:1px solid var(--line); padding:.35rem .6rem; text-align:left; vertical-align:top; font-size:.86rem; }
+main th { background:var(--side); }
+main code { background:var(--side); padding:.1rem .3rem; border-radius:4px; font-size:.85em; }
+main pre { background:var(--side); padding:.8rem 1rem; border-radius:8px; overflow-x:auto; }
+main pre code { padding:0; }
+main h1 { margin-top:0; }
+main h2 { margin-top:2.4rem; padding-top:.6rem; border-top:1px solid var(--line); }
+main h1 + p, main h1 + figure { margin-top:0; }
+main a { color:var(--accent); }
+kbd { font:600 .78em ui-monospace, monospace; padding:.08rem .4rem; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; background:var(--card); white-space:nowrap; }
+td img { max-width:130px; max-height:60px; border:none; background:#fff; }
+.footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font-size:.8rem; }
+
+figure.shot { margin:1.4rem 0 1rem; }
+.shot-frame { position:relative; display:block; width:100%; padding:0; margin:0; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:zoom-in; box-shadow:0 1px 3px rgba(15,23,42,.08); }
+.shot-frame img { display:block; width:100%; height:auto; border-radius:7px; }
+.mark { position:absolute; border:2px solid var(--mark); background:var(--mark-fill); border-radius:5px; pointer-events:none; }
+.badge, .mk { display:inline-flex; align-items:center; justify-content:center; width:1.45rem; height:1.45rem; border-radius:50%;
+  background:var(--mark); color:var(--badge-fg); font:700 .78rem/1 system-ui, sans-serif; }
+.badge { position:absolute; box-shadow:0 0 0 2px #fff, 0 1px 4px rgba(0,0,0,.35); }
+.badge.tl { left:0; top:0; transform:translate(-45%,-45%); }
+.badge.tr { right:0; top:0; transform:translate(45%,-45%); }
+.badge.bl { left:0; bottom:0; transform:translate(-45%,45%); }
+.badge.br { right:0; bottom:0; transform:translate(45%,45%); }
+.badge.c { left:50%; top:50%; transform:translate(-50%,-50%); }
+.badge.t { left:50%; top:0; transform:translate(-50%,-55%); }
+.badge.b { left:50%; bottom:0; transform:translate(-50%,55%); }
+.badge.l { left:0; top:50%; transform:translate(-55%,-50%); }
+.badge.r { right:0; top:50%; transform:translate(55%,-50%); }
+.badge.above { left:50%; top:0; transform:translate(-50%,-125%); }
+figcaption { color:var(--muted); font-size:.85rem; margin-top:.45rem; }
+.mk { width:1.25rem; height:1.25rem; font-size:.7rem; vertical-align:.1em; margin:0 .1rem; }
+ol.legend { list-style:none; padding:0; margin:.4rem 0 1.6rem; counter-reset:legend; }
+ol.legend > li { counter-increment:legend; position:relative; padding-left:2.1rem; margin-bottom:.4rem; }
+ol.legend > li::before { content:counter(legend); position:absolute; left:0; top:.1rem; display:flex; align-items:center; justify-content:center;
+  width:1.45rem; height:1.45rem; border-radius:50%; background:var(--mark); color:var(--badge-fg); font:700 .78rem/1 system-ui, sans-serif; }
+ol.steps { padding-left:0; list-style:none; counter-reset:step; }
+ol.steps > li { counter-increment:step; position:relative; padding:0 0 .7rem 2.3rem; }
+ol.steps > li::before { content:counter(step); position:absolute; left:0; top:.05rem; width:1.6rem; height:1.6rem; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; background:var(--accent); color:#fff; font:700 .8rem/1 system-ui, sans-serif; }
+ol.steps > li::after { content:""; position:absolute; left:.78rem; top:1.8rem; bottom:.15rem; width:2px; background:var(--line); }
+ol.steps > li:last-child::after { display:none; }
+.callout { border:1px solid var(--line); border-left:4px solid var(--accent); background:var(--card); border-radius:8px; padding:.6rem 1rem; margin:1.2rem 0; }
+.callout.tip { border-left-color:var(--tip); }
+.callout.warning { border-left-color:var(--warn); }
+.callout > p:first-child { margin-top:0; }
+.callout > p:last-child { margin-bottom:0; }
+.callout-title { display:block; font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.15rem; color:var(--accent); }
+.tip .callout-title { color:var(--tip); }
+.warning .callout-title { color:var(--warn); }
+blockquote { margin:1.2rem 0; padding:.2rem 1rem; border-left:4px solid var(--line); color:var(--muted); }
+
+.cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:1rem; margin:1.2rem 0 2rem; }
+.card { display:flex; flex-direction:column; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--card); color:var(--fg) !important; text-decoration:none; transition:transform .12s ease, box-shadow .12s ease; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(15,23,42,.14); }
+.card img { width:100%; height:130px; object-fit:cover; object-position:var(--pos, center); border-bottom:1px solid var(--line); background:#fff; }
+.card b { padding:.6rem .8rem 0; }
+.card span { padding:.15rem .8rem .8rem; color:var(--muted); font-size:.85rem; line-height:1.45; }
+
+dialog.zoom { border:none; padding:0; background:transparent; max-width:none; max-height:none; overflow:visible; }
+dialog.zoom::backdrop { background:rgba(15,23,42,.82); }
+dialog.zoom .shot-frame { cursor:zoom-out; }
+dialog.zoom .zoom-close { position:fixed; top:.8rem; right:1rem; width:2.4rem; height:2.4rem; border-radius:50%; border:none; background:#fff; color:#0f172a; font-size:1.3rem; cursor:pointer; }
+
+.nav-toggle, .mobile-bar, .backdrop { display:none; }
+@media (max-width: 820px) {
+  body { display:block; }
+  .mobile-bar { display:flex; align-items:center; gap:.9rem; position:fixed; top:0; left:0; right:0; z-index:30; background:var(--side); border-bottom:1px solid var(--line); padding:.55rem .9rem; font-weight:600; font-size:.95rem; }
+  .mobile-bar label { display:flex; flex-direction:column; justify-content:center; gap:5px; width:38px; height:38px; padding:.45rem .5rem; border-radius:8px; cursor:pointer; }
+  .mobile-bar label:active { background:var(--line); }
+  .mobile-bar label span { display:block; width:22px; height:2px; background:var(--fg); border-radius:2px; }
+  nav { position:fixed; top:0; left:0; bottom:0; height:100dvh; width:min(78vw, 280px); z-index:50; transform:translateX(-100%); transition:transform .25s ease; box-shadow:0 0 24px rgba(15,23,42,.35); }
+  .nav-toggle:checked ~ nav { transform:none; }
+  .nav-toggle:checked ~ .backdrop { display:block; position:fixed; inset:0; z-index:40; background:rgba(15,23,42,.45); }
+  main { padding:4.3rem 1rem 3rem; }
+  .badge { width:1.15rem; height:1.15rem; font-size:.65rem; }
+}
+</style></head>
+<body><input class="nav-toggle" id="nav-toggle" type="checkbox">
+<header class="mobile-bar"><label for="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></label>DEXPI Viewer manual</header>
+<label class="backdrop" for="nav-toggle" aria-hidden="true"></label>
+<nav><h2><a href="index.html" style="padding:0">DEXPI Viewer</a></h2><a href="index.html" class="active">DEXPI Viewer manual</a>
+<h3>Guide</h3>
+<a href="getting-started.html">Getting started</a>
+<a href="tasks.html">Common tasks</a>
+<h3>Panels</h3>
+<a href="viewing.html">Viewing the drawing</a>
+<a href="explorer.html">Explorer & Properties</a>
+<a href="validation.html">Validation</a>
+<a href="inspect.html">Inspect panel</a>
+<a href="xml-trees.html">Conceptual Model Tree & Diagram Tree</a>
+<a href="topology.html">Topology & connections</a>
+<a href="highlight.html">Highlight</a>
+<a href="export.html">Exports</a>
+<a href="settings.html">Settings & shortcuts</a>
+<h3>Reference</h3>
+<a href="conventions.html">Conventions beyond the spec</a>
+<a href="rules.html">Validation rule reference</a>
+<a href="metamodel.html">DEXPI 2.0 information model</a>
+<a href="symbols.html">DiscProfile 0.6.6 symbol catalogue</a>
+<a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
+<main><h1 id="dexpi-viewer-manual">DEXPI Viewer manual</h1>
+<p>A fast viewer and checker for <strong>DEXPI 2.0 XML</strong> P&amp;ID files. Everything runs in your browser — files never leave your machine.</p>
+<aside class="callout tip"><span class="callout-title">Tip</span><p><strong>How to read this manual.</strong> Screenshots carry numbered markers; the list under each picture explains them, and the text points back with the same number, e.g. press <strong>Open</strong> <span class="mk">1</span>. Click any picture to see it full size.</p>
+</aside>
+<h2 id="start-here">Start here</h2>
+<div class="cards">
+<a class="card" href="getting-started.html"><img src="images/workbench.png" alt="" style="--pos:top left"><b>Getting started</b><span>Open a file, pick a profile, find your way around the workbench.</span></a>
+<a class="card" href="tasks.html"><img src="images/underlay.png" alt="" style="--pos:center"><b>Common tasks</b><span>Step-by-step recipes: verify a drawing, trace a line, chase a finding.</span></a>
+</div><h2 id="panels">Panels</h2>
+<div class="cards">
+<a class="card" href="viewing.html"><img src="images/selection-halo.png" alt="" style="--pos:center"><b>Viewing the drawing</b><span>Zoom, pan, select, the minimap and the verification underlay.</span></a>
+<a class="card" href="explorer.html"><img src="images/explorer.png" alt="" style="--pos:top"><b>Explorer &amp; Properties</b><span>Search the plant hierarchy and read every value of an object.</span></a>
+<a class="card" href="validation.html"><img src="images/validation.png" alt="" style="--pos:top"><b>Validation</b><span>Findings, filters, severity overrides and reports.</span></a>
+<a class="card" href="inspect.html"><img src="images/inspect.png" alt="" style="--pos:center"><b>Inspect</b><span>A diagram of one object and everything it is connected to.</span></a>
+<a class="card" href="xml-trees.html"><img src="images/conceptual-tree.png" alt="" style="--pos:top"><b>XML trees</b><span>The file's own structure: Conceptual Model Tree and Diagram Tree.</span></a>
+<a class="card" href="topology.html"><img src="images/connections.png" alt="" style="--pos:center"><b>Topology &amp; connections</b><span>The semantic graph and upstream / downstream tracing.</span></a>
+<a class="card" href="highlight.html"><img src="images/highlight.png" alt="" style="--pos:center"><b>Highlight</b><span>Colour the drawing by classification or your own filters.</span></a>
+<a class="card" href="export.html"><img src="images/ribbon-export.png" alt="" style="--pos:center"><b>Exports</b><span>PDF, SVG and validation reports.</span></a>
+<a class="card" href="settings.html"><img src="images/settings-shortcuts.png" alt="" style="--pos:top"><b>Settings &amp; shortcuts</b><span>Rendering options, profile loading and the keymap.</span></a>
+</div><h2 id="reference">Reference</h2>
+<ul>
+<li><a href="conventions.html">Conventions beyond the spec</a> — where no spec exists and what this viewer does instead</li>
+<li><a href="rules.html">Validation rule reference</a> — all rules with defaults and meaning <em>(generated)</em></li>
+<li><a href="metamodel.html">DEXPI 2.0 information model</a> — the classes validation checks against <em>(generated)</em></li>
+<li><a href="symbols.html">DiscProfile 0.6.6 symbol catalogue</a> — every profile symbol rendered <em>(generated)</em></li>
+</ul>
+<p>The screenshots in this manual use the official DISC example sheet <code>DISC_EXAMPLE-14-08</code> with DiscProfile 0.6.3.</p>
+<div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main>
+<script>
+const dialog = document.createElement("dialog");
+dialog.className = "zoom";
+document.body.append(dialog);
+dialog.addEventListener("click", () => dialog.close());
+for (const frame of document.querySelectorAll(".shot-frame")) {
+  frame.addEventListener("click", () => {
+    const copy = frame.cloneNode(true);
+    const w = Number(frame.dataset.w);
+    const h = Number(frame.dataset.h);
+    copy.style.width = "min(96vw, " + (92 * w / h).toFixed(2) + "vh, " + w + "px)";
+    copy.removeAttribute("aria-label");
+    const close = document.createElement("button");
+    close.className = "zoom-close";
+    close.type = "button";
+    close.setAttribute("aria-label", "Close");
+    close.textContent = "×";
+    dialog.replaceChildren(copy, close);
+    dialog.showModal();
+  });
+}
+</script></body></html>
