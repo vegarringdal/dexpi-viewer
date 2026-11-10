@@ -7,13 +7,15 @@ const pkg: { version: string } = JSON.parse(readFileSync("./package.json", "utf-
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // GitHub Pages serves from a subpath, so all asset URLs must be relative,
-  // and the deployed site is whatever `docs/` contains on the default branch.
+  // GitHub Pages serves from a subpath (and previews from /preview/ below it),
+  // so all asset URLs must be relative. CI publishes `dist/` to the `livedemo`
+  // branch — see .github/workflows/deploy.yml.
   base: "./",
   build: {
-    outDir: "docs",
+    outDir: "dist",
   },
   define: {
-    __APP_VERSION__: JSON.stringify(pkg.version),
+    // CI sets APP_VERSION for dev previews (e.g. 0.1.39-next.57).
+    __APP_VERSION__: JSON.stringify(process.env.APP_VERSION || pkg.version),
   },
 });

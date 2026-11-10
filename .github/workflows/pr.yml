@@ -1,0 +1,37 @@
+# Checks for pull requests. PRs into main must also bump package.json version.
+name: PR checks
+
+on:
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  version-bump:
+    if: github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch main
+        run: git fetch --depth=1 origin main
+
+      - name: Version must be higher than main
+        run: |
+          git show origin/main:package.json > /tmp/main-package.json
+          node scripts/checkVersionBump.mjs /tmp/main-package.json package.json

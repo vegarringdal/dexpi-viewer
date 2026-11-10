@@ -1,0 +1,99 @@
+# Reusable deploy job, called by update_main_demo.yml and update_dev_demo.yml.
+# Builds `branch` and publishes it to the `livedemo` branch (served by Pages):
+#   main -> livedemo/            https://vegarringdal.github.io/dexpi-viewer/
+#   dev  -> livedemo/preview/    https://vegarringdal.github.io/dexpi-viewer/preview/
+# Each deploy only replaces its own part of the branch.
+name: Deploy (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        description: "Branch to build: main or dev"
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Always build the intended branch, whatever ref the run was started from.
+          ref: ${{ inputs.branch }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check (typecheck + lint) and test
+        run: |
+          npm run check
+          npm test
+
+      - name: Resolve version
+        id: version
+        env:
+          BRANCH: ${{ inputs.branch }}
+        run: |
+          base=$(node -p "require('./package.json').version")
+          case "$BRANCH" in
+            main)
+              echo "app=${base}" >> "$GITHUB_OUTPUT"
+              echo "dir=." >> "$GITHUB_OUTPUT"
+              echo "storage=PROD_" >> "$GITHUB_OUTPUT" ;;
+            dev)
+              # Unique per run, so the About tab shows which preview build is live.
+              echo "app=${base}-next.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+              echo "dir=preview" >> "$GITHUB_OUTPUT"
+              echo "storage=PREVIEW_" >> "$GITHUB_OUTPUT" ;;
+            *)
+              echo "::error::Unknown branch '$BRANCH' (expected main or dev)"
+              exit 1 ;;
+          esac
+
+      - name: Build
+        run: npm run build
+        env:
+          APP_VERSION: ${{ steps.version.outputs.app }}
+          # localStorage key prefix, so prod and preview (same origin) keep separate settings.
+          VITE_STORAGE_PREFIX: ${{ steps.version.outputs.storage }}
+
+      - name: Publish to livedemo
+        env:
+          BRANCH: ${{ inputs.branch }}
+          TARGET: ${{ steps.version.outputs.dir }}
+          APP_VERSION: ${{ steps.version.outputs.app }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads origin livedemo > /dev/null; then
+            git fetch --depth=1 origin livedemo
+            git worktree add -B livedemo site origin/livedemo
+          else
+            git worktree add --orphan -b livedemo site
+          fi
+
+          cd site
+          if [ "$TARGET" = "." ]; then
+            # Prod: replace everything at the root except the preview folder.
+            find . -mindepth 1 -maxdepth 1 ! -name .git ! -name preview -exec rm -rf {} +
+            cp -r ../dist/. .
+          else
+            rm -rf "$TARGET"
+            mkdir -p "$TARGET"
+            cp -r ../dist/. "$TARGET"/
+          fi
+          touch .nojekyll
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git commit -m "deploy ${BRANCH} ${APP_VERSION} ($(git -C .. rev-parse --short HEAD))"
+          git push origin livedemo
