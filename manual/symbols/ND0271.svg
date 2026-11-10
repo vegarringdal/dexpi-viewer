@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24.0237mm" height="23.9763mm" viewBox="-12.0119 -11.9882 24.0237 23.9763">
+  <rect x="-12.0119" y="-11.9882" width="24.0237" height="23.9763" fill="white"/>
+  <polyline points="-5.9882,0.2495 5.9882,0.2557" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-6.0119,-0.2514 6.0119,-0.2277" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="-5.9882,-5.9882 5.9882,-5.9882 5.9882,5.9882 -5.9882,5.9882" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse transform="translate(0,0) rotate(0)" rx="5.9882" ry="5.9882" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

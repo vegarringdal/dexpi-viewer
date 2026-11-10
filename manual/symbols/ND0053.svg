@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="26.9943mm" height="34.0084mm" viewBox="-13.7307 -16.6284 26.9943 34.0084">
+  <rect x="-13.7307" y="-16.6284" width="26.9943" height="34.0084" fill="white"/>
+  <polygon points="3.7925,-10.6284 7.2635,-8.6244 5.2595,-5.1533 1.7884,-7.1574" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <text transform="translate(4.0707,-7.2171) rotate(30)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.6303" text-anchor="middle" fill="rgb(0,0,0)" y="0">S</text>
+  <polygon points="-5.7267,5.9048 -2.2556,7.9089 -4.2596,11.38 -7.7307,9.3759" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-3.9912,6.907 0,0" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,0 3.524,-6.1555" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <text transform="translate(-5.4485,9.3162) rotate(30)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="2.6303" text-anchor="middle" fill="rgb(0,0,0)" y="0">S</text>
+</svg>

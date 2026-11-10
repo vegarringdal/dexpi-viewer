@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="124mm" height="52mm" viewBox="-62 -26 124 52">
+  <rect x="-62" y="-26" width="124" height="52" fill="white"/>
+  <polyline points="39.9313,-15.9862 40.46,-15.9941 40.9834,-15.9285 41.4999,-15.7909 42.0081,-15.5833 42.5063,-15.3072 42.9931,-14.9643 43.4669,-14.5565 43.9261,-14.0853 44.3693,-13.5525 44.7948,-12.9598 45.2013,-12.3089 45.587,-11.6016 45.9505,-10.8394 46.2903,-10.0242 46.6048,-9.1575 46.8925,-8.2413" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="46.8925,-8.2413 47.3724,-6.3066 47.7169,-4.284 47.926,-2.2023 47.9997,-0.0902 47.9377,2.0235 47.7401,4.11 47.4067,6.1405 46.9375,8.0862" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="46.9375,8.0862 46.6548,9.0092 46.3451,9.8831 46.0098,10.7062 45.6504,11.4769 45.2685,12.1932 44.8656,12.8535 44.4433,13.4561 44.003,13.9992 43.5462,14.4811 43.0746,14.8999 42.5896,15.254 42.0928,15.5417 41.5856,15.7611 41.0697,15.9105 40.5465,15.9882 40.0175,15.9925" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-39.9312,15.9862 -40.46,15.9941 -40.9834,15.9285 -41.4999,15.7909 -42.0081,15.5833 -42.5063,15.3072 -42.9931,14.9643 -43.4669,14.5565 -43.9261,14.0853 -44.3693,13.5525 -44.7948,12.9598 -45.2013,12.3089 -45.587,11.6016 -45.9505,10.8394 -46.2903,10.0242 -46.6048,9.1575 -46.8925,8.2413" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-46.8925,8.2413 -47.3724,6.3066 -47.7169,4.284 -47.926,2.2023 -47.9997,0.0902 -47.9377,-2.0235 -47.7401,-4.11 -47.4067,-6.1405 -46.9375,-8.0862" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-46.9375,-8.0862 -46.6548,-9.0092 -46.3451,-9.8831 -46.0098,-10.7062 -45.6504,-11.4769 -45.2685,-12.1932 -44.8656,-12.8535 -44.4433,-13.4561 -44.003,-13.9992 -43.5462,-14.4811 -43.0746,-14.8999 -42.5896,-15.254 -42.0928,-15.5417 -41.5856,-15.7611 -41.0697,-15.9105 -40.5465,-15.9882 -40.0175,-15.9925" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="40,16 40,-16" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-40,16 -40,-16" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-40,16 40,16" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-40,-16 40,-16" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-56,-20 56,-20" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="56,20 56,-20" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-56,20 -56,-20" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-56,20 56,20" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
