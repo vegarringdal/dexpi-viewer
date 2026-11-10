@@ -1,6 +1,7 @@
 import { type DiscProfile, parseDiscProfile } from "../../lib/dexpi/discProfile.ts";
 import { type BundledProfileVersion, bundledProfileUrl } from "../../lib/dexpi/profileVersion.ts";
 import { fail, ok, type Result } from "../../lib/result.ts";
+import { storageKey } from "../../lib/storageKey.ts";
 import { DEFAULT_PROFILE_STATE, NO_PROFILE, type ProfileState, profileState } from "./profile.state.ts";
 
 // -----------------------------------------------------------------------------
@@ -14,7 +15,7 @@ import { DEFAULT_PROFILE_STATE, NO_PROFILE, type ProfileState, profileState } fr
 // into the document lifecycle.
 // -----------------------------------------------------------------------------
 
-const PROFILE_STORAGE_KEY = "dexpi.profile";
+const PROFILE_STORAGE_KEY = storageKey("dexpi.profile");
 
 let loadedProfile: DiscProfile | null = null;
 

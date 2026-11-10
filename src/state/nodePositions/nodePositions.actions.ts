@@ -1,5 +1,6 @@
 import { hexToRgb, type NodeMarkerStyle } from "../../lib/dexpi/inspectOverlays.ts";
 import type { NodePositionMarker, NodePositionSource } from "../../lib/dexpi/types.ts";
+import { storageKey } from "../../lib/storageKey.ts";
 import { type NodePositionKindSettings, nodePositionsState } from "./nodePositions.state.ts";
 
 // -----------------------------------------------------------------------------
@@ -15,7 +16,7 @@ const DEFAULTS: Readonly<Record<NodePositionSource, NodePositionKindSettings>> =
   profile: { enabled: false, colorHex: "#e07a1f", scale: 1, widthMm: DEFAULT_WIDTH_MM },
 };
 
-const STORAGE_KEY = "dexpi.nodePositions";
+const STORAGE_KEY = storageKey("dexpi.nodePositions");
 
 /** Shared by the panel's steppers and the stored-value validator. */
 export const NODE_MARKER_SCALE_MIN = 0.2;
