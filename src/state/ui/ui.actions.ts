@@ -1,4 +1,5 @@
 import type { DockManager } from "@tredespace/ui/dockable";
+import { storageKey } from "../../lib/storageKey.ts";
 
 // -----------------------------------------------------------------------------
 // Dock manager handle
@@ -8,7 +9,7 @@ import type { DockManager } from "@tredespace/ui/dockable";
 // the ribbon can open panels. Layout persistence lives here too.
 // -----------------------------------------------------------------------------
 
-const LAYOUT_STORAGE_KEY = "dexpi.dockLayout";
+const LAYOUT_STORAGE_KEY = storageKey("dexpi.dockLayout");
 const LAYOUT_SAVE_DEBOUNCE_MS = 400;
 
 let dockManager: DockManager | null = null;

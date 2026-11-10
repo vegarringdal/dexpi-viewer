@@ -2538,3 +2538,5 @@ Scope note: covers per-object SHAPE only — cross-object semantics
     "rule B" label alignment under rotation/mirroring is a requirements
     change rather than a profile one, and the note it cites is not in
     the pack — not implemented.
+- **2026-11-10** Prefix local storage, so we can have prod and preview running
+    on same domain

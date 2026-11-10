@@ -4,10 +4,11 @@ import {
   type SeverityOverride,
   type ValidationIssue,
 } from "../../lib/dexpi/validation.ts";
+import { storageKey } from "../../lib/storageKey.ts";
 import { getLoadedDocument } from "../viewer/viewer.actions.ts";
 import { validationConfigState } from "./validation.state.ts";
 
-const OVERRIDES_STORAGE_KEY = "dexpi.validation.severityOverrides";
+const OVERRIDES_STORAGE_KEY = storageKey("dexpi.validation.severityOverrides");
 const OVERRIDE_VALUES: readonly SeverityOverride[] = ["error", "warning", "info", "ignore"];
 
 function isSeverityOverride(value: unknown): value is SeverityOverride {

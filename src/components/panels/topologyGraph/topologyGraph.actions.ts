@@ -1,4 +1,5 @@
 import type { GraphEdgeKind, HardwareKind } from "../../../lib/graph/semanticGraph.ts";
+import { storageKey } from "../../../lib/storageKey.ts";
 import {
   GRAPH_EDGE_KINDS,
   GRAPH_HARDWARE_KINDS,
@@ -10,7 +11,7 @@ import {
 // Constants
 // -----------------------------------------------------------------------------
 
-const STORAGE_KEY = "dexpi.topologyGraph";
+const STORAGE_KEY = storageKey("dexpi.topologyGraph");
 
 export const MIN_GRAPH_DEPTH = 1;
 export const MAX_GRAPH_DEPTH = 6;

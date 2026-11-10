@@ -1,6 +1,7 @@
+import { storageKey } from "../../lib/storageKey.ts";
 import { type Theme, themeState } from "./theme.state.ts";
 
-const THEME_STORAGE_KEY = "dexpi.theme";
+const THEME_STORAGE_KEY = storageKey("dexpi.theme");
 
 /**
  * The @tredespace/ui stylesheet is dark by default and remaps to light when

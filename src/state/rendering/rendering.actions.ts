@@ -1,9 +1,10 @@
 import { setPreferBuiltinSignalStyle as applySignalStylePreference } from "../../lib/dexpi/signalLines.ts";
 import { setUnitDisplayMode, type UnitDisplayMode } from "../../lib/dexpi/values.ts";
+import { storageKey } from "../../lib/storageKey.ts";
 import { reparseCurrentDocument } from "../viewer/viewer.actions.ts";
 import { DEFAULT_RENDERING_STATE, type RenderingState, renderingState } from "./rendering.state.ts";
 
-const RENDERING_STORAGE_KEY = "dexpi.rendering";
+const RENDERING_STORAGE_KEY = storageKey("dexpi.rendering");
 
 function persist(): void {
   localStorage.setItem(RENDERING_STORAGE_KEY, JSON.stringify(renderingState.get()));
