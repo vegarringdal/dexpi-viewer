@@ -1,7 +1,7 @@
 import { IconPuzzle, IconPuzzleFilled, IconWand } from "@tabler/icons-react";
 import { RibbonButton, RibbonSection, useFilePicker } from "@tredespace/ui/widgets";
 import type { JSX } from "react";
-import { BUNDLED_PROFILE_VERSIONS, LATEST_BUNDLED_PROFILE } from "../../lib/dexpi/profileVersion.ts";
+import { LATEST_BUNDLED_PROFILE, RIBBON_PROFILE_VERSIONS } from "../../lib/dexpi/profileVersion.ts";
 import { profileState } from "../../state/profile/profile.state.ts";
 import {
   followDeclaredProfile,
@@ -33,7 +33,9 @@ function versionTooltip(version: string): string {
  * Auto and a version button can light at once — Auto is the mode, the lit
  * version is what that mode resolved the open document to. The ribbon packs
  * by size, so the two mediums (Auto, Custom) share the first column and the
- * version minis stack three high in the next.
+ * version minis stack in the next. Only RIBBON_PROFILE_VERSIONS get a button;
+ * a bundled version Auto resolves to without one (0.6.3) shows in the status
+ * bar instead.
  */
 export function ProfileSection(): JSX.Element {
   const { active, isPinned, autoLoad, declaredVersion } = profileState.use();
@@ -64,7 +66,7 @@ export function ProfileSection(): JSX.Element {
           tooltip={CUSTOM_TOOLTIP}
           onClick={profilePicker.open}
         />
-        {BUNDLED_PROFILE_VERSIONS.map((version) => (
+        {RIBBON_PROFILE_VERSIONS.map((version) => (
           <RibbonButton
             key={version}
             icon={<IconPuzzleFilled />}

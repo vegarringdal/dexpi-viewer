@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="19.9851mm" height="17.5103mm" viewBox="-9.9925 -7.9963 19.9851 17.5103">
+  <rect x="-9.9925" y="-7.9963" width="19.9851" height="17.5103" fill="white"/>
+  <text transform="translate(-0.0312,2.9008)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="0.811" text-anchor="middle" fill="rgb(0,0,0)" y="0">NC</text>
+  <polyline points="-3.9925,3.3687 3.486,3.3687" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="3.9227,3.3687 3.486,3.514 3.486,3.2233" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="-3.9925,-1.9963 3.9925,-1.9963 3.9925,1.9963 -3.9925,1.9963" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0.3394,0.1585 3.9925,1.9963" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="-3.9925,-1.9963 -0.3394,-0.1585" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse transform="translate(0,0) rotate(0)" rx="0.3743" ry="0.3743" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

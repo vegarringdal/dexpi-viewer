@@ -122,7 +122,7 @@ in `refrences/` when in doubt.
 | `refrences/DEXPIViewer/` | The prior-art viewer (JS + SVG); its `src/dexpiParser.js` documents the 2.0 XML shapes in practice |
 | `refrences/spec-model-Core-Diagram.py` | The spec's own Core.Diagram model source (from gitlab dexpi/Specification `src/model/Core/Diagram/Diagram.py`) — authoritative for graphics semantics: SVG mapping, DashStyle table, FillStyle, EllipseArc geometry |
 | `refrences/discdexpi-disc-profile/` | DISC Profile spec from [ToniaPedersen/DISCDEXPI](https://github.com/ToniaPedersen/DISCDEXPI): 0.4/0.5 zips (html + xml) + schema; 0.5 XML extracted (`DISC-Profile-0.5-xml/xml/` — Builtin/Core/Plant/DiscProfile model XML incl. FL0/FL10 variants). The 97 MB html extraction is deliberately NOT committed — unzip on demand |
-| `refrences/discdexpi-2026pack/` | [ToniaPedersen/DISCDEXPI_2026Pack](https://github.com/ToniaPedersen/DISCDEXPI_2026Pack): DISC Profile **0.6.x** — `Profile/xml/` holds the CURRENT release (0.6.6, synced to upstream `dbbd4ec`), upstream's `0.6.3xml.zip`/`0.6.4xml.zip`/`0.6.4html.zip`/`DISC Profile 0.6.6.xml.zip`/`DISC Profile 0.6.6.html.zip` and the schema sit beside it, with changes docs 0.6.0→0.6.3, 0.6.3→0.6.4 and 0.6.4→0.6.6 (there is no 0.6.5) and the Pilot Transfer Requirements rev 6.2; plus PID Validation Method (docx/drawio/pptx) and `Blueprint/DISC_EXAMPLE-14/` — real DEXPI XML files WITH official SVG renderings (verification fixtures like C01). The html extraction is deliberately NOT committed — unzip on demand. The catalogues the APP ships (and every test parses) live in `public/profiles/`, not here, so the same 6.4 MB file is not stored twice per release |
+| `refrences/discdexpi-2026pack/` | [ToniaPedersen/DISCDEXPI_2026Pack](https://github.com/ToniaPedersen/DISCDEXPI_2026Pack): DISC Profile **0.6.x** — `Profile/xml/` holds the CURRENT release (0.6.7, synced 2026-11-18 from a main-branch zip download), upstream's `0.6.3xml.zip`/`0.6.4xml.zip`/`0.6.4html.zip`/`DISC Profile 0.6.6.*.zip`/`DISC Profile 0.6.7.*.zip` and the schema sit beside it, with changes docs 0.6.0→0.6.3, 0.6.3→0.6.4, 0.6.4→0.6.6 and 0.6.6→0.6.7 (there is no 0.6.5) and the Pilot Transfer Requirements rev 6.3; plus PID Validation Method (docx/drawio/pptx) and `Blueprint/DISC_EXAMPLE-14/` — real DEXPI XML files WITH official SVG renderings (verification fixtures like C01). The html extraction is deliberately NOT committed — unzip on demand. The catalogues the APP ships (and every test parses) live in `public/profiles/`, not here, so the same 6.4 MB file is not stored twice per release |
 | `external/tredespace-ui-0.0.56.tgz` | UI library (`@tredespace/ui`); README inside covers setup |
 | `external/tredespace-client.ts` | tredespace embed API reference (not used yet) |
 
@@ -2540,3 +2540,62 @@ Scope note: covers per-object SHAPE only — cross-object semantics
     the pack — not implemented.
 - **2026-11-10** Prefix local storage, so we can have prod and preview running
     on same domain
+- **2026-11-18** DiscProfile 0.6.7 bundled as the latest release; 0.6.3
+  dropped from the ribbon (director, off the pack's
+  `DiscProfile_Changes_0.6.6_to_0.6.7.md` and requirements rev 6.3).
+  - `public/profiles/DiscProfile-0.6.7.xml` (8.3 MB, byte-identical to
+    upstream's `DISC Profile 0.6.7.xml.zip` and `Profile/xml/`).
+    `BUNDLED_PROFILE_VERSIONS` is 0.6.7 / 0.6.6 / 0.6.4 / 0.6.3 and
+    `LATEST_BUNDLED_PROFILE` 0.6.7 (Ctrl+Shift+L, symbols.md). Version
+    detection needed no change: the stamp and URIs keep the 0.6.4 shape.
+  - New `RIBBON_PROFILE_VERSIONS` (0.6.7 / 0.6.6 / 0.6.4) drives the
+    version minis, still three high. 0.6.3 stays bundled because
+    `PRE_STAMP_VERSION` resolves unversioned imports to it under Auto and
+    the DISC_EXAMPLE-14 blueprints only validate against it. When Auto
+    lands on 0.6.3 no mini lights; the status bar still names it.
+  - No code change was needed for the profile content; everything is
+    data-driven. ND0003 / ND0272 gain the bare `'H'` / `'L'` alarm
+    letters, and the 2026-10-22 rule (`resolveLiteralText`) already keys
+    on the text, not the symbol, so they stay conditional. The new
+    text-only labels ND0314–ND0321 are Core.Diagram.Label symbols with no
+    primitives; a Label group's `Represents` target is the object their
+    placeholder resolves on, the same path the 32 Label symbols of 0.6.6
+    use.
+  - Director's rule for this release: behaviour follows the SELECTED
+    profile, not the document and not a newer/older release.
+  - New MDL-010 "Class not in selected DISC profile" (warning,
+    `profileClassValidation.ts`). Base-model validation leaves
+    `DiscProfile/…` classes out of scope and uses `classSupers` only for
+    reference-target compatibility, so before this an unknown profile
+    class passed silently. MDL-010 checks every object typed in the
+    document's DiscProfile namespace (its own Import prefix, via
+    `detectProfileImportPrefix`) against the loaded catalogue's classes,
+    one aggregated finding per class. TieInPoint passes against 0.6.6 and
+    is flagged against 0.6.7. Silent with no catalogue loaded (GFX-001
+    covers that) or no DiscProfile import. Across the 15 DISC_EXAMPLE-14
+    sheets: clean against 0.6.3 (their release); against 0.6.4+ two
+    sheets flag LevelMeasuringInstrumentNuclear, which 0.6.4 removed.
+    Profile-property checks (UsageConstraint allowed properties, e.g. the
+    dropped BreakValue1/2) are not covered.
+  - Not purely additive, unlike 0.6.6. Property-break values move off the
+    break onto the PipingNetworkSegments either side (rev 6.3); ND0007 /
+    ND0242 lose their `<BreakValue1>` / `<BreakValue2>` labels and,
+    with ND0043, are relinked to Core.Diagram.Label. The sheet-space rule
+    in `buildProfileLabelOverlays` keys on a PropertyBreak represented
+    type, so 0.6.7 break labels placed on a Label rotate with their
+    placement (see below). There is still no 0.6.7 sample drawing (the
+    blueprints are 0.6.3).
+  - ND0043's template still reads
+    `<TieInPointIdentifier>\n<CommissioningPackage>`, though 0.6.7 renamed
+    the attribute to `CommissioningPackageIdentifier` (on Nozzle and
+    PipeFitting). Director: render what the selected profile publishes —
+    no alias from the old name to the new one, so the second line picks
+    up `CommissioningPackage` only. If upstream fixes the template, the
+    next catalogue carries the fix.
+  - Accepted (director): 0.6.7 break-value labels on a Label rotate with
+    their placement; the PropertyBreak sheet-space rule is not extended
+    to them. Revisit when a 0.6.7 sample drawing exists.
+  - Pinned in discProfileOfficial.test.ts ("what 0.6.7 changed against
+    0.6.6"; 354 symbols / 401 variants / 253 with templates; the
+    primitive-less list is now per release). Generated docs refreshed;
+    `documentation/symbols/ND0273.svg` removed (ND0273 is text-only now).

@@ -1,6 +1,6 @@
 # Validation rule reference
 
-Generated from the app's rule tables by `npm run generate:docs` — 24 rules.
+Generated from the app's rule tables by `npm run generate:docs` — 25 rules.
 Default severities can be overridden per rule (including *Ignore*) in the Validation panel's severity configuration; overrides persist across sessions.
 
 ## Schema
@@ -44,6 +44,7 @@ Default severities can be overridden per rule (including *Ignore*) in the Valida
 | `MDL-007` | Reference target class mismatch | error | A reference target's class is incompatible with the declared target class (profile extension ancestry is honoured; unknown extensions are skipped, never guessed). |
 | `MDL-008` | Unknown component property | warning | A Components property is not defined for the object's class. |
 | `MDL-009` | Abstract class instantiated | error | An abstract model class is instantiated — the spec requires a concrete subclass. |
+| `MDL-010` | Class not in selected DISC profile | warning | A DiscProfile class the document instantiates is not defined by the loaded DISC profile — checked against the selected release, so a class removed upstream (e.g. TieInPoint in 0.6.7) is flagged only when that release is loaded. |
 
 ## Meta data
 

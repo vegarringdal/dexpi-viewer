@@ -9,7 +9,8 @@ import { normalizeLabelTemplateText } from "./labelExpression.ts";
 // first real, published profile data (earlier support was reconstructed from
 // the prior-art viewer). Every bundled release is a regression anchor: the
 // counts match the pack's own comparison reports (284 symbols in v0.6.3, 292
-// in v0.6.4, 343 in v0.6.6), and those reports drive the diff assertions.
+// in v0.6.4, 343 in v0.6.6, 354 in v0.6.7), and those reports drive the diff
+// assertions.
 // -----------------------------------------------------------------------------
 
 const BUNDLED_DIR = join(__dirname, "../../../public/profiles");
@@ -55,12 +56,49 @@ type CatalogueShape = Readonly<{
   symbols: number;
   variants: number;
   withTemplates: number;
+  /** Symbols with a graphics-free variant: node markers and text-only labels. */
+  primitiveless: readonly string[];
 }>;
 
+/** The node-/label-only symbols every release carries without graphics. */
+const NODE_ONLY_SYMBOLS = ["ND0000", "ND0040", "ND0041"];
+
+/** §4.1.2 / §4.2.4 of the 0.6.7 report: ND0273 and the eight new text-only labels. */
+const TEXT_ONLY_IN_067 = ["ND0273", ...Array.from({ length: 8 }, (_, i) => `ND0${String(314 + i)}`)];
+
 const CATALOGUES: readonly CatalogueShape[] = [
-  { version: "0.6.3", stamp: null, symbols: 284, variants: 320, withTemplates: 210 },
-  { version: "0.6.4", stamp: "0.6.4", symbols: 292, variants: 328, withTemplates: 215 },
-  { version: "0.6.6", stamp: "0.6.6", symbols: 343, variants: 388, withTemplates: 244 },
+  {
+    version: "0.6.3",
+    stamp: null,
+    symbols: 284,
+    variants: 320,
+    withTemplates: 210,
+    primitiveless: NODE_ONLY_SYMBOLS,
+  },
+  {
+    version: "0.6.4",
+    stamp: "0.6.4",
+    symbols: 292,
+    variants: 328,
+    withTemplates: 215,
+    primitiveless: NODE_ONLY_SYMBOLS,
+  },
+  {
+    version: "0.6.6",
+    stamp: "0.6.6",
+    symbols: 343,
+    variants: 388,
+    withTemplates: 244,
+    primitiveless: NODE_ONLY_SYMBOLS,
+  },
+  {
+    version: "0.6.7",
+    stamp: "0.6.7",
+    symbols: 354,
+    variants: 401,
+    withTemplates: 253,
+    primitiveless: [...NODE_ONLY_SYMBOLS, ...TEXT_ONLY_IN_067],
+  },
 ];
 
 for (const shape of CATALOGUES) {
@@ -86,7 +124,7 @@ for (const shape of CATALOGUES) {
       const emptyPrim = names.filter((n) =>
         profile.symbols.get(n)?.variants.some((v) => v.primitives.length === 0),
       );
-      expect(emptyPrim.sort()).toEqual(["ND0000", "ND0040", "ND0041"]);
+      expect(emptyPrim.sort()).toEqual([...shape.primitiveless].sort());
     });
 
     it("label templates parse for the majority of symbols", () => {
@@ -294,6 +332,111 @@ describe("what 0.6.6 changed against 0.6.4", () => {
       expect(templateTexts(v6, `${box}B`).length).toBeGreaterThanOrEqual(7);
     }
     expect(templateTexts(v6, "ND0301B")).toContain("<InsideDiameter> x <LengthTanTan>");
+  });
+});
+
+// -----------------------------------------------------------------------------
+// 0.6.6 → 0.6.7 diff (DiscProfile_Changes_0.6.6_to_0.6.7.md §3, §4). The first
+// release since 0.6.4 that is not purely additive: TieInPoint is gone and the
+// property-break symbols were relinked to Core.Diagram.Label.
+// -----------------------------------------------------------------------------
+
+/** §4.1 — every symbol 0.6.7 adds. */
+const SYMBOLS_ADDED_IN_067 = ["ND0312", "ND0313A", "ND0313B", ...TEXT_ONLY_IN_067.slice(1)];
+
+/** §4.1.2 — each text-only label's single placeholder. */
+const TEXT_ONLY_LABELS: Readonly<Record<string, string>> = {
+  ND0314: "<PipingToFromEndpoint>",
+  ND0315: "<NominalDiameterRepresentation>",
+  ND0316: "<PlantAreaIdentificationCode>",
+  ND0317: "<HeatTracingTypeRepresentation>",
+  ND0318: "<InsulationType>",
+  ND0319: "<LineId>",
+  ND0320: "<PipingClassCode>",
+  ND0321: "<ScopeIdentification>",
+};
+
+function textPrimitives(profile: DiscProfile, symbolName: string): readonly string[] {
+  return (profile.symbols.get(symbolName)?.variants[0]?.primitives ?? []).flatMap((p) =>
+    p.kind === "text" ? [p.value] : [],
+  );
+}
+
+describe("what 0.6.7 changed against 0.6.6", () => {
+  const v6 = loadBundledProfile("0.6.6");
+  const v7 = loadBundledProfile("0.6.7");
+
+  it("adds 11 symbols and removes none (§4.1, §4.3)", () => {
+    expect(SYMBOLS_ADDED_IN_067).toHaveLength(11);
+    const added = bareSymbolNames(v7).filter((k) => !v6.symbols.has(k));
+    expect(added.sort()).toEqual([...SYMBOLS_ADDED_IN_067].sort());
+    expect(bareSymbolNames(v6).filter((k) => !v7.symbols.has(k))).toEqual([]);
+  });
+
+  it("removes the TieInPoint class (§3.1)", () => {
+    expect(v6.classSupers.has("DiscProfile/InformationModel.TieInPoint")).toBe(true);
+    expect(v7.classSupers.has("DiscProfile/InformationModel.TieInPoint")).toBe(false);
+  });
+
+  it("gives the Non-SAS functions the SAS alarm labels (§4.2.1)", () => {
+    for (const symbol of ["ND0003", "ND0272"]) {
+      expect(templateTexts(v6, symbol).join("\n")).not.toContain("AlarmValue");
+      expect(templateTexts(v7, symbol)).toEqual(
+        expect.arrayContaining([
+          "'H'",
+          "'HH=' & SignalConveyingFunction:<AlarmValue>",
+          "'L'",
+          "'LL=' & SignalConveyingFunction:<AlarmValue>",
+        ]),
+      );
+    }
+  });
+
+  it("drops the break-value labels from ND0007 and ND0242; ND0043 keeps its own (§4.2.2)", () => {
+    for (const symbol of ["ND0007", "ND0242"]) {
+      expect(templateTexts(v6, symbol)).toEqual(["<BreakValue1>", "<BreakValue2>"]);
+      expect(templateTexts(v7, symbol)).toEqual([]);
+    }
+    expect(templateTexts(v7, "ND0043")).toEqual(templateTexts(v6, "ND0043"));
+  });
+
+  it("adds the text-only labels that now carry the break values (§4.1.2)", () => {
+    for (const [symbol, text] of Object.entries(TEXT_ONLY_LABELS)) {
+      const variant = v7.symbols.get(symbol)?.variants[0];
+      expect(variant?.primitives).toEqual([]);
+      expect(variant?.labelTemplates.map((t) => [t.text, t.hAlign, t.vAlign])).toEqual([
+        [text, "Center", "Center"],
+      ]);
+    }
+  });
+
+  it("adds the flow-arrow butterfly valves, normally-open in the _1 variant (§4.1.1)", () => {
+    const variants = v7.symbols.get("ND0313A")?.variants ?? [];
+    expect(variants.map((v) => v.condition)).toEqual([
+      null,
+      { attributeName: "ValvePosition", literalValue: "NormallyOpen" },
+    ]);
+    expect(templateTexts(v7, "ND0313A")[0]).toMatch(/^<ObjectDisplayName>\n/);
+    expect(templateTexts(v7, "ND0313B")[0]).not.toContain("<ObjectDisplayName>");
+  });
+
+  it("turns ND0273 into a text-only label reading 'MIN. ' (§4.2.4)", () => {
+    expect(v6.symbols.get("ND0273")?.variants[0]?.primitives.length).toBeGreaterThan(0);
+    const label = v7.symbols.get("ND0273")?.variants[0]?.labelTemplates[0];
+    expect(label).toMatchObject({
+      text: "'MIN. ' & <LowerLimitEndToEndLength>",
+      hAlign: "Center",
+      vAlign: "Center",
+    });
+    expect(normalizeLabelTemplateText(label?.text ?? "")).toBe("MIN. <LowerLimitEndToEndLength>");
+  });
+
+  it("draws the DIB barrier codes and reorders ND0307B's dimensions (§4.2.4)", () => {
+    expect(textPrimitives(v6, "ND0029")).toEqual([]);
+    expect(textPrimitives(v7, "ND0029")).toEqual(["DPE", "SR"]);
+    expect(textPrimitives(v7, "ND0030")).toEqual(["DPE", "DPE"]);
+    expect(templateTexts(v6, "ND0307B")).toContain("<Length>x<Height>x<Width>");
+    expect(templateTexts(v7, "ND0307B")).toContain("<Length>x<Width>x<Height>");
   });
 });
 

@@ -1,6 +1,7 @@
 import { isFlowReferenceProperty } from "./connectivity.ts";
 import type { DiscProfile } from "./discProfile.ts";
 import { validateAgainstModel } from "./modelValidation.ts";
+import { checkProfileClasses } from "./profileClassValidation.ts";
 import { detectDeclaredProfile, PRE_STAMP_VERSION } from "./profileVersion.ts";
 import { buildLookupIndex, lookupAttribute } from "./resolveTemplates.ts";
 import {
@@ -73,6 +74,7 @@ export const RULE_TITLES: Readonly<Record<string, string>> = {
   "MDL-007": "Reference target class mismatch",
   "MDL-008": "Unknown component property",
   "MDL-009": "Abstract class instantiated",
+  "MDL-010": "Class not in selected DISC profile",
   "META-002": "Invalid template attribute references",
   "META-003": "Profile version mismatch",
 };
@@ -749,6 +751,7 @@ export function validateDocument(root: Element, profile: DiscProfile | null = nu
   checkNominalDiameterMismatch(root, byId, issues);
   checkPipingClassChange(root, byId, issues);
   issues.push(...validateAgainstModel(root, profile?.classSupers));
+  issues.push(...checkProfileClasses(root, profile));
   checkTemplateAttributeReferences(root, issues);
   checkProfileVersion(root, profile, issues);
   return sortBySeverity(issues);

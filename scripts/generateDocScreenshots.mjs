@@ -277,7 +277,7 @@ SHOTS.ribbonFile = async (page) => {
       { target: button(page, "Example"), at: "b" },
       { target: button(page, "Auto"), at: "l" },
       { target: button(page, "Custom profile"), at: "l" },
-      { target: await around(button(page, "0.6.6"), button(page, "0.6.3")), at: "b" },
+      { target: await around(button(page, "0.6.7"), button(page, "0.6.4")), at: "b" },
     ],
   });
 };

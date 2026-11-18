@@ -6,9 +6,11 @@ import {
   detectDeclaredProfile,
   detectDeclaredProfileFromText,
   detectProfileFileVersion,
+  detectProfileImportPrefix,
   isBundledProfileVersion,
   LATEST_BUNDLED_PROFILE,
   PRE_STAMP_VERSION,
+  RIBBON_PROFILE_VERSIONS,
 } from "./profileVersion.ts";
 
 // -----------------------------------------------------------------------------
@@ -46,6 +48,7 @@ function parse(xml: string): Element {
 
 describe("bundled catalogue registry", () => {
   it("knows the versions it ships and how to reach them", () => {
+    expect(isBundledProfileVersion("0.6.7")).toBe(true);
     expect(isBundledProfileVersion("0.6.6")).toBe(true);
     expect(isBundledProfileVersion("0.6.4")).toBe(true);
     expect(isBundledProfileVersion("0.6.3")).toBe(true);
@@ -55,9 +58,14 @@ describe("bundled catalogue registry", () => {
     expect(bundledProfileName("0.6.3")).toBe("DiscProfile 0.6.3");
   });
 
-  it("orders the picker newest first and makes 0.6.6 the latest", () => {
-    expect(BUNDLED_PROFILE_VERSIONS).toEqual(["0.6.6", "0.6.4", "0.6.3"]);
-    expect(LATEST_BUNDLED_PROFILE).toBe("0.6.6");
+  it("orders the bundled releases newest first and makes 0.6.7 the latest", () => {
+    expect(BUNDLED_PROFILE_VERSIONS).toEqual(["0.6.7", "0.6.6", "0.6.4", "0.6.3"]);
+    expect(LATEST_BUNDLED_PROFILE).toBe("0.6.7");
+  });
+
+  it("offers every bundled version but 0.6.3 as a ribbon button, latest first", () => {
+    expect(RIBBON_PROFILE_VERSIONS).toEqual(["0.6.7", "0.6.6", "0.6.4"]);
+    expect(RIBBON_PROFILE_VERSIONS[0]).toBe(LATEST_BUNDLED_PROFILE);
   });
 });
 
@@ -106,9 +114,22 @@ describe("detectDeclaredProfile", () => {
   });
 });
 
+describe("detectProfileImportPrefix", () => {
+  it("returns the prefix the document gives its DiscProfile import", () => {
+    expect(detectProfileImportPrefix(parse(documentText("http://www.to.define")))).toBe("DiscProfile");
+    const renamed = '<Model><Import prefix="Disc" source="http://www.to.define/DiscProfile/0.6.7"/></Model>';
+    expect(detectProfileImportPrefix(parse(renamed))).toBe("Disc");
+  });
+
+  it("is null when the document imports no DiscProfile", () => {
+    expect(detectProfileImportPrefix(parse(documentText(null)))).toBeNull();
+  });
+});
+
 describe("detectDeclaredProfileFromText", () => {
   it("matches the parsed reading on every prologue shape", () => {
     const sources = [
+      "http://www.to.define/DiscProfile/0.6.7",
       "http://www.to.define/DiscProfile/0.6.6",
       "http://www.to.define/DiscProfile/0.6.4",
       "http://www.to.define",

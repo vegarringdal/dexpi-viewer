@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DiscProfile changes 0.6.6 to 0.6.7</title>
+  <style>
+    body { margin: 0; color: #171717; background: #ffffff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 48px 24px; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 1.4em 0 0.6em; }
+    h1 { font-size: 2.25rem; margin-top: 0; }
+    .tbl { width: 100%; overflow-x: auto; margin: 1.5rem 0; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #d4d4d4; padding: 0.6rem 0.75rem; text-align: left; vertical-align: top; }
+    th { background: #f5f5f5; }
+    tr:nth-child(even) td { background: #fafafa; }
+    pre { overflow-x: auto; background: #171717; color: #f5f5f5; padding: 1rem; border-radius: 0.5rem; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    :not(pre) > code { background: #f5f5f5; color: #171717; padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.9em; word-break: break-word; }
+    blockquote { border-left: 4px solid #d4d4d4; margin-left: 0; padding-left: 1rem; color: #525252; }
+    a { color: #1d4ed8; }
+    img { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <main>
+<h1 id="discprofile-model-comparison-report">DiscProfile Model Comparison Report</h1>
+<h3 id="class-modelling-and-symbol-library-version-066-version-067">Class Modelling and Symbol Library: Version 0.6.6 → Version 0.6.7</h3>
+<p><strong>Prepared:</strong> 13 November 2026<br />
+<strong>Prepared for:</strong> Users of the DiscProfile DEXPI extension model</p>
+<h2 id="1-purpose-and-scope">1. Purpose and Scope</h2>
+<p>This report documents all differences between the version 0.6.6 and version 0.6.7 releases of the DiscProfile DEXPI extension model — the information model that defines equipment classes, attributes, and graphical symbols used across the DiscProfile profile.</p>
+<p>Files compared:</p>
+<ul>
+<li>DiscProfile.xml (v0.6.6 → v0.6.7)</li>
+<li>Profile.xml (v0.6.6 → v0.6.7)</li>
+</ul>
+<p><code>Profile.xml</code> — the metamodel that defines symbols, symbol usage and the validation rules — has no substantive change apart from its version URI (§2.1).</p>
+<p>The DiscProfile.xml review covers the class model (new, removed and modified classes and attributes), the type-code packages, the usage constraint (profile scope) and the symbol library (graphical objects, label templates and their linkage to classes). Purely cosmetic differences in the XML — element ordering, indentation, line endings (CRLF in 0.6.6, LF in 0.6.7) and floating-point coordinate rounding — are excluded. The seven symbols whose only change is coordinate rounding are listed in §4.2.5 for completeness.</p>
+<p>The comparison was produced by structurally parsing both model files and diffing their class definitions, data properties, enumerations, type codes, constraint objects and symbol catalogue entries.</p>
+<h2 id="2-summary-of-changes">2. Summary of Changes</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Model Element</th>
+<th>v0.6.6</th>
+<th>v0.6.7</th>
+<th>Net Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Concrete Classes</td>
+<td>193</td>
+<td>192</td>
+<td>−1 (0 added, 1 removed, 1 modified)</td>
+</tr>
+<tr>
+<td>Abstract Classes</td>
+<td>4</td>
+<td>4</td>
+<td>No change (1 modified)</td>
+</tr>
+<tr>
+<td>Class Extensions</td>
+<td>29</td>
+<td>30</td>
+<td>+1 (1 added, 7 modified)</td>
+</tr>
+<tr>
+<td>Data Properties on extensions</td>
+<td>140</td>
+<td>141</td>
+<td>+1 (7 added, 6 removed)</td>
+</tr>
+<tr>
+<td>Enumerations</td>
+<td>3</td>
+<td>3</td>
+<td>No change</td>
+</tr>
+<tr>
+<td>Type-code packages</td>
+<td>5</td>
+<td>5</td>
+<td>No change (32 codes)</td>
+</tr>
+<tr>
+<td>Symbols (graphical)</td>
+<td>343</td>
+<td>354</td>
+<td>+11</td>
+</tr>
+<tr>
+<td>Symbol variants</td>
+<td>388</td>
+<td>401</td>
+<td>+13</td>
+</tr>
+<tr>
+<td>Label templates</td>
+<td>458</td>
+<td>476</td>
+<td>+18</td>
+</tr>
+<tr>
+<td>Symbols modified</td>
+<td>—</td>
+<td>23</td>
+<td>+ 7 with coordinate rounding only</td>
+</tr>
+<tr>
+<td>Allowed classes (UsageConstraint)</td>
+<td>294</td>
+<td>293</td>
+<td>+0 / −1</td>
+</tr>
+<tr>
+<td>Allowed properties (UsageConstraint)</td>
+<td>332</td>
+<td>328</td>
+<td>+7 / −11</td>
+</tr>
+<tr>
+<td>Validation rules (<code>Profile.xml</code>)</td>
+<td>5</td>
+<td>5</td>
+<td>No change</td>
+</tr>
+</tbody>
+</table></div>
+<p>Unlike 0.6.6, this release is <strong>not purely additive</strong>. One class (<code>TieInPoint</code>) and eleven allowed properties were removed, the three property-break symbols were relinked from <code>Plant.Piping.PropertyBreak</code> to <code>Core.Diagram.Label</code>, and <code>Sequence</code> was consolidated at PipingComponent level.</p>
+<p><em>Counts are taken directly from the two files. Data properties include all <code>DataProperty</code>/<code>ReferenceProperty</code>/<code>CompositionProperty</code> elements on class extensions. The 0.6.6 counts agree with the 0.6.4 → 0.6.6 report.</em></p>
+<h3 id="21-version-stamping">2.1 Version Stamping</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>v0.6.6</th>
+<th>v0.6.7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Model/@uri</code> (DiscProfile)</td>
+<td><code>http://www.to.define/DiscProfile/0.6.6</code></td>
+<td><code>http://www.to.define/DiscProfile/0.6.7</code></td>
+</tr>
+<tr>
+<td><code>Profile</code> import source</td>
+<td><code>http://www.dexpi.org/specification/Temp/Profile/0.6.6</code></td>
+<td><code>http://www.dexpi.org/specification/Temp/Profile/0.6.7</code></td>
+</tr>
+<tr>
+<td><code>MetaData/version</code> (DiscProfile)</td>
+<td><code>0.6.6</code></td>
+<td><code>0.6.7</code></td>
+</tr>
+<tr>
+<td><code>Model/@uri</code> (Profile.xml)</td>
+<td><code>http://www.dexpi.org/specification/Temp/Profile/0.6.6</code></td>
+<td><code>http://www.dexpi.org/specification/Temp/Profile/0.6.7</code></td>
+</tr>
+<tr>
+<td><code>MetaData/version</code> (Profile.xml)</td>
+<td>absent</td>
+<td>absent</td>
+</tr>
+<tr>
+<td><code>Core</code> / <code>MetaData</code> / <code>Plant</code> imports</td>
+<td>DEXPI 2.0.0</td>
+<td>DEXPI 2.0.0 (unchanged)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Tooling that matches on the exact model URI or <code>Profile</code> import URI must be updated.</p>
+<h2 id="3-class-model-changes">3. Class Model Changes</h2>
+<h3 id="31-removed-concrete-class">3.1 Removed Concrete Class</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Class Name</th>
+<th>Superclass</th>
+<th>RDL Label</th>
+<th>RDL URI</th>
+<th>Attributes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TieInPoint</td>
+<td><code>/InformationModel.LogicalBreak</code></td>
+<td>TIE IN POINT</td>
+<td><code>http://noaka.org/rdl/TieInPoint</code></td>
+<td>CommissioningPackage, TieInPointIdentifier</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>TieInPoint</code> was a LogicalBreak used under a PropertyBreak. Its information now sits directly on the nozzle or pipe fitting as <code>TieInPointIdentifier</code> and <code>CommissioningPackageIdentifier</code> (§3.3). No concrete classes were added.</p>
+<h3 id="32-modified-classes">3.2 Modified Classes</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MechanicalJoint (concrete)</td>
+<td><code>JointConnectionSize</code> removed. The class now has no own attributes. The connection size uses <code>NominalDiameterRepresentation</code> from the parent Nozzle.</td>
+</tr>
+<tr>
+<td>LogicalBreak (abstract)</td>
+<td><code>BreakValue1</code> and <code>BreakValue2</code> removed. The LogicalBreak subclasses (AreaBreak, HeatTracingBreak, InsulationBreak, LineIdBreak, NominalDiameterBreak, PipingClassBreak, ScopeBreak) now carry no attributes. The break values shown must come from the PipingNetworkSegments on either side of the break, and are owned by those segments' representation groups.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="33-class-extensions-and-attributes">3.3 Class Extensions and Attributes</h3>
+<p><strong>New class extension</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Class Extension</th>
+<th>Extends</th>
+<th>Attributes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PipeFittingExtension</td>
+<td><code>Plant/Piping.PipeFitting</code></td>
+<td>CommissioningPackageIdentifier, TieInPointIdentifier</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>New attributes (7)</strong>. All are optional (<code>lower="0" upper="1"</code>).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Class Extension</th>
+<th>Attribute</th>
+<th>Data Type</th>
+<th>Description</th>
+<th>RDL URI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NozzleExtension</td>
+<td>CommissioningPackageIdentifier</td>
+<td>Undefined | String</td>
+<td>Commissioning Package identifier</td>
+<td><code>http://noaka.org/rdl/CommissioningPackageIdentifierAssignmentClass</code></td>
+</tr>
+<tr>
+<td>NozzleExtension</td>
+<td>NominalDiameterRepresentation</td>
+<td>Undefined | String</td>
+<td>Nominal diameter for the nozzle</td>
+<td><code>http://sandbox.dexpi.org/rdl/NominalDiameterRepresentationAssignmentClass</code></td>
+</tr>
+<tr>
+<td>NozzleExtension</td>
+<td>TieInPointIdentifier</td>
+<td>Undefined | String</td>
+<td>Tie In Point identifier</td>
+<td><code>http://noaka.org/rdl/TieInPointIdentifierAssignmentClass</code></td>
+</tr>
+<tr>
+<td>PipeFittingExtension</td>
+<td>CommissioningPackageIdentifier</td>
+<td>Undefined | String</td>
+<td>Commissioning Package identifier</td>
+<td><code>http://noaka.org/rdl/CommissioningPackageIdentifierAssignmentClass</code></td>
+</tr>
+<tr>
+<td>PipeFittingExtension</td>
+<td>TieInPointIdentifier</td>
+<td>Undefined | String</td>
+<td>Tie In Point identifier</td>
+<td><code>http://noaka.org/rdl/TieInPointIdentifierAssignmentClass</code></td>
+</tr>
+<tr>
+<td>PipingNetworkSegmentExtension</td>
+<td>PlantArea</td>
+<td>Reference → <code>Plant/PlantStructure.PlantArea</code> (0..1)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>ProcessInstrumentationFunctionExtension</td>
+<td>Sequence</td>
+<td>Undefined | String</td>
+<td>Sequence number which is part of the tag number.</td>
+<td><code>http://noaka.org/rdl/SequenceAssignmentClass</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Removed attributes (6 on extensions)</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Class Extension</th>
+<th>Attribute</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>InlineMeasuringElementExtension</td>
+<td>Sequence</td>
+<td>Inherited from <code>PipingComponentExtension.Sequence</code></td>
+</tr>
+<tr>
+<td>OperatedValveExtension</td>
+<td>Sequence</td>
+<td>Inherited from <code>PipingComponentExtension.Sequence</code></td>
+</tr>
+<tr>
+<td>SafetyValveOrFittingExtension</td>
+<td>Sequence</td>
+<td>Inherited from <code>PipingComponentExtension.Sequence</code></td>
+</tr>
+<tr>
+<td>PropertyBreakExtension</td>
+<td>BreakIdentifier</td>
+<td>Property-break values removed</td>
+</tr>
+<tr>
+<td>PropertyBreakExtension</td>
+<td>BreakValue1</td>
+<td>Property-break values removed</td>
+</tr>
+<tr>
+<td>PropertyBreakExtension</td>
+<td>BreakValue2</td>
+<td>Property-break values removed</td>
+</tr>
+</tbody>
+</table></div>
+<p>Notes:</p>
+<ul>
+<li><code>PropertyBreakExtension</code> now has only the <code>LogicalBreaks</code> composition.</li>
+<li><code>Sequence</code> is now defined on PipingComponentExtension, ProcessEquipmentExtension, NozzleExtension and ProcessInstrumentationFunctionExtension. OperatedValve, SafetyValveOrFitting and InlineMeasuringElement are PipingComponents, so they still have <code>Sequence</code> through inheritance.</li>
+<li><code>PlantArea</code> is the only new reference property. It has no description or RDL URI.</li>
+<li>The commissioning-package attribute of the removed <code>TieInPoint</code> was called <code>CommissioningPackage</code> (<code>…/CommissioningPackageAssignmentClass</code>). The new attribute is <code>CommissioningPackageIdentifier</code> (<code>…/CommissioningPackageIdentifierAssignmentClass</code>).</li>
+</ul>
+<p>No existing attribute changed its data type, multiplicity, description or RDL URI.</p>
+<h3 id="34-enumerations-and-type-code-packages">3.4 Enumerations and Type-Code Packages</h3>
+<p>All three enumerations (BlindPosition, PlugState, ValvePosition) and all five type-code packages (32 codes) are unchanged.</p>
+<h3 id="35-profile-scope-usageconstraint">3.5 Profile Scope (UsageConstraint)</h3>
+<p><strong>Allowed classes</strong>: 0 added, 1 removed (294 → 293).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Entry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.TieInPoint</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Allowed properties</strong>: 7 added, 11 removed (332 → 328).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Entry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.NozzleExtension.CommissioningPackageIdentifier</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.NozzleExtension.NominalDiameterRepresentation</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.NozzleExtension.TieInPointIdentifier</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.PipeFittingExtension.CommissioningPackageIdentifier</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.PipeFittingExtension.TieInPointIdentifier</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.PipingNetworkSegmentExtension.PlantArea</code></td>
+</tr>
+<tr>
+<td>Added</td>
+<td><code>DiscProfile.InformationModel.ProcessInstrumentationFunctionExtension.Sequence</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.InlineMeasuringElementExtension.Sequence</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.OperatedValveExtension.Sequence</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.SafetyValveOrFittingExtension.Sequence</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.PropertyBreakExtension.BreakIdentifier</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.PropertyBreakExtension.BreakValue1</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.PropertyBreakExtension.BreakValue2</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.LogicalBreak.BreakValue1</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.LogicalBreak.BreakValue2</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.MechanicalJoint.JointConnectionSize</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.TieInPoint.CommissioningPackage</code></td>
+</tr>
+<tr>
+<td>Removed</td>
+<td><code>DiscProfile.InformationModel.TieInPoint.TieInPointIdentifier</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>Plant.Piping.PropertyBreak</code> is still an allowed class, but after the relinking in §4.2.2 no symbol has it as its usage class.</p>
+<h2 id="4-symbol-library-changes">4. Symbol Library Changes</h2>
+<p>Total symbols: 343 → 354. No symbols were removed. 11 were added and 23 were modified (plus 7 with coordinate rounding only). Label template objects rose from 458 to 476.</p>
+<h3 id="41-new-symbols">4.1 New Symbols</h3>
+<h4 id="411-valves">4.1.1 Valves</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+<th>Linked Class (<code>MetaData/usage</code>)</th>
+<th>Variants</th>
+<th>Nodes</th>
+<th>Bounding Box</th>
+<th>Rot/Mir/ResX/ResY</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0313A</td>
+<td>Valve Butterfly With Flow Arrow (Manual Valve)</td>
+<td><code>Plant.Piping.ButterflyValve</code></td>
+<td>ND0313A_0, ND0313A_1</td>
+<td>2</td>
+<td>(-4, -2) – (4, 3.5)</td>
+<td>Y/Y/N/N</td>
+</tr>
+<tr>
+<td>ND0313B</td>
+<td>Valve Butterfly With Flow Arrow (Actuated Valve)</td>
+<td><code>Plant.Piping.ButterflyValve</code></td>
+<td>ND0313B_0, ND0313B_1</td>
+<td>2</td>
+<td>(-4, -2) – (4, 3.5)</td>
+<td>Y/Y/N/N</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>They share the <code>ButterflyValve</code> class with ND0192A/B.</li>
+<li>The <code>_1</code> variant has the condition <code>OperatedValveExtension.ValvePosition = ValvePosition.NormallyOpen</code>. This differs from the other valve pairs, whose <code>_1</code> variant is <code>NormallyClose</code>.</li>
+<li>ND0313A uses the full valve label <code>&lt;ObjectDisplayName&gt;</code> + <code>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt;</code> / <code>&lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt;</code>. ND0313B leaves out <code>&lt;ObjectDisplayName&gt;</code>, as for the other actuated valves.</li>
+</ul>
+<h4 id="412-labels">4.1.2 Labels</h4>
+<p>All have <code>Core.Diagram.Label</code> as their usage class, one variant, and rotation, mirroring and resizing allowed.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+<th>Size / Nodes</th>
+<th>Label templates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0312</td>
+<td>Special Item Plant Code</td>
+<td>(0, −12) – (12, 0), 1 Label node, 3 primitives</td>
+<td><strong>A</strong> <code>&lt;SpecialItemNumber&gt;</code> (LeftBottom)<br><strong>B</strong> <code>&lt;ProcessPlantIdentificationCode&gt;-</code> (RightCenter)</td>
+</tr>
+<tr>
+<td>ND0314</td>
+<td>PipingToFromEndpoint</td>
+<td>0 × 0, no nodes</td>
+<td><strong>A</strong> <code>&lt;PipingToFromEndpoint&gt;</code></td>
+</tr>
+<tr>
+<td>ND0315</td>
+<td>NominalDiameterRepresentation</td>
+<td>0 × 0, no nodes</td>
+<td><strong>A</strong> <code>&lt;NominalDiameterRepresentation&gt;</code></td>
+</tr>
+<tr>
+<td>ND0316</td>
+<td>PlantAreaIdentificationCode</td>
+<td>0 × 0, no nodes</td>
+<td><strong>A</strong> <code>&lt;PlantAreaIdentificationCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0317</td>
+<td>HeatTracingTypeRepresentation</td>
+<td>0 × 0, no nodes</td>
+<td><strong>A</strong> <code>&lt;HeatTracingTypeRepresentation&gt;</code></td>
+</tr>
+<tr>
+<td>ND0318</td>
+<td>InsulationType</td>
+<td>0 × 0, no nodes</td>
+<td><strong>A</strong> <code>&lt;InsulationType&gt;</code></td>
+</tr>
+<tr>
+<td>ND0319</td>
+<td>LineId</td>
+<td>0 × 0, no nodes</td>
+<td><strong>A</strong> <code>&lt;LineId&gt;</code></td>
+</tr>
+<tr>
+<td>ND0320</td>
+<td>PipingClassCode</td>
+<td>0 × 0, no nodes</td>
+<td><strong>A</strong> <code>&lt;PipingClassCode&gt;</code></td>
+</tr>
+<tr>
+<td>ND0321</td>
+<td>ScopeIdentification</td>
+<td>0 × 0, no nodes</td>
+<td><strong>A</strong> <code>&lt;ScopeIdentification&gt;</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>ND0314–ND0321 are text-only labels with no graphics. All have a single CenterCenter label.</p>
+<h3 id="42-modified-symbols">4.2 Modified Symbols</h3>
+<h4 id="421-alarm-labels-added-to-non-sas-functions-2-symbols">4.2.1 Alarm labels added to Non-SAS functions (2 symbols)</h4>
+<p>ND0003 <em>Non SAS Function in CCR</em> and ND0272 <em>Non Sas Function Local</em> received the same four alarm labels that the SAS functions ND0006 and ND0269–ND0271 got in 0.6.6:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Alignment</th>
+<th>Text</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>E</td>
+<td>LeftBottom</td>
+<td><code>'H'</code></td>
+</tr>
+<tr>
+<td>F</td>
+<td>LeftBottom</td>
+<td><code>'HH=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;</code></td>
+</tr>
+<tr>
+<td>G</td>
+<td>LeftTop</td>
+<td><code>'L'</code></td>
+</tr>
+<tr>
+<td>H</td>
+<td>LeftTop</td>
+<td><code>'LL=' &amp; SignalConveyingFunction:&lt;AlarmValue&gt;</code></td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="422-property-break-symbols-relinked-to-label-3-symbols">4.2.2 Property-break symbols relinked to Label (3 symbols)</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+<th>Change</th>
+<th>0.6.7 symbol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0007</td>
+<td>Property Break</td>
+<td>Usage <code>Plant.Piping.PropertyBreak</code> → <code>Core.Diagram.Label</code>. Labels A <code>&lt;BreakValue1&gt;</code> and B <code>&lt;BreakValue2&gt;</code> removed. Label node removed. Graphic redrawn: the single arrowed line at y = −10 is replaced by two half-lines at y = −6 with arrowheads at the centre. Bounding box unchanged.</td>
+<td><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiB3aWR0aD0iMTAyLjM4Nm1tIiBoZWlnaHQ9Ijk0LjcxMzRtbSIgdmlld0JveD0iLTEzLjAzMTMgLTE4LjAzMTMgMjQuMTg3NSAyMi4zNzUiPjxkZWZzIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIvPjxnPjxnIGlkPSJjZWxsLU5EMDAwNy1zeW1ib2wtNSIgbGF5ZXI9IlN5bWJvbCI+PHBhdGggZD0iTTItNkw4LTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjI1IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHBvaW50ZXItZXZlbnRzPSJzdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvZz48ZyBpZD0iY2VsbC1ORDAwMDctc3ltYm9sLTQiIGxheWVyPSJTeW1ib2wiPjxwYXRoIGQ9Ik0wIDBMMC0xMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAuMjUiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgcG9pbnRlci1ldmVudHM9InN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9nPjxnIGlkPSJjZWxsLU5EMDAwNy1zeW1ib2wtMyIgbGF5ZXI9IlN5bWJvbCI+PHBhdGggZD0iTS0yLTZMLTgtNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAuMjUiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgcG9pbnRlci1ldmVudHM9InN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9nPjxnIGlkPSJjZWxsLU5EMDAwNy1zeW1ib2wtMiIgbGF5ZXI9IlN5bWJvbCI+PHBhdGggZD0iTS0yLTYuNzVMMC02LTItNS4yNVoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjI1IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHBvaW50ZXItZXZlbnRzPSJhbGwiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvZz48ZyBpZD0iY2VsbC1ORDAwMDctc3ltYm9sLTEiIGxheWVyPSJTeW1ib2wiPjxwYXRoIGQ9Ik0yLTUuMjQ5OTk5OTk5OTk5OTk5TDAtNS45OTk5OTk5OTk5OTk5OTkgMi02Ljc0OTk5OTk5OTk5OTk5OVoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjI1IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHBvaW50ZXItZXZlbnRzPSJhbGwiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvZz48ZyBpZD0iY2VsbC1ORDAwMDctb3JpZ28iIGNvbnRlbnQ9IiZsdDtvYmplY3QgbGFiZWw9JnF1b3Q7b3JpZ28mcXVvdDsvJmd0OyIgZGF0YS1sYWJlbD0ib3JpZ28iIGxheWVyPSJPcmlnbyI+PGVsbGlwc2UgY3g9IjAiIGN5PSIwIiByeD0iMC4yNSIgcnk9IjAuMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmMDAwMCIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIi8+PC9nPjwvZz48ZyBsYXllcj0iRGltZW5zaW9uIj48dGV4dCB4PSIwIiB5PSItMTUuMTMxMjUiIGZvbnQtc2l6ZT0iMC4ybW0iIGZvbnQtZmFtaWx5PSJIZWx2ZXRpY2EiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM3Nzc3NzciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+VzogMTYuMDwvdGV4dD48cGF0aCBkPSJNLTgsLTE1LjAzMTI1IDgsLTE1LjAzMTI1IE0tOCwtMTUuMDMxMjUgLTcuMywtMTUuMzgxMjUgTS04LC0xNS4wMzEyNSAtNy4zLC0xNC42ODEyNSBNOCwtMTUuMDMxMjUgNy4zLC0xNS4zODEyNSBNOCwtMTUuMDMxMjUgNy4zLC0xNC42ODEyNSBNLTgsLTE0LjYzMTI1IC04LC0xNS40MzEyNSBNOCwtMTQuNjMxMjUgOCwtMTUuNDMxMjUiIHN0cm9rZT0iIzc3Nzc3NyIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48dGV4dCB4PSItMTEuMTMxMjUiIHk9Ii01LjgiIGZvbnQtc2l6ZT0iMC4ybW0iIGZvbnQtZmFtaWx5PSJIZWx2ZXRpY2EiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM3Nzc3NzciIHRyYW5zZm9ybT0icm90YXRlKC05MCAtMTEuMTMxMjUgLTUuOCkiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+SDogMTIuMDwvdGV4dD48cGF0aCBkPSJNLTExLjAzMTI1LTEyTC0xMS4wMzEyNS03Ljc3MTU2MTE3MjM3NjA5NmUtMTZNLTExLjAzMTI1LTEyTC0xMC42ODEyNS0xMS4zTS0xMS4wMzEyNS0xMkwtMTEuMzgxMjUtMTEuM00tMTEuMDMxMjUtNy43NzE1NjExNzIzNzYwOTZlLTE2TC0xMC42ODEyNS0wLjcwMDAwMDAwMDAwMDAwMDdNLTExLjAzMTI1LTcuNzcxNTYxMTcyMzc2MDk2ZS0xNkwtMTEuMzgxMjUtMC43MDAwMDAwMDAwMDAwMDA2TS0xMS40MzEyNS0xMkwtMTAuNjMxMjUtMTJNLTExLjQzMTI1LTYuNjYxMzM4MTQ3NzUwOTM5ZS0xNkwtMTAuNjMxMjUtNy43NzE1NjExNzIzNzYwOTZlLTE2IiBzdHJva2U9IiM3Nzc3NzciIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9nPjxnIGxheWVyPSJTeW1ib2xSZWdpc3RyYXRpb25OdW1iZXIiPjx0ZXh0IHg9Ii0xMi4wMzEyNSIgeT0iLTE2LjEwNTExMzY4NTEzMTA3MyIgZm9udC1zaXplPSIwLjJtbSIgZm9udC1mYW1pbHk9IkhlbHZldGljYSIgdGV4dC1hbmNob3I9InN0YXJ0IiBmaWxsPSIjMDAwMDAwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPk5EMDAwNzwvdGV4dD48L2c+PGcgbGF5ZXI9IkdyaWQiPjxnIGxheWVyPSJHcmlkX21pY3JvIj48cGF0aCBkPSJNLTEzLjAzMTI1LC0xOCAxMS4xNTYyNSwtMTgiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS0xMy4wMzEyNSwtMTcgMTEuMTU2MjUsLTE3IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tMTMuMDMxMjUsLTE2IDExLjE1NjI1LC0xNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLjAzMTI1LC0xNSAxMS4xNTYyNSwtMTUiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS0xMy4wMzEyNSwtMTQgMTEuMTU2MjUsLTE0IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tMTMuMDMxMjUsLTEzIDExLjE1NjI1LC0xMyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLjAzMTI1LC0xMiAxMS4xNTYyNSwtMTIiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS0xMy4wMzEyNSwtMTEgMTEuMTU2MjUsLTExIiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tMTMuMDMxMjUsLTEwIDExLjE1NjI1LC0xMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLjAzMTI1LC05IDExLjE1NjI1LC05IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tMTMuMDMxMjUsLTggMTEuMTU2MjUsLTgiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS0xMy4wMzEyNSwtNyAxMS4xNTYyNSwtNyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLjAzMTI1LC02IDExLjE1NjI1LC02IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tMTMuMDMxMjUsLTUgMTEuMTU2MjUsLTUiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS0xMy4wMzEyNSwtNCAxMS4xNTYyNSwtNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLjAzMTI1LC0zIDExLjE1NjI1LC0zIiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tMTMuMDMxMjUsLTIgMTEuMTU2MjUsLTIiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS0xMy4wMzEyNSwtMSAxMS4xNTYyNSwtMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLjAzMTI1LDAgMTEuMTU2MjUsMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLjAzMTI1LDEgMTEuMTU2MjUsMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLjAzMTI1LDIgMTEuMTU2MjUsMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLjAzMTI1LDMgMTEuMTU2MjUsMyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLjAzMTI1LDQgMTEuMTU2MjUsNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEzLC0xOC4wMzEyNSAtMTMsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEyLC0xOC4wMzEyNSAtMTIsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTExLC0xOC4wMzEyNSAtMTEsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEwLC0xOC4wMzEyNSAtMTAsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTksLTE4LjAzMTI1IC05LDQuMzQzNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS04LC0xOC4wMzEyNSAtOCw0LjM0Mzc1IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tNywtMTguMDMxMjUgLTcsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTYsLTE4LjAzMTI1IC02LDQuMzQzNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS01LC0xOC4wMzEyNSAtNSw0LjM0Mzc1IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tNCwtMTguMDMxMjUgLTQsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTMsLTE4LjAzMTI1IC0zLDQuMzQzNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS0yLC0xOC4wMzEyNSAtMiw0LjM0Mzc1IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tMSwtMTguMDMxMjUgLTEsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNMCwtMTguMDMxMjUgMCw0LjM0Mzc1IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0xLC0xOC4wMzEyNSAxLDQuMzQzNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTIsLTE4LjAzMTI1IDIsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNMywtMTguMDMxMjUgMyw0LjM0Mzc1IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik00LC0xOC4wMzEyNSA0LDQuMzQzNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTUsLTE4LjAzMTI1IDUsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNNiwtMTguMDMxMjUgNiw0LjM0Mzc1IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik03LC0xOC4wMzEyNSA3LDQuMzQzNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTgsLTE4LjAzMTI1IDgsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNOSwtMTguMDMxMjUgOSw0LjM0Mzc1IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMTYsIDIxNiwgMjE2KSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIwLjI1IiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0xMCwtMTguMDMxMjUgMTAsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoMjE2LCAyMTYsIDIxNikiIHN0cm9rZS1vcGFjaXR5PSIwLjUiIHN0cm9rZS13aWR0aD0iMC4yNSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNMTEsLTE4LjAzMTI1IDExLDQuMzQzNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDIxNiwgMjE2LCAyMTYpIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjAuMjUiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9nPjxnIGxheWVyPSJHcmlkX21pbm9yIj48cGF0aCBkPSJNLTEzLjAzMTI1LC0xNSAxMS4xNTYyNSwtMTUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzdmN2Y3ZiIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIgc3Ryb2tlLXdpZHRoPSIwLjUiIHN0cm9rZS1kYXNoYXJyYXk9IjEuMCwgMi4wIiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tMTMuMDMxMjUsLTEwIDExLjE1NjI1LC0xMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjN2Y3ZjdmIiBzdHJva2Utb3BhY2l0eT0iMC4yIiBzdHJva2Utd2lkdGg9IjAuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMS4wLCAyLjAiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS0xMy4wMzEyNSwtNSAxMS4xNTYyNSwtNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjN2Y3ZjdmIiBzdHJva2Utb3BhY2l0eT0iMC4yIiBzdHJva2Utd2lkdGg9IjAuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMS4wLCAyLjAiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTS0xMy4wMzEyNSwwIDExLjE1NjI1LDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzdmN2Y3ZiIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIgc3Ryb2tlLXdpZHRoPSIwLjUiIHN0cm9rZS1kYXNoYXJyYXk9IjEuMCwgMi4wIiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tMTAsLTE4LjAzMTI1IC0xMCw0LjM0Mzc1IiBmaWxsPSJub25lIiBzdHJva2U9IiM3ZjdmN2YiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMC41IiBzdHJva2UtZGFzaGFycmF5PSIxLjAsIDIuMCIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTUsLTE4LjAzMTI1IC01LDQuMzQzNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzdmN2Y3ZiIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIgc3Ryb2tlLXdpZHRoPSIwLjUiIHN0cm9rZS1kYXNoYXJyYXk9IjEuMCwgMi4wIiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLC0xOC4wMzEyNSAwLDQuMzQzNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzdmN2Y3ZiIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIgc3Ryb2tlLXdpZHRoPSIwLjUiIHN0cm9rZS1kYXNoYXJyYXk9IjEuMCwgMi4wIiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik01LC0xOC4wMzEyNSA1LDQuMzQzNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzdmN2Y3ZiIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIgc3Ryb2tlLXdpZHRoPSIwLjUiIHN0cm9rZS1kYXNoYXJyYXk9IjEuMCwgMi4wIiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0xMCwtMTguMDMxMjUgMTAsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjN2Y3ZjdmIiBzdHJva2Utb3BhY2l0eT0iMC4yIiBzdHJva2Utd2lkdGg9IjAuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMS4wLCAyLjAiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9nPjxnIGxheWVyPSJHcmlkX21ham9yIj48cGF0aCBkPSJNLTEzLjAzMTI1LC0xMCAxMS4xNTYyNSwtMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBmMGYwZiIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIgc3Ryb2tlLXdpZHRoPSIxIiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0tMTMuMDMxMjUsMCAxMS4xNTYyNSwwIiBmaWxsPSJub25lIiBzdHJva2U9IiMwZjBmMGYiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNLTEwLC0xOC4wMzEyNSAtMTAsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGYwZjBmIiBzdHJva2Utb3BhY2l0eT0iMC4yIiBzdHJva2Utd2lkdGg9IjEiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTAsLTE4LjAzMTI1IDAsNC4zNDM3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGYwZjBmIiBzdHJva2Utb3BhY2l0eT0iMC4yIiBzdHJva2Utd2lkdGg9IjEiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTEwLC0xOC4wMzEyNSAxMCw0LjM0Mzc1IiBmaWxsPSJub25lIiBzdHJva2U9IiMwZjBmMGYiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMSIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L2c+PC9nPjwvc3ZnPg==" alt="ND0007 symbol, 0.6.7" width="220"></td>
+</tr>
+<tr>
+<td>ND0242</td>
+<td>Area Break</td>
+<td>Usage <code>Plant.Piping.PropertyBreak</code> → <code>Core.Diagram.Label</code>. Labels A <code>&lt;BreakValue1&gt;</code> and B <code>&lt;BreakValue2&gt;</code> removed.</td>
+<td></td>
+</tr>
+<tr>
+<td>ND0043</td>
+<td>Tie In Point Property Break</td>
+<td>Usage <code>Plant.Piping.PropertyBreak</code> → <code>Core.Diagram.Label</code>. Labels unchanged.</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="423-label-alignment-and-position-12-symbols">4.2.3 Label alignment and position (12 symbols)</h4>
+<p>The label alignment of ND0012A, ND0182B, ND0028, ND0031, ND0237, ND0225A, ND0225B, ND0244A, ND0244B, ND0245A, ND0245B and ND0029 has been adjusted for the viewers. The label text is unchanged.</p>
+<h4 id="424-graphics-and-other-changes-6-symbols">4.2.4 Graphics and other changes (6 symbols)</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ND0029 / ND0029A</td>
+<td>Double Isolation Ball Valve (DIB-2), manual / actuated</td>
+<td>Two static text primitives added to each variant: <code>DPE</code> and <code>SR</code> (size 1.0)</td>
+</tr>
+<tr>
+<td>ND0030 / ND0030A</td>
+<td>Double Isolation Ball Valve (DIB-1), manual / actuated</td>
+<td>Two static text primitives <code>DPE</code> added to each variant (size 1.0)</td>
+</tr>
+<tr>
+<td>ND0227</td>
+<td>Strainer T Temporary</td>
+<td>Static text <code>TS</code> enlarged from size 1.5 to 2.75 and repositioned</td>
+</tr>
+<tr>
+<td>ND0273</td>
+<td>Segment Minimum Length</td>
+<td>Turned into a text-only label: bounding box (-5, -1) – (5, 3) → 0 × 0, both piping nodes and all graphics (2 polygons, 3 polylines) removed. Label A <code>'Min: ' &amp; &lt;LowerLimitEndToEndLength&gt;</code> (CenterTop) → <code>'MIN. ' &amp; &lt;LowerLimitEndToEndLength&gt;</code> (CenterCenter, at origin)</td>
+</tr>
+<tr>
+<td>ND0307B</td>
+<td>Equipment box 8: Process Heater</td>
+<td>Label C <code>&lt;Length&gt;x&lt;Height&gt;x&lt;Width&gt;</code> → <code>&lt;Length&gt;x&lt;Width&gt;x&lt;Height&gt;</code>, the same order as the other equipment boxes</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="425-coordinate-rounding-only-7-symbols-not-counted-as-modified">4.2.5 Coordinate rounding only (7 symbols, not counted as modified)</h4>
+<p>ND0119, ND0181A, ND0181B, ND0186, ND0187, ND0247 and ND0291A differ only by coordinate rounding (maximum difference 0.001 mm). Bounding boxes, nodes and labels are unchanged.</p>
+<p>No other symbol had changes to geometry, nodes, transformation flags, class linkage, variants, conditions or type codes.</p>
+<h3 id="43-removed-symbols">4.3 Removed Symbols</h3>
+<p>None.</p>
+  </main>
+</body>
+</html>

@@ -18,7 +18,7 @@
 2. **Example** — load a bundled official DISC example sheet (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>).
 3. **Auto** — let the open document decide which DISC profile catalogue resolves its profile symbols: it loads the version the document declares.
 4. **Custom profile** — load your own `DiscProfile.xml`.
-5. **0.6.6 / 0.6.4 / 0.6.3** — pin one of the bundled official releases (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> picks the newest).
+5. **0.6.7 / 0.6.6 / 0.6.4** — pin one of the bundled official releases (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> picks the newest). 0.6.3 still ships, but only **Auto** loads it (for drawings with an unversioned import); it has no button.
 
 <!-- steps -->
 1. Press **Open** (#1) and choose a file, or drop it on the window.
@@ -35,6 +35,7 @@ The releases are not interchangeable:
 
 - **0.6.4** adds eight symbols, removes two classes, relinks two symbols, and adds a `ShutoffCapability` field to 38 valve labels.
 - **0.6.6** removes nothing. It adds 51 symbols (new valves, fire-fighting nozzles, an internal pipe and the ND0300–ND0310 equipment boxes) and the 20 classes they draw. It also renames the `IOPS` type code to `IOPPS`, and shows the H and L alarms as the letter only. The viewer draws that letter only on instruments that actually carry the alarm.
+- **0.6.7** is not purely additive. It removes the `TieInPoint` class: its identifiers now sit on the nozzle or pipe fitting. With 0.6.7 loaded, a drawing that still uses `TieInPoint` is flagged as [MDL-010](rules.md); validation always checks against the profile you have selected. The property-break symbols (ND0007, ND0242, ND0043) become plain labels, and the break values move to the piping segments on either side, shown by eight new text-only labels (ND0314–ND0321). It also adds a butterfly valve with a flow arrow (ND0313A/B) and a special-item plant-code label (ND0312), and gives the Non-SAS functions (ND0003, ND0272) the same alarm labels the SAS functions have.
 
 A mismatch is reported in Validation as [META-003](rules.md).
 

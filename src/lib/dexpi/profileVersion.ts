@@ -15,13 +15,21 @@
 /** The version an unstamped DiscProfile model/import is taken to mean. */
 export const PRE_STAMP_VERSION = "0.6.3";
 
-/** Bundled catalogues, newest first — the version picker's option order. */
-export const BUNDLED_PROFILE_VERSIONS = ["0.6.6", "0.6.4", "0.6.3"] as const;
+/** Bundled catalogues, newest first — everything Auto and the loader can resolve. */
+export const BUNDLED_PROFILE_VERSIONS = ["0.6.7", "0.6.6", "0.6.4", "0.6.3"] as const;
 
 export type BundledProfileVersion = (typeof BUNDLED_PROFILE_VERSIONS)[number];
 
+/**
+ * The bundled catalogues the ribbon offers as pin buttons, newest first.
+ * 0.6.3 stays bundled — Auto loads it for unversioned imports and the
+ * DISC_EXAMPLE-14 blueprints only validate against it — but is no longer
+ * offered for pinning (director, 2026-11-18).
+ */
+export const RIBBON_PROFILE_VERSIONS: readonly BundledProfileVersion[] = ["0.6.7", "0.6.6", "0.6.4"];
+
 /** The newest bundled catalogue — what the ribbon's profile hotkey loads. */
-export const LATEST_BUNDLED_PROFILE: BundledProfileVersion = "0.6.6";
+export const LATEST_BUNDLED_PROFILE: BundledProfileVersion = "0.6.7";
 
 export function isBundledProfileVersion(value: string): value is BundledProfileVersion {
   return BUNDLED_PROFILE_VERSIONS.some((v) => v === value);
@@ -80,24 +88,42 @@ type ImportDecl = Readonly<{ prefix: string; source: string }>;
  * DiscProfile import at all needs no profile and says so.
  */
 function declaredProfileOf(imports: Iterable<ImportDecl>): DeclaredProfile {
-  for (const { prefix, source } of imports) {
-    if (prefix !== "DiscProfile" && !source.includes("DiscProfile")) {
-      continue;
-    }
-
-    return { isImported: true, version: versionFromUri(source) ?? PRE_STAMP_VERSION };
+  const decl = findProfileImport(imports);
+  if (!decl) {
+    return NO_DECLARED_PROFILE;
   }
-  return NO_DECLARED_PROFILE;
+
+  return { isImported: true, version: versionFromUri(decl.source) ?? PRE_STAMP_VERSION };
+}
+
+function findProfileImport(imports: Iterable<ImportDecl>): ImportDecl | null {
+  for (const decl of imports) {
+    if (decl.prefix === "DiscProfile" || decl.source.includes("DiscProfile")) {
+      return decl;
+    }
+  }
+  return null;
+}
+
+function importsOf(root: Element): ImportDecl[] {
+  return [...root.querySelectorAll("Import")].map((imp) => ({
+    prefix: imp.getAttribute("prefix") ?? "",
+    source: imp.getAttribute("source") ?? "",
+  }));
 }
 
 /** The DiscProfile version a parsed document declares. */
 export function detectDeclaredProfile(root: Element): DeclaredProfile {
-  return declaredProfileOf(
-    [...root.querySelectorAll("Import")].map((imp) => ({
-      prefix: imp.getAttribute("prefix") ?? "",
-      source: imp.getAttribute("source") ?? "",
-    })),
-  );
+  return declaredProfileOf(importsOf(root));
+}
+
+/**
+ * The prefix a parsed document gives its DiscProfile import — what its
+ * profile-class object types start with ("DiscProfile/InformationModel.…").
+ * Null when the document imports no DiscProfile.
+ */
+export function detectProfileImportPrefix(root: Element): string | null {
+  return findProfileImport(importsOf(root))?.prefix || null;
 }
 
 /** How far into an unparsed document to look for Imports when it holds no Object. */

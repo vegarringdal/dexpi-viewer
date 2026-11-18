@@ -95,6 +95,7 @@ const RULE_DOCS = {
   "MDL-007": ["error", "A reference target's class is incompatible with the declared target class (profile extension ancestry is honoured; unknown extensions are skipped, never guessed)."],
   "MDL-008": ["warning", "A Components property is not defined for the object's class."],
   "MDL-009": ["error", "An abstract model class is instantiated — the spec requires a concrete subclass."],
+  "MDL-010": ["warning", "A DiscProfile class the document instantiates is not defined by the loaded DISC profile — checked against the selected release, so a class removed upstream (e.g. TieInPoint in 0.6.7) is flagged only when that release is loaded."],
   "META-002": ["error", "An AttributeRepresentation names an attribute that does not resolve on (or near) its object — the template fragment renders blank."],
   "META-003": ["warning", "The loaded DISC catalogue is a different release from the one the document's DiscProfile Import declares — symbols, label fields and classes the two releases do not share will not resolve."],
 };
