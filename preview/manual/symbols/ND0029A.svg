@@ -1,10 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="21.0044mm" height="17.9971mm" viewBox="-10.9976 -8.9985 21.0044 17.9971">
-  <rect x="-10.9976" y="-8.9985" width="21.0044" height="17.9971" fill="white"/>
-  <polyline points="-4.9976,2.3738 -4.9888,0.0181" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="21.0044mm" height="18.778mm" viewBox="-10.9976 -8.9985 21.0044 18.778">
+  <rect x="-10.9976" y="-8.9985" width="21.0044" height="18.778" fill="white"/>
+  <polyline points="-4.9976,2.4988 -4.9888,0.0181" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
   <polyline points="-4.9888,0.0181 -4.9976,-2.4988" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
-  <polyline points="3.9981,2.3738 4.0068,0.0181" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="3.9981,2.4988 4.0068,0.0181" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
   <polyline points="4.0068,0.0181 3.9981,-2.4988" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
   <polyline points="2.9985,2.9985 2.9985,-2.9985" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
   <polygon points="-3.9981,-2.9985 -2.9985,-2.9985 -2.9985,2.9985 -3.9981,2.9985" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
   <ellipse transform="translate(0,0) rotate(0)" rx="2.9985" ry="2.9985" fill="none" stroke="rgb(0,0,0)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <text transform="translate(-4.2792,3.7794)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="0.9995" text-anchor="end" fill="rgb(0,0,0)" y="0">DPE</text>
+  <text transform="translate(3.3421,3.7794)" font-family="Arial, Carlito, 'Liberation Sans', sans-serif" font-size="0.9995" text-anchor="start" fill="rgb(0,0,0)" y="0">SR</text>
 </svg>

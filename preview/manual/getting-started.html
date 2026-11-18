@@ -115,7 +115,7 @@ dialog.zoom .zoom-close { position:fixed; top:.8rem; right:1rem; width:2.4rem; h
 <a href="conventions.html">Conventions beyond the spec</a>
 <a href="rules.html">Validation rule reference</a>
 <a href="metamodel.html">DEXPI 2.0 information model</a>
-<a href="symbols.html">DiscProfile 0.6.6 symbol catalogue</a>
+<a href="symbols.html">DiscProfile 0.6.7 symbol catalogue</a>
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
 <main><h1 id="getting-started">Getting started</h1>
 <figure class="shot"><button type="button" class="shot-frame" aria-label="Enlarge image" data-w="2340" data-h="1350" style="max-width:2340px"><img src="images/workbench.png" alt="The workbench with a DISC example sheet loaded and a ball valve selected" width="1560" height="900" loading="lazy"><span class="mark" style="left:0.064%;top:0.111%;width:99.872%;height:11.778%"><span class="badge c">1</span></span><span class="mark" style="left:0.064%;top:12.222%;width:18.288%;height:85.889%"><span class="badge c">2</span></span><span class="mark" style="left:18.224%;top:12.222%;width:63.147%;height:85.889%"><span class="badge c">3</span></span><span class="mark" style="left:81.244%;top:12.222%;width:1.923%;height:53.400%"><span class="badge c">4</span></span><span class="mark" style="left:83.038%;top:12.222%;width:16.897%;height:59.078%"><span class="badge c">5</span></span><span class="mark" style="left:83.038%;top:71.078%;width:16.897%;height:27.033%"><span class="badge c">6</span></span><span class="mark" style="left:0.064%;top:97.222%;width:99.872%;height:2.667%"><span class="badge c">7</span></span></button><figcaption>The workbench with a DISC example sheet loaded and a ball valve selected</figcaption></figure>
@@ -135,7 +135,7 @@ dialog.zoom .zoom-close { position:fixed; top:.8rem; right:1rem; width:2.4rem; h
 <li><strong>Example</strong> — load a bundled official DISC example sheet (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>).</li>
 <li><strong>Auto</strong> — let the open document decide which DISC profile catalogue resolves its profile symbols: it loads the version the document declares.</li>
 <li><strong>Custom profile</strong> — load your own <code>DiscProfile.xml</code>.</li>
-<li><strong>0.6.6 / 0.6.4 / 0.6.3</strong> — pin one of the bundled official releases (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> picks the newest).</li>
+<li><strong>0.6.7 / 0.6.6 / 0.6.4</strong> — pin one of the bundled official releases (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> picks the newest). 0.6.3 still ships, but only <strong>Auto</strong> loads it (for drawings with an unversioned import); it has no button.</li>
 </ol>
 <ol class="steps">
 <li>Press <strong>Open</strong> <span class="mk">1</span> and choose a file, or drop it on the window.</li>
@@ -149,6 +149,7 @@ dialog.zoom .zoom-close { position:fixed; top:.8rem; right:1rem; width:2.4rem; h
 <ul>
 <li><strong>0.6.4</strong> adds eight symbols, removes two classes, relinks two symbols, and adds a <code>ShutoffCapability</code> field to 38 valve labels.</li>
 <li><strong>0.6.6</strong> removes nothing. It adds 51 symbols (new valves, fire-fighting nozzles, an internal pipe and the ND0300–ND0310 equipment boxes) and the 20 classes they draw. It also renames the <code>IOPS</code> type code to <code>IOPPS</code>, and shows the H and L alarms as the letter only. The viewer draws that letter only on instruments that actually carry the alarm.</li>
+<li><strong>0.6.7</strong> is not purely additive. It removes the <code>TieInPoint</code> class: its identifiers now sit on the nozzle or pipe fitting. With 0.6.7 loaded, a drawing that still uses <code>TieInPoint</code> is flagged as <a href="rules.html">MDL-010</a>; validation always checks against the profile you have selected. The property-break symbols (ND0007, ND0242, ND0043) become plain labels, and the break values move to the piping segments on either side, shown by eight new text-only labels (ND0314–ND0321). It also adds a butterfly valve with a flow arrow (ND0313A/B) and a special-item plant-code label (ND0312), and gives the Non-SAS functions (ND0003, ND0272) the same alarm labels the SAS functions have.</li>
 </ul>
 <p>A mismatch is reported in Validation as <a href="rules.html">META-003</a>.</p>
 <h2 id="the-status-bar">The status bar</h2>

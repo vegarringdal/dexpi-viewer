@@ -115,10 +115,10 @@ dialog.zoom .zoom-close { position:fixed; top:.8rem; right:1rem; width:2.4rem; h
 <a href="conventions.html">Conventions beyond the spec</a>
 <a href="rules.html" class="active">Validation rule reference</a>
 <a href="metamodel.html">DEXPI 2.0 information model</a>
-<a href="symbols.html">DiscProfile 0.6.6 symbol catalogue</a>
+<a href="symbols.html">DiscProfile 0.6.7 symbol catalogue</a>
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
 <main><h1 id="validation-rule-reference">Validation rule reference</h1>
-<p>Generated from the app&#39;s rule tables by <code>npm run generate:docs</code> — 24 rules.
+<p>Generated from the app&#39;s rule tables by <code>npm run generate:docs</code> — 25 rules.
 Default severities can be overridden per rule (including <em>Ignore</em>) in the Validation panel&#39;s severity configuration; overrides persist across sessions.</p>
 <h2 id="schema">Schema</h2>
 <table>
@@ -294,6 +294,12 @@ Default severities can be overridden per rule (including <em>Ignore</em>) in the
 <td>Abstract class instantiated</td>
 <td>error</td>
 <td>An abstract model class is instantiated — the spec requires a concrete subclass.</td>
+</tr>
+<tr>
+<td><code>MDL-010</code></td>
+<td>Class not in selected DISC profile</td>
+<td>warning</td>
+<td>A DiscProfile class the document instantiates is not defined by the loaded DISC profile — checked against the selected release, so a class removed upstream (e.g. TieInPoint in 0.6.7) is flagged only when that release is loaded.</td>
 </tr>
 </tbody></table>
 <h2 id="meta-data">Meta data</h2>

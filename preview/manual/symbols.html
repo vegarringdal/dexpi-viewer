@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DiscProfile 0.6.6 symbol catalogue — DEXPI Viewer manual</title><style>
+<title>DiscProfile 0.6.7 symbol catalogue — DEXPI Viewer manual</title><style>
 :root { color-scheme: light dark; --bg:#f8fafc; --fg:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#2563eb; --side:#eef2f7; --card:#ffffff;
   --mark:#f59e0b; --mark-fill:rgba(245,158,11,.07); --badge-fg:#111827; --tip:#059669; --warn:#d97706; }
 @media (prefers-color-scheme: dark) { :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --line:#1e293b; --accent:#60a5fa; --side:#111c31; --card:#16213a;
@@ -115,10 +115,10 @@ dialog.zoom .zoom-close { position:fixed; top:.8rem; right:1rem; width:2.4rem; h
 <a href="conventions.html">Conventions beyond the spec</a>
 <a href="rules.html">Validation rule reference</a>
 <a href="metamodel.html">DEXPI 2.0 information model</a>
-<a href="symbols.html" class="active">DiscProfile 0.6.6 symbol catalogue</a>
+<a href="symbols.html" class="active">DiscProfile 0.6.7 symbol catalogue</a>
 <a href="../index.html" style="margin-top:1rem;color:var(--muted)">← Back to the app</a></nav>
-<main><h1 id="discprofile-066-symbol-catalogue">DiscProfile 0.6.6 symbol catalogue</h1>
-<p>Generated from the official <code>DiscProfile.xml</code> by <code>npm run generate:docs</code>, rendered with the app&#39;s own SVG emitter — 343 symbols.
+<main><h1 id="discprofile-067-symbol-catalogue">DiscProfile 0.6.7 symbol catalogue</h1>
+<p>Generated from the official <code>DiscProfile.xml</code> by <code>npm run generate:docs</code>, rendered with the app&#39;s own SVG emitter — 354 symbols.
 Conditional variants render their default variant; label-template placeholders are listed per symbol.</p>
 <table>
 <thead>
@@ -151,7 +151,7 @@ Conditional variants render their default variant; label-template placeholders a
 <td><code>ND0003</code></td>
 <td><img src="symbols/ND0003.svg" alt="ND0003"></td>
 <td>1</td>
-<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;NonSasFunction&gt;</td>
+<td>&lt;ProcessPlantIdentificationCode&gt;-&lt;PlantSystemIdentificationCode&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;NonSasFunction&gt;<br>&#39;H&#39;<br>&#39;HH=&#39; &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>&#39;L&#39;<br>&#39;LL=&#39; &amp; SignalConveyingFunction:&lt;AlarmValue&gt;</td>
 </tr>
 <tr>
 <td><code>ND0004</code></td>
@@ -175,7 +175,7 @@ Conditional variants render their default variant; label-template placeholders a
 <td><code>ND0007</code></td>
 <td><img src="symbols/ND0007.svg" alt="ND0007"></td>
 <td>1</td>
-<td>&lt;BreakValue1&gt;<br>&lt;BreakValue2&gt;</td>
+<td>—</td>
 </tr>
 <tr>
 <td><code>ND0008A</code></td>
@@ -1657,7 +1657,7 @@ Conditional variants render their default variant; label-template placeholders a
 <td><code>ND0242</code></td>
 <td><img src="symbols/ND0242.svg" alt="ND0242"></td>
 <td>1</td>
-<td>&lt;BreakValue1&gt;<br>&lt;BreakValue2&gt;</td>
+<td>—</td>
 </tr>
 <tr>
 <td><code>ND0243</code></td>
@@ -1861,13 +1861,13 @@ Conditional variants render their default variant; label-template placeholders a
 <td><code>ND0272</code></td>
 <td><img src="symbols/ND0272.svg" alt="ND0272"></td>
 <td>1</td>
-<td>&lt;ObjectDisplayName&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;NonSasFunction&gt;</td>
+<td>&lt;ObjectDisplayName&gt;<br>&lt;TagType&gt;<br>&lt;ProcessInstrumentationFunctionNumber&gt;&lt;TagSuffix&gt;<br>&lt;NonSasFunction&gt;<br>&#39;H&#39;<br>&#39;HH=&#39; &amp; SignalConveyingFunction:&lt;AlarmValue&gt;<br>&#39;L&#39;<br>&#39;LL=&#39; &amp; SignalConveyingFunction:&lt;AlarmValue&gt;</td>
 </tr>
 <tr>
 <td><code>ND0273</code></td>
-<td><img src="symbols/ND0273.svg" alt="ND0273"></td>
+<td><em>(label-only)</em></td>
 <td>1</td>
-<td>&#39;Min: &#39; &amp; &lt;LowerLimitEndToEndLength&gt;</td>
+<td>&#39;MIN. &#39; &amp; &lt;LowerLimitEndToEndLength&gt;</td>
 </tr>
 <tr>
 <td><code>ND0274</code></td>
@@ -2143,7 +2143,7 @@ Conditional variants render their default variant; label-template placeholders a
 <td><code>ND0307B</code></td>
 <td><img src="symbols/ND0307B.svg" alt="ND0307B"></td>
 <td>1</td>
-<td>&lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;Length&gt;x&lt;Height&gt;x&lt;Width&gt;<br>&lt;DesignCaseHeatFlowRate&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt;</td>
+<td>&lt;ObjectDisplayName&gt;<br>&lt;EquipmentDescription&gt;<br>&lt;Length&gt;x&lt;Width&gt;x&lt;Height&gt;<br>&lt;DesignCaseHeatFlowRate&gt;<br>&lt;MaterialOfConstructionCode&gt;<br>&lt;VendorCompanyName&gt;<br>&lt;PurchaseOrderIdentificationCode&gt;</td>
 </tr>
 <tr>
 <td><code>ND0308A</code></td>
@@ -2186,6 +2186,72 @@ Conditional variants render their default variant; label-template placeholders a
 <td><img src="symbols/ND0311.svg" alt="ND0311"></td>
 <td>1</td>
 <td>—</td>
+</tr>
+<tr>
+<td><code>ND0312</code></td>
+<td><img src="symbols/ND0312.svg" alt="ND0312"></td>
+<td>1</td>
+<td>&lt;SpecialItemNumber&gt;<br>&lt;ProcessPlantIdentificationCode&gt;-</td>
+</tr>
+<tr>
+<td><code>ND0313A</code></td>
+<td><img src="symbols/ND0313A.svg" alt="ND0313A"></td>
+<td>2 (ValvePosition=NormallyOpen)</td>
+<td>&lt;ObjectDisplayName&gt; ⏎ &lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt;</td>
+</tr>
+<tr>
+<td><code>ND0313B</code></td>
+<td><img src="symbols/ND0313B.svg" alt="ND0313B"></td>
+<td>2 (ValvePosition=NormallyOpen)</td>
+<td>&lt;NominalDiameterRepresentation&gt;&lt;ValveDataSheet&gt; ⏎ &lt;TrimType&gt; &lt;LockMechanism&gt; &lt;ShutoffCapability&gt;</td>
+</tr>
+<tr>
+<td><code>ND0314</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>&lt;PipingToFromEndpoint&gt;</td>
+</tr>
+<tr>
+<td><code>ND0315</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>&lt;NominalDiameterRepresentation&gt;</td>
+</tr>
+<tr>
+<td><code>ND0316</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>&lt;PlantAreaIdentificationCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0317</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>&lt;HeatTracingTypeRepresentation&gt;</td>
+</tr>
+<tr>
+<td><code>ND0318</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>&lt;InsulationType&gt;</td>
+</tr>
+<tr>
+<td><code>ND0319</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>&lt;LineId&gt;</td>
+</tr>
+<tr>
+<td><code>ND0320</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>&lt;PipingClassCode&gt;</td>
+</tr>
+<tr>
+<td><code>ND0321</code></td>
+<td><em>(label-only)</em></td>
+<td>1</td>
+<td>&lt;ScopeIdentification&gt;</td>
 </tr>
 </tbody></table>
 <div class="footer">Generated from documentation/ — see scripts/buildDocsSite.mjs.</div></main>
