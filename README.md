@@ -7,201 +7,42 @@
 
 **Live app: <https://vegarringdal.github.io/dexpi-viewer/>** ·
 **Manual: <https://vegarringdal.github.io/dexpi-viewer/manual/>**
-(also `?docs` on the app URL, ribbon Help → Docs, or F1)
+(also `?docs` on the app URL, ribbon Help → Docs, or F1) ·
+Preview of the `dev` branch: <https://vegarringdal.github.io/dexpi-viewer/preview/>
 
-A fast viewer for **DEXPI 2.0 XML** P&ID files: React 19 workbench UI
-(dockable panels + ribbon, light/dark theme) around a Skia
-**CanvasKit** drawing surface.
+A fast viewer and checker for **DEXPI 2.0 XML** P&ID files. Everything runs
+in the browser — files never leave your machine. React workbench UI
+(dockable panels + ribbon, light/dark theme) around a Skia **CanvasKit**
+drawing surface.
 
-See [DESIGN.md](DESIGN.md) for architecture, milestones, and the
-decisions log. Project rules live in [CLAUDE.md](CLAUDE.md).
-The **user manual** lives in [documentation/](documentation/index.md)
-(guide + generated rule reference, information-model summary, and a
-DiscProfile symbol catalogue) and ships with the app as `manual/` —
-ribbon → Help → Docs. Regenerate derived content with
-`npm run generate:docs`; the build converts it to the static site.
-Screenshots and their numbered markers come from driving the real app:
-start `npm run dev -- --port 5199 --strictPort`, then run
-`node scripts/generateDocScreenshots.mjs` (all shots) or pass shot names
-to re-take a few (needs Playwright, not a project dependency — see the
-script header).
+## Features
 
-## Status
+- **Faithful rendering** of DEXPI 2.0 diagrams, including symbols and label
+  templates from a **DISC profile** (bundled releases or your own
+  `DiscProfile.xml`) — [Viewing](documentation/viewing.md)
+- **Explorer & Properties** — searchable plant hierarchy and every value of
+  the selected object — [Explorer](documentation/explorer.md)
+- **Validation** against the DEXPI information model, the DISC profile and
+  connectivity rules, with filters and severity overrides —
+  [Validation](documentation/validation.md), [rule reference](documentation/rules.md)
+- **Inspect** — a diagram of one object and everything it references —
+  [Inspect](documentation/inspect.md)
+- **XML trees** — the file's own Conceptual Model and Diagram structure —
+  [XML trees](documentation/xml-trees.md)
+- **Topology & tracing** — semantic graph and upstream/downstream traces —
+  [Topology](documentation/topology.md)
+- **Highlight** — colour the drawing by classification or custom filters,
+  inspect label templates and node positions —
+  [Highlight](documentation/highlight.md)
+- **Verification underlay** — align an official PDF/SVG/image under the
+  drawing to spot differences — [Viewing](documentation/viewing.md)
+- **Exports** — PDF and SVG (as authored or as viewed) and validation
+  reports as Excel or CSV — [Exports](documentation/export.md)
+- **Settings & shortcuts** — rendering options, profile loading,
+  rebindable keymap — [Settings](documentation/settings.md)
 
-M0–M4 are done: the app **opens, renders, and inspects DEXPI 2.0 XML
-files**. The unit-tested parser turns the XML object graph into a typed
-scene graph (primitives, shape-catalogue instancing, labels, connectors)
-plus a conceptual plant hierarchy; the CanvasKit stage renders it under
-one mm→px matrix with pan/zoom, fit-on-load, min-px stroke clamp,
-theme-adaptive colors, and Liberation Sans text. Click or hover anything
-in the drawing to select/highlight it (hit-testing incl. transformed
-symbol instances); the object tree (searchable) and properties panel
-(formatted physical quantities) stay in sync, with zoom-to-object.
-Verified headless against the Tennessee Eastman example and the
-C01 DEXPI reference P&ID (`refrences/reference_pid.xml`), whose layout
-matches the official rendering — including instrument balloons (ellipse
-arcs), node-position-stitched connector lines, and the title block.
-
-**M5 (connectivity) and M6 (export, validation, DISC profiles) are done
-too**: trace upstream (amber) / downstream (green) from any selection;
-export the drawing as spec-mapped **SVG** or vector **PDF** (embedded
-metric-compatible fonts) — either as authored, or **as viewed** (ribbon
-Export → As viewed), which bakes the current black & white mode, highlight
-tints, dim-drawing and trace overlays into the file and embeds the alignment
-underlay (always on white paper — the dark theme never reaches an export);
-and the validation findings as **CSV** or an
-**Excel** workbook (`.xlsx`, frozen header + auto-filter, written without a
-spreadsheet dependency), each row carrying the source XML line number and an
-XPath locator of the offending element itself — the `<References>`/`<Data>`
-element a finding is about, not just the object that owns it — alongside the
-rule/severity/message;
-twenty-four validation rules in five categories — Schema (SCH), Graphics
-(GFX), Connectivity (CON, incl. unconnected nozzles and nominal-diameter
-mismatches at connection points), **Model (MDL)** — every object checked
-against the DEXPI information model generated from the official XMI:
-unknown classes/properties, missing required properties, illegal enum
-literals, reference cardinality and target-class rules (profile
-extension classes chased through their declared supertypes),
-version-aware via the document's Import URIs — and Meta data (META,
-incl. a profile-version mismatch between the document and the loaded
-catalogue) —
-feed the Validation
-panel (count in the tab, severity + category filters, click to jump to
-the object, per-rule severity overrides incl. Ignore, persisted); and a
-**DISC profile** (DiscProfile.xml, DEXPI 2.1) resolves
-Profile/SymbolUsage references with per-instance variant conditions —
-the official releases **0.6.3**, **0.6.4**, **0.6.6** and **0.6.7** ship with the
-app (upstream skipped 0.6.5), a custom `DiscProfile.xml` can be loaded
-instead, and Settings → Profile can **auto-load the release the
-document's `DiscProfile` Import declares** (0.6.4 is the first to carry
-a version stamp; unversioned imports mean 0.6.3). The ribbon offers
-0.6.7, 0.6.6 and 0.6.4 as pin buttons; 0.6.3 is reached through Auto only.
-Clicking the drawing reveals the object in the searchable tree
-(expand/collapse-all included).
-
-**M7 polish is in**: the panel layout persists across sessions (ribbon
-Reset restores the default), a **minimap** (bottom-left, toggleable)
-shows the whole drawing with a live viewport rectangle and click/drag
-navigation, the View section has Fit / zoom in / out / 100% with
-hotkeys, and `FillStyle.Hatch` renders as real 45° hatching.
-Selection is **multi-capable**: ctrl/cmd-click toggles and shift-click
-range-selects in the tree (ctrl-click works on the canvas too), all
-selected objects highlight in the drawing, hovering any object row in
-a panel highlights it on the canvas, and right-clicking tree rows opens
-copy options (label / type / label+type+id, one row per object).
-
-A **verification underlay** (Drawing-panel toolbar) loads a reference
-image, SVG, or PDF stretched onto the diagram extent — the official
-DISC renderings align exactly — with opacity, under/over placement and
-mm nudges (0.1mm steps), a "hide white" blend that drops the
-reference's paper background, and an ink tint (color picker — e.g.
-red reference under black drawing) for spotting rendering differences
-in place.
-
-An **Inspect** panel (ribbon toggle) draws a UML-style instance diagram
-of the selected object for debugging: its full raw data in a center
-card, and every one-hop relation — references, referenced-by,
-containment, DISC-profile instance stubs — as neighbor cards with edges
-labeled by the actual property names; clicking a neighbor re-centers on
-it.
-
-Two finishing pieces: **labels resolve their TextTemplates** — text
-comes from live attribute values (with proper unit symbols: barg, °C,
-m³/h), beating stale literal snapshots; resolution is all-or-nothing,
-so a template with any missing, unsupported or empty fragment keeps the
-label's original XML text instead of a partial value, and sibling label
-parts that share one ambiguous template keep their distinct literals
-instead of repeating one resolved value — and the scene body is cached
-as a **Skia picture**, so panning, hovering and selection replay a
-recording (~56 fps sustained pan even under software rendering).
-
-Heat-traced piping (`HeatTracingType`) draws a dashed overlay laterally
-offset from the pipe centerline per DISC Profile
-`LineStroke.LateralOffset` semantics (positive = right of the drawing
-direction), with miter-joined bends; a loaded DiscProfile's heat-trace
-`LineStroke` (color, dash, width, rounding, dash offset) overrides the
-built-in defaults. Text values with line breaks render as proper
-multiline blocks — per-line horizontal alignment, block-level vertical
-alignment, shared 1.4×size line spacing — identically on canvas and in
-the SVG/PDF exports.
-
-**M8 adds a Topology graph panel** (ribbon Panels → Topology): the
-engineering data as a semantic network — plant objects as nodes
-(connection hardware collapsed into its owner, category-colored
-borders) with **flow**, **containment**, and **reference** edges,
-laid out left→right along the flow direction. Nozzles, chambers,
-piping nodes and ports can optionally be shown as mini nodes on the
-flow path instead of being collapsed; a vertical-spacing stepper
-spreads dense layouts, and the selection's direct neighbours can be
-tinted by relation (amber upstream, green downstream, violet signal). Neighborhood mode graphs the
-current selection with an adjustable hop depth; Document mode graphs
-the whole file (soft-capped with a coverage note). Nodes sync with the
-global selection both ways, double-click zooms the drawing to the
-object, and the view pans/zooms like the drawing. The tree panel is
-now titled **Explorer**.
-
-**M9 adds a Highlight panel** (ribbon Panels → Highlight): tint the
-drawing by classification — heat-traced runs, signal/instrument
-lines, or piping service (fluid code / piping class, with ancestor
-inheritance) — each value in its own color with a legend of counts
-and per-value visibility toggles. A **Custom** mode builds your own
-filters instead — by type, attribute, ID, XPath (a trailing `*`
-matches an object and all its children) or persistent ID, with
-contains/equals (and negated) wildcard matching, an optional advanced
-`&`/`|` expression syntax, per-filter color and priority ordering
-(lower filter wins overlaps), and JSON save/load for reusable filter
-sets.
-
-The Highlight panel splits into three collapsible sections, which
-compose freely. **General Highlight** is the classification tinting
-above. **Label Inspect** draws every profile `LabelTemplate` at the
-position, rotation, size and alignment the profile declares (sheet
-units — a stretched symbol placement never stretches its labels) —
-*including* the placements the viewer normally suppresses because the
-drawing carries its own label — in a color and opacity you pick, in
-front of or behind the drawing, so you can check that a generated
-DEXPI file put its text where the profile says. **Node Positions**
-marks connection points: a hollow circle for each node position the
-file declares, a hollow triangle inscribed in that same circle for each
-attachment point the profile symbol declares — so a coinciding pair
-reads as a triangle inside its circle instead of one hiding the other.
-Kinds are listed per type with a count, its own color, size scale and
-outline width. Marker size is in drawing mm, so it keeps a fixed
-proportion to the symbol it annotates at every zoom; the per-type
-appearance is remembered between sessions, and **Reset scale** puts
-every size back to 1×.
-
-All three sections show the same **Dim drawing** toggle — it is one
-shared switch, so flipping it anywhere flips it everywhere. It fades the
-drawing and nothing else: the veil is painted below every overlay, so
-classification tints, label-template marks and node markers all stay at
-full strength on top of a faded sheet. Both inspection overlays are
-included in the **As viewed** PDF/SVG exports alongside the general
-highlighting.
-
-All milestones M0–M11 are complete; the open items are niche
-(Proteus-era edge tolerances, profile LabelTemplate overlays, culling
-for truly huge files) and tracked in DESIGN.md.
-
-**Two raw-XML browsers** sit alongside the Explorer (ribbon Panels →
-Conceptual Model / Diagram Tree): the **Conceptual Model Tree** and
-**Diagram Tree** panels mirror the file's `ConceptualModel`/`Diagram`
-XML containment exactly — one expandable group row per `<Components
-property=…>` bucket, one row per object underneath — instead of the
-Explorer's flattened hierarchy. Each row shows the bare type in the
-main column and the resolved value/tag (TagName, ItemTag, SegmentNumber,
-…) in a drag-resizable side column; the tree/Data split below it is
-drag-resizable too, and the tree itself is virtualized (only rows near
-the viewport mount) so a large, mostly-expanded subtree stays smooth to
-scroll — Explorer shares the same virtualized tree component. Both
-panels start collapsed and expand to reveal the current selection; the
-selected row's raw Data table (aggregate values like Stroke/Color
-render as an indented block, not one flattened line) and Inverse
-References (grouped by `ReferencingType.property`, e.g.
-`AttributeRepresentation.Object [2]`) render below the tree. A Diagram
-Tree row cross-links to its real conceptual object via its own
-`Represents`/`Object` reference, so selecting either tree, the drawing,
-or the Explorer keeps all of them in sync.
+Start with the [manual index](documentation/index.md) or
+[Getting started](documentation/getting-started.md).
 
 ## Getting started
 
@@ -212,45 +53,57 @@ npm run dev       # Vite dev server on http://localhost:5173
 
 | Script | What |
 | ------ | ---- |
-| `npm run dev` | dev server |
-| `npm run build` | typecheck + production build to `docs/` (deployed by GitHub Pages) |
+| `npm run dev` | Dev server |
+| `npm run build` | Manual site + typecheck + production build to `dist/` |
 | `npm run typecheck` | `tsc -b` (app) + test project |
-| `npm test` | Vitest (parser units, jsdom) |
+| `npm test` | Vitest |
 | `npm run lint` / `lint:fix` | Biome check (fix) |
-| `npm run check` | typecheck + lint |
+| `npm run check` | Typecheck + lint |
+| `npm run generate:docs` | Regenerate the manual's derived pages (rules, metamodel, symbols) |
+| `npm run docs:site` | Build the manual as static HTML into `public/manual/` |
+| `npm run generate:metamodel` | Regenerate the DEXPI metamodel tables from the XMI |
+| `npm run generate:notices` | Regenerate third-party notices (after dependency changes) |
+
+Manual screenshots come from driving the real app: start
+`npm run dev -- --port 5199 --strictPort`, then run
+`node scripts/generateDocScreenshots.mjs` (all shots) or pass shot names to
+re-take a few (needs Playwright, not a project dependency — see the script
+header).
+
+Deployment is CI: `main` publishes to the live app, `dev` to the preview.
 
 ## Stack
 
-- **React 19** + **Vite 7** + **TypeScript** (strict) + **Biome**
+- **React** + **Vite** + **TypeScript** (strict) + **Biome**
 - **@tredespace/ui** — widgets, ribbon, dockable panel shell, hotkeys
   (installed from the tarball in `external/`; usage guide:
   `external/treDeSpaceUI.md`)
-- **Tailwind CSS v4** — theming rule: author dark-theme utilities only;
-  the library remaps the `--color-*` variables under
-  `html[data-theme="light"]`
+- **Tailwind CSS v4** — author dark-theme utilities only; the library
+  remaps the `--color-*` variables under `html[data-theme="light"]`
 - **canvaskit-wasm** — Skia; the drawing is one WebGL canvas, not DOM
 
 ## Layout
 
 ```
 src/
-├─ components/  React shell: panels, ribbon, settings, hotkeys
-├─ state/       createStore domains: viewer, selection, trace, theme,
-│               rendering, ui (*.state.ts + *.actions.ts — see CLAUDE.md)
+├─ components/  React shell: ribbon, panels, settings, hotkeys, exports
+├─ state/       shared createStore domains (*.state.ts + *.actions.ts)
 └─ lib/
-   ├─ dexpi/     DEXPI 2.0 XML parser + document model (pure TS, unit-tested)
-   ├─ canvas/    CanvasKit surface, viewport (pan/zoom), scene drawing
-   ├─ generated/ third-party notices (npm run generate:notices)
-   └─ …          createStore, Result<T>, download helper
-refrences/    DEXPI specs, XSD, examples, prior-art viewer (read-only)
-external/     @tredespace/ui tarball + docs
+   ├─ dexpi/     DEXPI parser, document model, profiles, validation (pure TS)
+   ├─ canvas/    CanvasKit surface, viewport, scene drawing
+   ├─ graph/     topology + inspect graph models and layouts
+   ├─ assets/    bundled fonts (+ licenses)
+   └─ generated/ metamodel tables, third-party notices
+documentation/  user manual (markdown; built into the app's manual/)
+public/         bundled example drawing and DISC profile catalogues
+scripts/        docs/metamodel/notices generators, screenshot driver
+refrences/      DEXPI specs, XSD, examples, DISC packs (read-only)
+external/       @tredespace/ui tarball + docs
 ```
 
-## Keyboard shortcuts
-
-Placeholder defaults: **ALT then a 4-digit number** (first digit =
-ribbon section: 1 File, 2 View, 9 App). Rebind anything under
-Settings → Shortcuts; every ribbon tooltip shows the live combo.
+More in [DESIGN.md](DESIGN.md) (architecture and rendering rules),
+[OPEN_ITEMS.md](OPEN_ITEMS.md) (todos and maybes),
+[CHANGELOG.md](CHANGELOG.md), and [CLAUDE.md](CLAUDE.md) (project rules).
 
 ## License
 

@@ -6,6 +6,24 @@
 * keep readme.md up to date
 * app to by typescript/tsx(react) for gui and skia canvas kit for drawing.
 * read DESIGN.md for more info, and keep it up to date
+* CHANGELOG.md — add an entry for EVERY change. The version in package.json (never bump it yourself) is bumped by the director at release time; between bumps, each piece of work gets a bullet under a date heading so the diff between two versions reads as prose, not commits. Append at the TOP of the file:
+
+```
+- **YYYY.MM.DD** (>PACKAGEVERSION):
+  - **Short title** — what changed and why, and who or what triggered it
+    (director's ask, a bug report, a screenshot, a new spec/profile release).
+    - What was done: the behaviour or rule now in force, with the key files,
+      functions and constants named so the code can be found.
+    - Root cause, for a fix: what was wrong and how it was found.
+    - Decisions and rejected alternatives, with the reason.
+    - Verification: tests added or updated, checks against official data or
+      renderings, counts that pin it.
+    - Known gaps or deferred work: also add these to OPEN_ITEMS.md.
+    - Corrections to an earlier entry: name it ("supersedes 2026.09.03 …").
+```
+  Write for someone reading the diff between two releases — informative prose, not commit messages. Use as many detail bullets as the change needs; a one-line fix can stay one line. Leave out bullets that don't apply.
+  PACKAGEVERSION is the version currently in package.json (the entry is "after" that release). Several changes on one day share the date heading as separate title bullets. Write it in the same pass as the code. Read package.json and today's date at the moment you write the entry — the version is bumped often, so never copy the heading of the entry above: reuse an existing heading only when BOTH its date and its version still match; otherwise start a new heading on top.
+  History belongs here, not in DESIGN.md: DESIGN.md keeps only the current rule, edited in place when it changes.
 
 
 ## Working style
